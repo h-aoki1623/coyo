@@ -94,7 +94,10 @@ class ConversationService:
             )
 
         now = datetime.now(UTC)
-        duration_seconds = int((now - conversation.started_at).total_seconds())
+        started_at = conversation.started_at
+        if started_at.tzinfo is None:
+            started_at = started_at.replace(tzinfo=UTC)
+        duration_seconds = int((now - started_at).total_seconds())
 
         # Count turns that have corrections
         corrections_stmt = select(Turn.id).where(

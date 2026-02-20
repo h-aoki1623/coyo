@@ -40,7 +40,7 @@ class HistoryRepository:
         list_stmt = (
             select(Conversation)
             .where(Conversation.user_id == user_id)
-            .order_by(Conversation.created_at.desc())
+            .order_by(Conversation.started_at.desc())
             .offset(offset)
             .limit(limit)
         )

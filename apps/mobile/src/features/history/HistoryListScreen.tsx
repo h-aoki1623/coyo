@@ -18,66 +18,11 @@ import { Colors } from '@/constants/colors';
 import { findTopic } from '@/constants/topics';
 import type { RootStackParamList } from '@/navigation/types';
 import type { HistoryListItem, HistoryListResponse } from '@/types/conversation';
+import { formatDuration, formatTime, groupByDate } from './utils/format';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'HistoryList'>;
 
-interface SectionData {
-  title: string;
-  data: HistoryListItem[];
-}
-
 const PER_PAGE = 20;
-
-// -- Helper Functions --
-
-function formatDuration(seconds: number | null): string {
-  if (seconds === null || seconds === 0) return '--';
-  const mins = Math.floor(seconds / 60);
-  if (mins === 0) return '1分未満';
-  return `${mins}分間`;
-}
-
-function formatTime(isoString: string): string {
-  const date = new Date(isoString);
-  const hours = date.getHours();
-  const minutes = date.getMinutes().toString().padStart(2, '0');
-  const ampm = hours >= 12 ? 'PM' : 'AM';
-  const displayHour = hours % 12 || 12;
-  return `${displayHour}:${minutes} ${ampm}`;
-}
-
-function getSectionTitle(isoString: string): string {
-  const date = new Date(isoString);
-  const now = new Date();
-
-  const dateDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const diffDays = Math.floor((today.getTime() - dateDay.getTime()) / (1000 * 60 * 60 * 24));
-
-  if (diffDays === 0) return '今日';
-  if (diffDays === 1) return '昨日';
-
-  return `${date.getMonth() + 1}月${date.getDate()}日`;
-}
-
-function groupByDate(items: HistoryListItem[]): SectionData[] {
-  const sections: Map<string, HistoryListItem[]> = new Map();
-
-  for (const item of items) {
-    const title = getSectionTitle(item.startedAt);
-    const existing = sections.get(title);
-    if (existing) {
-      existing.push(item);
-    } else {
-      sections.set(title, [item]);
-    }
-  }
-
-  return Array.from(sections.entries()).map(([title, data]) => ({
-    title,
-    data,
-  }));
-}
 
 // -- Row Component --
 

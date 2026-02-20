@@ -15,44 +15,12 @@ import { Colors } from '@/constants/colors';
 import type { RootStackParamList } from '@/navigation/types';
 import type { HistoryDetailResponse, Turn, TurnCorrection, CorrectionItem } from '@/types/conversation';
 import { SegmentedControl } from './components/SegmentedControl';
+import { formatDuration, formatDetailHeader } from './utils/format';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'HistoryDetail'>;
 
 type LoadingState = 'loading' | 'loaded' | 'error';
-const TABS = ['フィードバック', 'チャット履歴'] as const;
-
-// -- Helper Functions --
-
-function formatDetailHeader(isoString: string, durationSeconds: number | null): string {
-  const date = new Date(isoString);
-  const now = new Date();
-
-  const dateDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const diffDays = Math.floor((today.getTime() - dateDay.getTime()) / (1000 * 60 * 60 * 24));
-
-  let datePart: string;
-  if (diffDays === 0) datePart = '今日';
-  else if (diffDays === 1) datePart = '昨日';
-  else datePart = `${date.getMonth() + 1}月${date.getDate()}日`;
-
-  const hours = date.getHours();
-  const minutes = date.getMinutes().toString().padStart(2, '0');
-  const ampm = hours >= 12 ? 'PM' : 'AM';
-  const displayHour = hours % 12 || 12;
-  const timePart = `${displayHour}:${minutes} ${ampm}`;
-
-  const durationPart = formatDuration(durationSeconds);
-
-  return `${datePart} ${timePart} · ${durationPart}`;
-}
-
-function formatDuration(seconds: number | null): string {
-  if (seconds === null || seconds === 0) return '--';
-  const mins = Math.floor(seconds / 60);
-  if (mins === 0) return '1分未満';
-  return `${mins}分間`;
-}
+const TABS = ['\u30D5\u30A3\u30FC\u30C9\u30D0\u30C3\u30AF', '\u30C1\u30E3\u30C3\u30C8\u5C65\u6B74'] as const;
 
 // -- Chat Bubble (read-only) --
 
