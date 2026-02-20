@@ -5,7 +5,7 @@ from collections.abc import AsyncIterator
 from openai import AsyncOpenAI
 from pydantic import BaseModel
 
-from coto.config import settings
+from coto.config import get_settings
 from coto.exceptions import ExternalServiceError
 from coto.services.llm.base import ChatMessage, ChatOptions, LLMClient, ModelInfo
 
@@ -17,6 +17,7 @@ class OpenAIClient(LLMClient):
     """
 
     def __init__(self, model: str | None = None) -> None:
+        settings = get_settings()
         self._client = AsyncOpenAI(api_key=settings.openai_api_key)
         self._model = model or settings.llm_conversation_model
 

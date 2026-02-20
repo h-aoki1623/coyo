@@ -5,12 +5,13 @@ from collections.abc import AsyncGenerator
 from fastapi import Header
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from coto.db import async_session_factory
+from coto.db import get_session_factory
 
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
     """Yield a database session and ensure cleanup on exit."""
-    async with async_session_factory() as session:
+    session_factory = get_session_factory()
+    async with session_factory() as session:
         yield session
 
 

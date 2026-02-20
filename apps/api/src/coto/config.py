@@ -1,5 +1,6 @@
 """Application settings loaded from environment variables."""
 
+from functools import lru_cache
 from typing import Literal
 
 from pydantic import ConfigDict
@@ -41,4 +42,11 @@ class Settings(BaseSettings):
     model_config = ConfigDict(env_file=".env", env_file_encoding="utf-8")
 
 
-settings = Settings()  # type: ignore[call-arg]
+@lru_cache(maxsize=1)
+def get_settings() -> Settings:
+    """Lazily instantiate and cache application settings.
+
+    Defers environment variable validation until first access,
+    allowing module imports to succeed without a .env file.
+    """
+    return Settings()  # type: ignore[call-arg]
