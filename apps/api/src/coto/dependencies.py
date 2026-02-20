@@ -1,11 +1,13 @@
 """FastAPI dependency injection providers."""
 
+import uuid
 from collections.abc import AsyncGenerator
 
 from fastapi import Depends, Header
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from coto.db import get_session_factory
+from coto.exceptions import ValidationError
 from coto.models.user import User
 from coto.repositories.user import UserRepository
 
@@ -18,10 +20,15 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
 
 
 async def get_device_id(x_device_id: str = Header(...)) -> str:
-    """Extract and return the device ID from the X-Device-Id header.
+    """Extract and validate the device ID from the X-Device-Id header.
 
-    The device ID is used to identify anonymous users across sessions.
+    The device ID must be a valid UUID v4 string. This prevents
+    abuse via crafted or excessively long header values.
     """
+    try:
+        uuid.UUID(x_device_id, version=4)
+    except (ValueError, AttributeError):
+        raise ValidationError("X-Device-Id must be a valid UUID v4")
     return x_device_id
 
 

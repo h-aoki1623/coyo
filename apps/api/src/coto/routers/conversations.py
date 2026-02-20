@@ -7,8 +7,9 @@ from fastapi import APIRouter, Depends, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 from sse_starlette.sse import EventSourceResponse
 
+from coto.config import get_settings
 from coto.dependencies import get_current_user, get_db
-from coto.exceptions import ConversationStateError
+from coto.exceptions import ConversationStateError, ValidationError
 from coto.models.user import User
 from coto.schemas.conversation import (
     ConversationResponse,
@@ -52,9 +53,9 @@ async def submit_turn(
     with events for: stt_result, ai_response_chunk, ai_response_done,
     correction_result, tts_audio_url, turn_complete.
     """
-    # Verify conversation exists and is active
+    # Verify conversation exists, belongs to user, and is active
     service = ConversationService(db)
-    conversation = await service.get_conversation(conversation_id)
+    conversation = await service.get_conversation(conversation_id, user.id)
     if conversation.status != "active":
         raise ConversationStateError(
             f"Cannot submit turn to conversation in '{conversation.status}' status. "
@@ -62,6 +63,14 @@ async def submit_turn(
         )
 
     audio_data = await audio.read()
+
+    # Validate file size to prevent abuse
+    settings = get_settings()
+    if len(audio_data) > settings.max_audio_size_bytes:
+        raise ValidationError(
+            f"Audio file exceeds maximum size of {settings.max_audio_size_bytes // (1024 * 1024)} MB"
+        )
+
     audio_filename = audio.filename or "audio.m4a"
     orchestrator = TurnOrchestrator(db)
 
@@ -85,7 +94,7 @@ async def get_conversation(
 ) -> ConversationResponse:
     """Retrieve a conversation by ID."""
     service = ConversationService(db)
-    conversation = await service.get_conversation(conversation_id)
+    conversation = await service.get_conversation(conversation_id, user.id)
     return ConversationResponse.model_validate(conversation)
 
 
@@ -103,7 +112,7 @@ async def get_feedback(
     Returns total turn counts and a list of turn-level corrections.
     """
     service = ConversationService(db)
-    stats = await service.get_feedback_with_stats(conversation_id)
+    stats = await service.get_feedback_with_stats(conversation_id, user.id)
     return FeedbackResponse(
         total_turns=stats.total_turns,
         total_corrections=stats.total_corrections,
@@ -122,7 +131,7 @@ async def end_conversation(
 ) -> ConversationResponse:
     """End an active conversation and compute final metrics."""
     service = ConversationService(db)
-    conversation = await service.end_conversation(conversation_id)
+    conversation = await service.end_conversation(conversation_id, user.id)
     return ConversationResponse.model_validate(conversation)
 
 
@@ -134,5 +143,5 @@ async def resume_conversation(
 ) -> ConversationResponse:
     """Resume a paused conversation."""
     service = ConversationService(db)
-    conversation = await service.resume_conversation(conversation_id)
+    conversation = await service.resume_conversation(conversation_id, user.id)
     return ConversationResponse.model_validate(conversation)

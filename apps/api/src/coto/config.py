@@ -36,6 +36,12 @@ class Settings(BaseSettings):
     gcs_bucket_name: str = "coto-audio-dev"
     gcs_audio_ttl_seconds: int = 3600
 
+    # CORS
+    cors_allowed_origins: list[str] = ["http://localhost:8081", "http://localhost:19006"]
+
+    # Upload limits
+    max_audio_size_bytes: int = 10 * 1024 * 1024  # 10 MB
+
     # Rate Limiting
     rate_limit_per_minute: int = 30
 

@@ -9,6 +9,7 @@ from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.responses import Response
 
+from coto.config import get_settings
 from coto.exceptions import CotoError
 
 
@@ -111,14 +112,14 @@ def setup_middleware(app: FastAPI) -> None:
     # Middleware (executed in reverse registration order)
     app.add_middleware(RequestIdMiddleware)
 
-    # CORS: allow cross-origin requests from the mobile app
-    # TODO: restrict allow_origins to app domain in production
+    # CORS: restrict to configured origins
+    settings = get_settings()
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],
+        allow_origins=settings.cors_allowed_origins,
         allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
+        allow_methods=["GET", "POST", "DELETE"],
+        allow_headers=["X-Device-Id", "X-Request-Id", "Content-Type"],
     )
 
     # Exception handlers

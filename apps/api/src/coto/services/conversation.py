@@ -64,12 +64,14 @@ class ConversationService:
     async def get_conversation(
         self,
         conversation_id: uuid.UUID,
+        user_id: uuid.UUID,
     ) -> Conversation:
-        """Retrieve a conversation by ID.
+        """Retrieve a conversation by ID, scoped to the requesting user.
 
-        Raises NotFoundError if the conversation does not exist.
+        Raises NotFoundError if the conversation does not exist or belongs
+        to a different user (same response to prevent information disclosure).
         """
-        conversation = await self._repo.get_by_id(conversation_id)
+        conversation = await self._repo.get_by_id_for_user(conversation_id, user_id)
         if conversation is None:
             raise NotFoundError("Conversation", str(conversation_id))
         return conversation
@@ -77,13 +79,14 @@ class ConversationService:
     async def end_conversation(
         self,
         conversation_id: uuid.UUID,
+        user_id: uuid.UUID,
     ) -> Conversation:
         """End an active conversation and compute final metrics.
 
         Transitions status to 'completed', calculates duration,
         tallies corrections, and optionally computes a score.
         """
-        conversation = await self._repo.get_by_id(conversation_id)
+        conversation = await self._repo.get_by_id_for_user(conversation_id, user_id)
         if conversation is None:
             raise NotFoundError("Conversation", str(conversation_id))
 
@@ -122,13 +125,14 @@ class ConversationService:
     async def resume_conversation(
         self,
         conversation_id: uuid.UUID,
+        user_id: uuid.UUID,
     ) -> Conversation:
         """Resume a paused conversation.
 
         Transitions status from 'paused' back to 'active'.
         Raises ConversationStateError if not in 'paused' status.
         """
-        conversation = await self._repo.get_by_id(conversation_id)
+        conversation = await self._repo.get_by_id_for_user(conversation_id, user_id)
         if conversation is None:
             raise NotFoundError("Conversation", str(conversation_id))
 
@@ -145,14 +149,15 @@ class ConversationService:
     async def get_feedback(
         self,
         conversation_id: uuid.UUID,
+        user_id: uuid.UUID,
     ) -> list[TurnCorrection]:
         """Retrieve all corrections for turns in a conversation.
 
         Returns a list of TurnCorrection objects with eagerly loaded items,
         filtered to only turns that have corrections.
         """
-        # Verify conversation exists
-        conversation = await self._repo.get_by_id(conversation_id)
+        # Verify conversation exists and belongs to user
+        conversation = await self._repo.get_by_id_for_user(conversation_id, user_id)
         if conversation is None:
             raise NotFoundError("Conversation", str(conversation_id))
 
@@ -172,13 +177,14 @@ class ConversationService:
     async def get_feedback_with_stats(
         self,
         conversation_id: uuid.UUID,
+        user_id: uuid.UUID,
     ) -> FeedbackStats:
         """Get feedback with summary statistics for a conversation.
 
         Returns an immutable FeedbackStats containing total turn counts,
         corrections, and clean turns alongside the correction details.
         """
-        corrections = await self.get_feedback(conversation_id)
+        corrections = await self.get_feedback(conversation_id, user_id)
 
         # Count total user turns for this conversation
         total_turns_stmt = select(func.count(Turn.id)).where(

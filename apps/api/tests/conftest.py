@@ -66,7 +66,7 @@ async def db_session(engine) -> AsyncGenerator[AsyncSession, None]:
 # Application fixtures
 # ---------------------------------------------------------------------------
 
-DEVICE_ID = "test-device-id-1234"
+DEVICE_ID = "00000000-0000-4000-a000-000000000001"
 
 
 @pytest.fixture
@@ -239,6 +239,8 @@ def mock_settings():
     mock.tts_model = "tts-1"
     mock.gcs_bucket_name = "test-bucket"
     mock.gcs_audio_ttl_seconds = 3600
+    mock.cors_allowed_origins = ["http://localhost:8081"]
+    mock.max_audio_size_bytes = 10 * 1024 * 1024
     mock.rate_limit_per_minute = 30
 
     with patch("coto.config.get_settings", return_value=mock):

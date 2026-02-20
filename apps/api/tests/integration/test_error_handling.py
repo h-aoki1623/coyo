@@ -77,12 +77,12 @@ class TestCORSMiddleware:
     """Tests for CORS middleware configuration."""
 
     @pytest.mark.integration
-    async def test_cors_allows_any_origin(self, client: AsyncClient):
-        """Verify that CORS is configured to allow all origins (development)."""
+    async def test_cors_allows_configured_origin(self, client: AsyncClient):
+        """Verify that CORS allows configured origins."""
         response = await client.options(
             "/health",
             headers={
-                "origin": "http://localhost:19006",
+                "origin": "http://localhost:8081",
                 "access-control-request-method": "GET",
             },
         )

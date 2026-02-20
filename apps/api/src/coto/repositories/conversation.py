@@ -35,6 +35,26 @@ class ConversationRepository:
         """Fetch a conversation by its primary key."""
         return await self._session.get(Conversation, conversation_id)
 
+    async def get_by_id_for_user(
+        self,
+        conversation_id: uuid.UUID,
+        user_id: uuid.UUID,
+    ) -> Conversation | None:
+        """Fetch a conversation by ID, scoped to a specific user.
+
+        Returns None if the conversation does not exist or belongs to
+        a different user. This prevents IDOR attacks by not revealing
+        whether a conversation ID exists for another user.
+        """
+        from sqlalchemy import select
+
+        stmt = select(Conversation).where(
+            Conversation.id == conversation_id,
+            Conversation.user_id == user_id,
+        )
+        result = await self._session.execute(stmt)
+        return result.scalar_one_or_none()
+
     async def update_status(
         self,
         conversation_id: uuid.UUID,
