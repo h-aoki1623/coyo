@@ -1,4 +1,18 @@
-.PHONY: dev-mobile dev-api lint lint-mobile lint-api test test-mobile test-api migrate migrate-new
+.PHONY: dev-mobile dev-api lint lint-mobile lint-api test test-mobile test-api migrate migrate-new docker-up docker-down docker-reset
+
+# Infrastructure
+docker-up:
+	docker compose up -d
+	@echo "Waiting for Postgres to be ready..."
+	@docker compose exec postgres pg_isready -U coto -d coto > /dev/null 2>&1 || sleep 3
+	@echo "Postgres and Redis are running."
+
+docker-down:
+	docker compose down
+
+docker-reset:
+	docker compose down -v
+	docker compose up -d
 
 # Development
 dev-mobile:
