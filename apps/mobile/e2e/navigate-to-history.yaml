@@ -1,0 +1,58 @@
+# navigate-to-history.yaml
+# Verifies navigation from the Home screen to the History List screen
+# by tapping the history button, then navigating back to Home.
+#
+# REQUIRES: Backend API must be running (run-e2e.sh starts it automatically).
+# The history list loads conversations from the API on mount.
+appId: com.coto.app
+---
+# Launch the application (clearState: false to preserve expo-dev-client settings)
+- launchApp:
+    clearState: false
+
+# Wait for the Home screen to fully render.
+- extendedWaitUntil:
+    visible:
+      id: "home-greeting"
+    timeout: 30000
+
+# Verify we start on the Home screen
+- assertVisible:
+    id: "home-greeting"
+
+# Tap the history button using its testID
+- tapOn:
+    id: "history-button"
+
+# Wait for the History List screen to load
+- waitForAnimationToEnd
+
+# Verify the History List screen header is shown (uses testID)
+- extendedWaitUntil:
+    visible:
+      id: "history-title"
+    timeout: 10000
+
+- assertVisible:
+    id: "history-title"
+
+# Capture evidence of the history screen
+- takeScreenshot: "history-list-screen"
+
+# Navigate back to Home screen
+- tapOn:
+    id: "nav-back"
+
+# Wait for transition back
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible:
+      id: "home-greeting"
+    timeout: 10000
+
+# Verify we returned to the Home screen
+- assertVisible:
+    id: "home-greeting"
+
+# Capture evidence of successful round-trip navigation
+- takeScreenshot: "back-to-home-from-history"

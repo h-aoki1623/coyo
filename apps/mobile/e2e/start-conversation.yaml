@@ -1,0 +1,44 @@
+# start-conversation.yaml
+# Verifies tapping a topic card initiates a conversation and navigates
+# to the Talk screen. Uses the "Sports" topic as the test case.
+#
+# REQUIRES: Backend API must be running (run-e2e.sh starts it automatically).
+appId: com.coto.app
+---
+# Launch the application (clearState: false to preserve expo-dev-client settings)
+- launchApp:
+    clearState: false
+
+# Wait for the Home screen to fully render.
+- extendedWaitUntil:
+    visible:
+      id: "home-greeting"
+    timeout: 30000
+
+# Verify we are on the Home screen
+- assertVisible:
+    id: "home-greeting"
+
+# Tap the Sports topic card using its testID
+- tapOn:
+    id: "topic-sports"
+
+# Wait for the API call and navigation transition.
+- waitForAnimationToEnd
+
+# Wait for the Talk screen to appear (backend must respond).
+- extendedWaitUntil:
+    visible:
+      id: "end-conversation"
+    timeout: 15000
+
+# Verify the Talk screen header
+- assertVisible:
+    text: "Coto"
+
+# Verify the end conversation button is present via testID
+- assertVisible:
+    id: "end-conversation"
+
+# Capture evidence of the Talk screen
+- takeScreenshot: "talk-screen-after-topic-tap"

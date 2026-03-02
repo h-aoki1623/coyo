@@ -1,0 +1,16 @@
+# Maestro E2E Test Configuration for Coto
+# This file configures shared settings for all Maestro flows.
+#
+# Usage:
+#   maestro test apps/mobile/e2e/           -- Run all flows
+#   maestro test apps/mobile/e2e/app-launch.yaml  -- Run a single flow
+
+# Flows to include when running the entire e2e directory
+flows:
+  - app-launch.yaml
+  - home-topic-cards.yaml
+  - navigate-to-history.yaml
+  - history-empty-state.yaml
+  - start-conversation.yaml
+  - feedback-return-home.yaml
+  - voice-conversation.yaml

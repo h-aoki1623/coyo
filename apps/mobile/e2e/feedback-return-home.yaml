@@ -1,0 +1,115 @@
+# feedback-return-home.yaml
+# Verifies the full conversation lifecycle: start a topic, end the
+# conversation, view feedback, and return to the home screen.
+#
+# PREREQUISITES:
+# - Backend API must be running and reachable
+# - A conversation must be started and completed to reach the Feedback screen
+#
+# This flow performs the complete journey:
+# 1. Home -> tap topic -> Talk screen
+# 2. Talk screen -> end conversation -> completion state
+# 3. Completion state -> tap "View feedback" -> Feedback screen
+# 4. Feedback screen -> tap "Back to home" -> Home screen
+#
+# NOTE: This is an advanced flow that depends on backend availability
+# and may need longer timeouts for API responses. If the backend is not
+# running, the flow will fail at the topic tap step.
+appId: com.coto.app
+---
+# -- Step 1: Launch and start a conversation --
+
+- launchApp:
+    clearState: false
+
+# Wait for the Home screen to fully render.
+- extendedWaitUntil:
+    visible:
+      id: "home-greeting"
+    timeout: 30000
+
+# Start a conversation on the Sports topic via testID
+- tapOn:
+    id: "topic-sports"
+
+# Wait for API call and navigation
+- extendedWaitUntil:
+    visible:
+      id: "end-conversation"
+    timeout: 15000
+
+# Verify the Talk screen loaded
+- assertVisible:
+    text: "Coto"
+- takeScreenshot: "feedback-flow-01-talk-screen"
+
+# -- Step 2: End the conversation --
+
+# Tap the end button via testID
+- tapOn:
+    id: "end-conversation"
+
+# An Alert dialog will appear asking for confirmation.
+# On Android, native AlertDialog auto-uppercases to "END" (unique on screen).
+# On iOS, the button text is "End" (same as the header button, so use index: 1).
+- runFlow:
+    when:
+      visible: "END"
+    commands:
+      - tapOn: "END"
+- runFlow:
+    when:
+      visible:
+        text: "End"
+        index: 1
+    commands:
+      - tapOn:
+          text: "End"
+          index: 1
+
+# Wait for the API call to complete and the completion footer to appear.
+- extendedWaitUntil:
+    visible:
+      id: "view-feedback"
+    timeout: 15000
+
+- takeScreenshot: "feedback-flow-02-conversation-ended"
+
+# -- Step 3: Navigate to Feedback screen --
+
+# Tap the "View feedback" button via testID
+- tapOn:
+    id: "view-feedback"
+
+# Wait for the Feedback screen to load (includes API call for feedback data)
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible:
+      id: "go-home"
+    timeout: 15000
+
+# Verify the "Back to home" button is present via testID
+- assertVisible:
+    id: "go-home"
+
+- takeScreenshot: "feedback-flow-03-feedback-screen"
+
+# -- Step 4: Return to Home screen --
+
+# Tap the "Back to home" button via testID
+- tapOn:
+    id: "go-home"
+
+# Wait for navigation back to Home
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible:
+      id: "home-greeting"
+    timeout: 5000
+
+# Verify we are back on the Home screen
+- assertVisible:
+    id: "home-greeting"
+- assertVisible: "TOPICS"
+
+- takeScreenshot: "feedback-flow-04-returned-home"

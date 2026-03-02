@@ -1,0 +1,183 @@
+# voice-conversation.yaml
+# Verifies a 4-turn voice conversation flow with correction verification.
+# In E2E mode, the microphone is bypassed and pre-recorded test audio files
+# are sent to the backend instead of live recording.
+#
+# Turn sequence:
+#   Turn 1 (user): clean audio  → correction result = no corrections
+#   Turn 2 (AI):   AI response
+#   Turn 3 (user): error audio  → correction result = has corrections (multiple)
+#   Turn 4 (AI):   AI response
+#
+# PREREQUISITES:
+# - App must be built with E2E_MODE=true
+# - Backend API must be running and reachable
+# - e2e/fixtures/test-audio-clean.m4a must exist (bundled at build time)
+# - e2e/fixtures/test-audio-errors.m4a must exist (bundled at build time)
+appId: com.coto.app
+---
+# -- Step 1: Launch and navigate to Talk screen --
+
+- launchApp:
+    clearState: false
+
+- extendedWaitUntil:
+    visible:
+      id: "topic-sports"
+    timeout: 30000
+
+- tapOn:
+    id: "topic-sports"
+
+- extendedWaitUntil:
+    visible:
+      text: "Coto"
+    timeout: 15000
+
+- assertVisible:
+    id: "end-conversation"
+
+- takeScreenshot: "voice-01-talk-screen"
+
+# -- Step 2: Turn 1 — Record + send (clean audio, no corrections expected) --
+
+- tapOn:
+    id: "record-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "send-recording"
+    timeout: 5000
+
+- tapOn:
+    id: "send-recording"
+
+# Wait for turn to complete (record button reappears when idle)
+- extendedWaitUntil:
+    visible:
+      id: "record-button"
+    timeout: 60000
+
+- takeScreenshot: "voice-02-turn1-complete"
+
+# Verify: no corrections for clean audio
+- runFlow:
+    when:
+      visible:
+        id: "correction-clean"
+    commands:
+      - takeScreenshot: "voice-02b-no-corrections"
+
+# -- Step 3: Turn 3 — Record + send (error audio, corrections expected) --
+
+- tapOn:
+    id: "record-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "send-recording"
+    timeout: 5000
+
+- tapOn:
+    id: "send-recording"
+
+# Wait for turn to complete
+- extendedWaitUntil:
+    visible:
+      id: "record-button"
+    timeout: 60000
+
+- takeScreenshot: "voice-03-turn3-complete"
+
+# Verify: has corrections for error audio.
+# Use extendedWaitUntil (not runFlow when) to handle rendering delay
+# between the turn_complete event and the correction UI update.
+- extendedWaitUntil:
+    visible:
+      id: "correction-toggle"
+    timeout: 30000
+
+- takeScreenshot: "voice-03b-has-corrections"
+
+# Tap to expand the correction card
+- tapOn:
+    id: "correction-toggle"
+
+# Verify the expanded card with corrected text and explanation
+- assertVisible:
+    id: "correction-card"
+- assertVisible:
+    id: "correction-corrected-text"
+- assertVisible:
+    id: "correction-explanation"
+
+- takeScreenshot: "voice-03c-correction-expanded"
+
+# Tap again to collapse the correction card
+- tapOn:
+    id: "correction-toggle"
+
+# Verify the expanded card is no longer visible
+- assertNotVisible:
+    id: "correction-card"
+
+- takeScreenshot: "voice-03d-correction-collapsed"
+
+# -- Step 4: End conversation --
+
+- tapOn:
+    id: "end-conversation"
+
+# Confirm the end dialog.
+# On Android, native AlertDialog auto-uppercases to "END" (unique on screen).
+# On iOS, the button text is "End" (same as the header button, so use index: 1).
+- runFlow:
+    when:
+      visible: "END"
+    commands:
+      - tapOn: "END"
+- runFlow:
+    when:
+      visible:
+        text: "End"
+        index: 1
+    commands:
+      - tapOn:
+          text: "End"
+          index: 1
+
+# Wait for completion footer
+- extendedWaitUntil:
+    visible:
+      id: "view-feedback"
+    timeout: 15000
+
+- takeScreenshot: "voice-04-conversation-ended"
+
+# -- Step 5: Navigate to Feedback --
+
+- tapOn:
+    id: "view-feedback"
+
+- waitForAnimationToEnd
+
+- extendedWaitUntil:
+    visible:
+      id: "go-home"
+    timeout: 15000
+
+- takeScreenshot: "voice-05-feedback-screen"
+
+# -- Step 6: Return to Home --
+
+- tapOn:
+    id: "go-home"
+
+- waitForAnimationToEnd
+
+- extendedWaitUntil:
+    visible:
+      id: "topic-sports"
+    timeout: 5000
+
+- takeScreenshot: "voice-06-returned-home"

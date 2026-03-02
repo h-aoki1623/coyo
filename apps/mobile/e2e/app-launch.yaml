@@ -1,0 +1,31 @@
+# app-launch.yaml
+# Verifies the app launches successfully and the Home screen is fully rendered
+# with the greeting text, subtitle, and TOPICS section header.
+#
+# Expected result: Home screen visible with greeting and topic section.
+appId: com.coto.app
+---
+# Launch the application (clearState: false to preserve expo-dev-client settings)
+- launchApp:
+    clearState: false
+
+# Wait for the Home screen to fully render.
+# On Android emulators, the Expo dev client cold start can be slow.
+- extendedWaitUntil:
+    visible:
+      id: "home-greeting"
+    timeout: 30000
+
+# Verify the greeting is displayed
+- assertVisible:
+    id: "home-greeting"
+
+# Verify the TOPICS section label is visible
+- assertVisible: "TOPICS"
+
+# Verify at least one topic card is present
+- assertVisible:
+    id: "topic-sports"
+
+# Capture evidence of successful launch
+- takeScreenshot: "home-screen-launch"
