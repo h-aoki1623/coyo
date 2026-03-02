@@ -1,23 +1,20 @@
 import { useCallback } from 'react';
-import { View, Text, Pressable, StyleSheet, Platform } from 'react-native';
+import { View, Text, Pressable, StyleSheet } from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
 import { Colors } from '@/constants/colors';
+import { Typography } from '@/constants/typography';
+import { t } from '@/i18n';
+import { OfflineIcon } from '@/components/icons';
 import { useAppStore } from '@/stores/app-store';
 
 /**
  * Full-screen overlay shown when the device has no network connectivity.
  * Displays a WiFi-off icon, message, and retry button.
- *
- * Integration: Render this as a modal overlay in App.tsx or RootNavigator.tsx
- * when `useNetworkStatus()` returns false.
  */
 export function OfflineScreen() {
   const setOnlineStatus = useAppStore((s) => s.setOnlineStatus);
 
   const handleRetry = useCallback(async () => {
-    // Trigger a re-check via NetInfo.
-    // The actual continuous monitoring happens via useNetworkStatus subscription.
-    // This forces an immediate re-evaluation of connectivity.
     try {
       const state = await NetInfo.fetch();
       setOnlineStatus(state.isConnected ?? false);
@@ -29,15 +26,12 @@ export function OfflineScreen() {
   return (
     <View style={styles.overlay}>
       <View style={styles.content}>
-        {/* WiFi-off icon */}
         <View style={styles.iconContainer}>
-          <WifiOffIcon />
+          <OfflineIcon size={56} color={Colors.textTertiary} />
         </View>
 
-        <Text style={styles.title}>オフラインです</Text>
-        <Text style={styles.body}>
-          このアプリを使用するにはインターネット接続が必要です。接続を確認してからもう一度お試しください。
-        </Text>
+        <Text style={styles.title}>{t('offline.title')}</Text>
+        <Text style={styles.body}>{t('offline.body')}</Text>
 
         <Pressable
           style={({ pressed }) => [
@@ -46,27 +40,11 @@ export function OfflineScreen() {
           ]}
           onPress={handleRetry}
           accessibilityRole="button"
-          accessibilityLabel="Retry network connection"
+          accessibilityLabel={t('offline.retry')}
         >
-          <Text style={styles.retryButtonText}>再試行</Text>
+          <Text style={styles.retryButtonText}>{t('offline.retry')}</Text>
         </Pressable>
       </View>
-    </View>
-  );
-}
-
-/**
- * Simple WiFi-off icon built from View shapes.
- */
-function WifiOffIcon() {
-  return (
-    <View style={styles.wifiIcon}>
-      {/* WiFi arcs */}
-      <View style={styles.wifiArcOuter} />
-      <View style={styles.wifiArcMiddle} />
-      <View style={styles.wifiDot} />
-      {/* Slash line */}
-      <View style={styles.slashLine} />
     </View>
   );
 }
@@ -74,102 +52,42 @@ function WifiOffIcon() {
 const styles = StyleSheet.create({
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: Colors.background,
+    backgroundColor: Colors.surfacePrimary,
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 999,
   },
   content: {
     alignItems: 'center',
-    paddingHorizontal: 40,
+    paddingHorizontal: 12,
   },
-  // WiFi icon
   iconContainer: {
-    marginBottom: 24,
+    marginBottom: 12,
   },
-  wifiIcon: {
-    width: 64,
-    height: 64,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  wifiArcOuter: {
-    width: 48,
-    height: 24,
-    borderWidth: 3,
-    borderColor: '#9CA3AF',
-    borderBottomWidth: 0,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    position: 'absolute',
-    top: 8,
-  },
-  wifiArcMiddle: {
-    width: 32,
-    height: 16,
-    borderWidth: 3,
-    borderColor: '#9CA3AF',
-    borderBottomWidth: 0,
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    position: 'absolute',
-    top: 20,
-  },
-  wifiDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#9CA3AF',
-    position: 'absolute',
-    bottom: 14,
-  },
-  slashLine: {
-    width: 3,
-    height: 56,
-    backgroundColor: '#9CA3AF',
-    position: 'absolute',
-    transform: [{ rotate: '45deg' }],
-  },
-  // Text
   title: {
-    fontSize: 24,
-    fontWeight: '700',
+    ...Typography.headline.ja,
     color: Colors.textPrimary,
     marginBottom: 12,
   },
   body: {
-    fontSize: 15,
+    ...Typography.body.ja,
     color: Colors.textSecondary,
     textAlign: 'center',
-    lineHeight: 22,
-    marginBottom: 28,
+    marginBottom: 20,
   },
-  // Retry button
   retryButton: {
-    backgroundColor: Colors.primaryBlue,
-    paddingHorizontal: 40,
-    paddingVertical: 16,
-    borderRadius: 14,
-    minWidth: 200,
+    backgroundColor: Colors.buttonPrimaryBg,
+    paddingHorizontal: 32,
+    height: 44,
+    borderRadius: 12,
     alignItems: 'center',
-    ...Platform.select({
-      ios: {
-        shadowColor: Colors.primaryBlue,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.2,
-        shadowRadius: 8,
-      },
-      android: {
-        elevation: 4,
-      },
-    }),
+    justifyContent: 'center',
   },
   retryButtonPressed: {
     opacity: 0.8,
   },
   retryButtonText: {
-    color: '#FFFFFF',
-    fontSize: 17,
-    fontWeight: '600',
+    ...Typography.body.ja,
+    color: Colors.textInverse,
   },
 });

@@ -1,0 +1,24 @@
+# dismiss-dev-client.yaml
+# Helper flow: dismisses the expo-dev-client onboarding dialog.
+#
+# Called by run-e2e.sh before running actual test flows.
+# The dialog only appears once per app install (persisted in shared preferences).
+# If the dialog is not visible, the conditional block is simply skipped.
+#
+# This file is NOT listed in config.yaml and is NOT a test flow.
+appId: com.coto.app
+---
+- launchApp:
+    clearState: false
+
+- extendedWaitUntil:
+    visible:
+      id: "home-greeting"
+    timeout: 30000
+
+- runFlow:
+    when:
+      visible: "Continue"
+    commands:
+      - tapOn: "Continue"
+      - waitForAnimationToEnd

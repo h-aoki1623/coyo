@@ -35,3 +35,12 @@ type TurnCorrectionRaw = components['schemas']['TurnCorrectionResponse'];
 export interface TurnCorrection extends Omit<TurnCorrectionRaw, 'items'> {
   items: CorrectionItem[];
 }
+
+// -- Sentence-level grouping (used by Feedback / History screens) -----------
+
+export interface SentenceCorrection {
+  readonly key: string;
+  readonly originalSentence: string;
+  readonly correctedSentence: string;
+  readonly items: readonly CorrectionItem[];
+}

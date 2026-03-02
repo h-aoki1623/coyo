@@ -6,6 +6,9 @@ import {
   formatDetailHeader,
 } from './format';
 
+// Note: jest.setup.js mocks expo-localization to return 'en' locale,
+// so i18n defaults to English. Test expected values match English translations.
+
 describe('formatDuration', () => {
   it('returns "--" for null seconds', () => {
     expect(formatDuration(null)).toBe('--');
@@ -15,35 +18,32 @@ describe('formatDuration', () => {
     expect(formatDuration(0)).toBe('--');
   });
 
-  it('returns "1\u5206\u672A\u6E80" for less than 60 seconds', () => {
-    expect(formatDuration(1)).toBe('1\u5206\u672A\u6E80');
-    expect(formatDuration(30)).toBe('1\u5206\u672A\u6E80');
-    expect(formatDuration(59)).toBe('1\u5206\u672A\u6E80');
+  it('returns less-than-minute label for less than 60 seconds', () => {
+    expect(formatDuration(1)).toBe('< 1 min');
+    expect(formatDuration(30)).toBe('< 1 min');
+    expect(formatDuration(59)).toBe('< 1 min');
   });
 
   it('returns minutes for 60+ seconds', () => {
-    expect(formatDuration(60)).toBe('1\u5206\u9593');
-    expect(formatDuration(120)).toBe('2\u5206\u9593');
-    expect(formatDuration(300)).toBe('5\u5206\u9593');
+    expect(formatDuration(60)).toBe('1 min');
+    expect(formatDuration(120)).toBe('2 min');
+    expect(formatDuration(300)).toBe('5 min');
   });
 
   it('truncates partial minutes', () => {
-    expect(formatDuration(90)).toBe('1\u5206\u9593');
-    expect(formatDuration(179)).toBe('2\u5206\u9593');
+    expect(formatDuration(90)).toBe('1 min');
+    expect(formatDuration(179)).toBe('2 min');
   });
 
   it('handles large durations', () => {
-    expect(formatDuration(3600)).toBe('60\u5206\u9593');
-    expect(formatDuration(7200)).toBe('120\u5206\u9593');
+    expect(formatDuration(3600)).toBe('60 min');
+    expect(formatDuration(7200)).toBe('120 min');
   });
 });
 
 describe('formatTime', () => {
   it('formats a morning time in AM', () => {
-    // 9:05 AM
     const result = formatTime('2026-01-15T09:05:00Z');
-    // The exact output depends on the timezone the test runs in,
-    // but it should match the pattern X:XX AM/PM
     expect(result).toMatch(/^\d{1,2}:\d{2} (AM|PM)$/);
   });
 
@@ -79,39 +79,39 @@ describe('formatTime', () => {
 });
 
 describe('getSectionTitle', () => {
-  it('returns "\u4ECA\u65E5" for today', () => {
+  it('returns "Today" for today', () => {
     const now = new Date(2026, 1, 20, 14, 0, 0);
     const todayISO = new Date(2026, 1, 20, 10, 0, 0).toISOString();
 
-    expect(getSectionTitle(todayISO, now)).toBe('\u4ECA\u65E5');
+    expect(getSectionTitle(todayISO, now)).toBe('Today');
   });
 
-  it('returns "\u6628\u65E5" for yesterday', () => {
+  it('returns "Yesterday" for yesterday', () => {
     const now = new Date(2026, 1, 20, 14, 0, 0);
     const yesterdayISO = new Date(2026, 1, 19, 10, 0, 0).toISOString();
 
-    expect(getSectionTitle(yesterdayISO, now)).toBe('\u6628\u65E5');
+    expect(getSectionTitle(yesterdayISO, now)).toBe('Yesterday');
   });
 
   it('returns formatted date for older dates', () => {
     const now = new Date(2026, 1, 20, 14, 0, 0);
     const olderISO = new Date(2026, 1, 15, 10, 0, 0).toISOString();
 
-    expect(getSectionTitle(olderISO, now)).toBe('2\u670815\u65E5');
+    expect(getSectionTitle(olderISO, now)).toBe('2/15');
   });
 
   it('returns formatted date for a different month', () => {
     const now = new Date(2026, 1, 20, 14, 0, 0);
     const janISO = new Date(2026, 0, 5, 10, 0, 0).toISOString();
 
-    expect(getSectionTitle(janISO, now)).toBe('1\u67085\u65E5');
+    expect(getSectionTitle(janISO, now)).toBe('1/5');
   });
 
   it('handles dates two days ago (not yesterday)', () => {
     const now = new Date(2026, 1, 20, 14, 0, 0);
     const twoDaysAgoISO = new Date(2026, 1, 18, 10, 0, 0).toISOString();
 
-    expect(getSectionTitle(twoDaysAgoISO, now)).toBe('2\u670818\u65E5');
+    expect(getSectionTitle(twoDaysAgoISO, now)).toBe('2/18');
   });
 });
 
@@ -132,9 +132,9 @@ describe('groupByDate', () => {
     const sections = groupByDate(items, now);
 
     expect(sections).toHaveLength(2);
-    expect(sections[0].title).toBe('\u4ECA\u65E5');
+    expect(sections[0].title).toBe('Today');
     expect(sections[0].data).toHaveLength(2);
-    expect(sections[1].title).toBe('\u6628\u65E5');
+    expect(sections[1].title).toBe('Yesterday');
     expect(sections[1].data).toHaveLength(1);
   });
 
@@ -160,9 +160,9 @@ describe('groupByDate', () => {
     const sections = groupByDate(items, now);
 
     expect(sections).toHaveLength(3);
-    expect(sections[0].title).toBe('\u6628\u65E5');
-    expect(sections[1].title).toBe('\u4ECA\u65E5');
-    expect(sections[2].title).toBe('2\u670815\u65E5');
+    expect(sections[0].title).toBe('Yesterday');
+    expect(sections[1].title).toBe('Today');
+    expect(sections[2].title).toBe('2/15');
   });
 
   it('handles a single item', () => {
@@ -184,21 +184,21 @@ describe('formatDetailHeader', () => {
     const todayAt10 = new Date(2026, 1, 20, 10, 30, 0);
     const result = formatDetailHeader(todayAt10.toISOString(), 300, now);
 
-    expect(result).toBe('\u4ECA\u65E5 10:30 AM \u00B7 5\u5206\u9593');
+    expect(result).toBe('Today 10:30 AM \u00B7 5 min');
   });
 
   it('formats yesterday with time and duration', () => {
     const yesterdayAt15 = new Date(2026, 1, 19, 15, 0, 0);
     const result = formatDetailHeader(yesterdayAt15.toISOString(), 120, now);
 
-    expect(result).toBe('\u6628\u65E5 3:00 PM \u00B7 2\u5206\u9593');
+    expect(result).toBe('Yesterday 3:00 PM \u00B7 2 min');
   });
 
   it('formats older date with time and duration', () => {
     const older = new Date(2026, 1, 10, 9, 5, 0);
     const result = formatDetailHeader(older.toISOString(), 600, now);
 
-    expect(result).toBe('2\u670810\u65E5 9:05 AM \u00B7 10\u5206\u9593');
+    expect(result).toBe('2/10 9:05 AM \u00B7 10 min');
   });
 
   it('formats with null duration', () => {
@@ -219,6 +219,6 @@ describe('formatDetailHeader', () => {
     const todayAt10 = new Date(2026, 1, 20, 10, 0, 0);
     const result = formatDetailHeader(todayAt10.toISOString(), 45, now);
 
-    expect(result).toContain('1\u5206\u672A\u6E80');
+    expect(result).toContain('< 1 min');
   });
 });

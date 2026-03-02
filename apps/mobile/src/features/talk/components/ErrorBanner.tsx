@@ -1,5 +1,8 @@
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { Colors } from '@/constants/colors';
+import { Typography } from '@/constants/typography';
+import { t } from '@/i18n';
+import { HintIcon } from '@/components/icons';
 
 interface Props {
   message: string;
@@ -7,21 +10,24 @@ interface Props {
 }
 
 /**
- * Red error banner displayed below the message list when an error occurs.
- * Shows an error message with a retry button.
+ * Error banner displayed in the message area when a recognition error occurs.
+ * Rounded card with icon circle, message text, and retry button.
  */
 export function ErrorBanner({ message, onRetry }: Props) {
   return (
     <View style={styles.container}>
       <View style={styles.content}>
+        <View style={styles.iconCircle}>
+          <HintIcon size={16} color={Colors.statusError} />
+        </View>
         <Text style={styles.message}>{message}</Text>
         <Pressable
           style={styles.retryButton}
           onPress={onRetry}
           accessibilityRole="button"
-          accessibilityLabel="Retry"
+          accessibilityLabel={t('common.retry')}
         >
-          <Text style={styles.retryText}>再試行</Text>
+          <Text style={styles.retryText}>{t('common.retry')}</Text>
         </Pressable>
       </View>
     </View>
@@ -30,35 +36,38 @@ export function ErrorBanner({ message, onRetry }: Props) {
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingHorizontal: 20,
   },
   content: {
-    backgroundColor: '#FEF2F2',
-    borderRadius: 12,
+    backgroundColor: Colors.statusErrorBg,
     borderWidth: 1,
-    borderColor: '#FECACA',
-    padding: 14,
+    borderColor: Colors.statusError,
+    borderRadius: 14,
+    paddingHorizontal: 17,
+    paddingVertical: 13,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
     gap: 12,
   },
+  iconCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#FEE2E2',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   message: {
-    fontSize: 14,
-    color: Colors.errorRed,
+    ...Typography.body.ja,
+    color: Colors.textPrimary,
     flex: 1,
-    lineHeight: 20,
   },
   retryButton: {
-    minWidth: 44,
-    minHeight: 44,
     justifyContent: 'center',
     alignItems: 'center',
   },
   retryText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: Colors.errorRed,
+    ...Typography.body.ja,
+    color: Colors.buttonGhostText,
   },
 });

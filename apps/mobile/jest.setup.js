@@ -50,8 +50,19 @@ jest.mock('expo-constants', () => ({
     expoConfig: {
       extra: {
         apiBaseUrl: 'http://localhost:8000',
+        e2eMode: false,
       },
     },
+  },
+}));
+
+// expo-asset
+jest.mock('expo-asset', () => ({
+  Asset: {
+    fromModule: jest.fn(() => ({
+      downloadAsync: jest.fn(() => Promise.resolve()),
+      localUri: 'file:///mock-test-audio.m4a',
+    })),
   },
 }));
 
@@ -61,6 +72,14 @@ jest.mock('@react-native-community/netinfo', () => ({
   fetch: jest.fn(() =>
     Promise.resolve({ isConnected: true, isInternetReachable: true }),
   ),
+}));
+
+// expo-localization
+jest.mock('expo-localization', () => ({
+  getLocales: jest.fn(() => [
+    { languageCode: 'en', languageTag: 'en-US', regionCode: 'US' },
+  ]),
+  getCalendars: jest.fn(() => [{}]),
 }));
 
 // react-native-safe-area-context

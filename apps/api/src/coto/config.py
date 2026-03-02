@@ -25,8 +25,8 @@ class Settings(BaseSettings):
     openai_api_key: str
 
     # LLM Config
-    llm_conversation_model: str = "gpt-5-mini"
-    llm_correction_model: str = "gpt-5-mini"
+    llm_conversation_model: str = "gpt-4.1-mini"
+    llm_correction_model: str = "gpt-4.1-mini"
 
     # TTS Config
     tts_voice: str = "nova"

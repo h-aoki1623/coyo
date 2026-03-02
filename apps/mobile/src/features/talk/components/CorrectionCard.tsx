@@ -1,7 +1,27 @@
-import { useState, useCallback } from 'react';
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { useState, useCallback, useRef } from 'react';
+import {
+  View,
+  Text,
+  Pressable,
+  StyleSheet,
+  Animated,
+  Easing,
+  type LayoutChangeEvent,
+} from 'react-native';
 import { Colors } from '@/constants/colors';
-import type { TurnCorrection } from '@/types/conversation';
+import { Typography } from '@/constants/typography';
+import { t } from '@/i18n';
+import {
+  CheckCircleIcon,
+  ExclamationCircleIcon,
+  ChevronDownIcon,
+  ChevronRightIcon,
+  SpinnerIcon,
+} from '@/components/icons';
+import { computeWordDiff, splitTrailingPunct } from '@/utils/word-diff';
+import type { TurnCorrection, CorrectionItem } from '@/types/conversation';
+
+const ANIMATION_DURATION = 300;
 
 interface CorrectionAnnotationProps {
   correctionStatus: 'none' | 'pending' | 'clean' | 'has_corrections';
@@ -17,49 +37,100 @@ export function CorrectionAnnotation({
   correction,
 }: CorrectionAnnotationProps) {
   const [expanded, setExpanded] = useState(false);
+  const [cardMounted, setCardMounted] = useState(false);
+  const [contentHeight, setContentHeight] = useState(0);
+  const animValue = useRef(new Animated.Value(0)).current;
 
   const handleToggle = useCallback(() => {
-    setExpanded((prev) => !prev);
+    const toExpanded = !expanded;
+    setExpanded(toExpanded);
+    if (toExpanded) {
+      setCardMounted(true);
+    }
+    Animated.timing(animValue, {
+      toValue: toExpanded ? 1 : 0,
+      duration: ANIMATION_DURATION,
+      easing: toExpanded
+        ? Easing.out(Easing.cubic)
+        : Easing.in(Easing.cubic),
+      useNativeDriver: false,
+    }).start(({ finished }) => {
+      if (finished && !toExpanded) setCardMounted(false);
+    });
+  }, [expanded, animValue]);
+
+  const handleContentLayout = useCallback((event: LayoutChangeEvent) => {
+    const h = Math.ceil(event.nativeEvent.layout.height);
+    if (h > 0) setContentHeight(h);
   }, []);
 
   if (correctionStatus === 'none') return null;
 
   if (correctionStatus === 'pending') {
     return (
-      <View style={styles.annotationRow}>
-        <Text style={styles.checkingText}>Checking...</Text>
+      <View style={styles.checkingRow} testID="correction-checking">
+        <SpinnerIcon size={12} color={Colors.buttonPrimaryBg} strokeWidth={2} />
+        <Text style={styles.checkingText}>{t('corrections.checking')}</Text>
       </View>
     );
   }
 
   if (correctionStatus === 'clean') {
     return (
-      <View style={styles.annotationRow}>
-        <Text style={styles.cleanIcon}>✓</Text>
-        <Text style={styles.cleanText}>No corrections</Text>
+      <View style={styles.annotationRow} testID="correction-clean">
+        <CheckCircleIcon size={16} color={Colors.statusSuccess} />
+        <Text style={styles.annotationText}>{t('corrections.noCorrections')}</Text>
       </View>
     );
   }
 
   // has_corrections
   const itemCount = correction?.items.length ?? 0;
+  const countLabel =
+    itemCount === 1
+      ? t('corrections.correctionCountOne')
+      : t('corrections.correctionCount', { count: itemCount });
 
   return (
-    <View>
+    <View style={styles.correctionWrapper}>
       <Pressable
         style={styles.annotationRow}
         onPress={handleToggle}
+        testID="correction-toggle"
         accessibilityRole="button"
-        accessibilityLabel={`${itemCount} corrections. Tap to ${expanded ? 'collapse' : 'expand'}`}
+        accessibilityLabel={countLabel}
       >
-        <Text style={styles.warningIcon}>⚠</Text>
-        <Text style={styles.correctionCountText}>
-          {itemCount} correction{itemCount !== 1 ? 's' : ''} {expanded ? '▼' : '›'}
-        </Text>
+        <ExclamationCircleIcon size={16} color={Colors.statusWarning} />
+        <Text style={styles.annotationText}>{countLabel}</Text>
+        {expanded ? (
+          <ChevronDownIcon size={10} color={Colors.textSecondary} />
+        ) : (
+          <ChevronRightIcon size={10} color={Colors.textSecondary} />
+        )}
       </Pressable>
 
-      {expanded && correction ? (
-        <ExpandedCorrectionCard correction={correction} />
+      {cardMounted && correction ? (
+        <Animated.View
+          style={[
+            contentHeight > 0
+              ? [
+                  styles.animatedContainer,
+                  {
+                    height: animValue.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [0, contentHeight],
+                    }),
+                    opacity: animValue,
+                  },
+                ]
+              : styles.measureContainer,
+          ]}
+          pointerEvents={expanded ? 'auto' : 'none'}
+        >
+          <View onLayout={handleContentLayout}>
+            <ExpandedCorrectionCard correction={correction} />
+          </View>
+        </Animated.View>
       ) : null}
     </View>
   );
@@ -69,163 +140,165 @@ interface ExpandedCorrectionCardProps {
   correction: TurnCorrection;
 }
 
+/**
+ * Expanded correction card showing corrected text with inline highlights,
+ * a divider, and the full explanation.
+ */
 function ExpandedCorrectionCard({ correction }: ExpandedCorrectionCardProps) {
   return (
-    <View style={styles.expandedCard}>
-      {correction.items.map((item) => (
-        <View key={item.id} style={styles.correctionItem}>
-          {/* Original sentence with error highlighted */}
-          <Text style={styles.originalSentence}>
-            {renderHighlightedText(item.originalSentence, item.original, 'original')}
-          </Text>
+    <View style={styles.expandedCard} testID="correction-card">
+      {/* Corrected text with highlighted corrections */}
+      <Text style={styles.correctedText} testID="correction-corrected-text">
+        {renderCorrectedText(correction.correctedText, correction.items)}
+      </Text>
 
-          {/* Corrected sentence with correction highlighted */}
-          <Text style={styles.correctedSentence}>
-            {renderHighlightedText(item.correctedSentence, item.corrected, 'corrected')}
-          </Text>
+      {/* Divider */}
+      <View style={styles.cardDivider} />
 
-          {/* Explanation */}
-          <View style={styles.explanationRow}>
-            <Text style={styles.explanationDiamond}>◇</Text>
-            <Text style={styles.explanationText}>{item.explanation}</Text>
-          </View>
-        </View>
-      ))}
+      {/* Explanation */}
+      <Text style={styles.explanationText} testID="correction-explanation">
+        {correction.explanation}
+      </Text>
     </View>
   );
 }
 
 /**
- * Render text with a specific word/phrase highlighted.
- * Splits the sentence by the target and wraps it in a styled span.
+ * Render the full corrected text with only the diff words highlighted.
+ * For each correction item, computes the word-level diff between
+ * original and corrected phrases, then highlights only changed/added words.
  */
-function renderHighlightedText(
-  sentence: string,
-  target: string,
-  type: 'original' | 'corrected',
+function renderCorrectedText(
+  correctedText: string,
+  items: CorrectionItem[],
 ): React.ReactNode[] {
-  const index = sentence.indexOf(target);
-  if (index === -1) {
-    // Target not found in sentence, render plain
-    return [
-      <Text key="plain" style={type === 'original' ? styles.originalPlain : styles.correctedPlain}>
-        {sentence}
-      </Text>,
-    ];
+  // Collect character ranges for diff-only highlights
+  const highlights: { start: number; end: number }[] = [];
+
+  for (const item of items) {
+    const phraseStart = correctedText.indexOf(item.corrected);
+    if (phraseStart === -1) continue;
+
+    const { correctedSegments } = computeWordDiff(item.original, item.corrected);
+
+    // Walk through segments sequentially to map character positions
+    let charOffset = 0;
+    for (const segment of correctedSegments) {
+      const segIdx = item.corrected.indexOf(segment.text, charOffset);
+      if (segIdx === -1) continue;
+
+      if (segment.isDiff) {
+        const [word] = splitTrailingPunct(segment.text);
+        highlights.push({
+          start: phraseStart + segIdx,
+          end: phraseStart + segIdx + word.length,
+        });
+      }
+
+      charOffset = segIdx + segment.text.length;
+    }
   }
 
-  const before = sentence.slice(0, index);
-  const after = sentence.slice(index + target.length);
+  // Sort by position
+  highlights.sort((a, b) => a.start - b.start);
 
-  return [
-    before ? (
-      <Text key="before" style={type === 'original' ? styles.originalPlain : styles.correctedPlain}>
-        {before}
-      </Text>
-    ) : null,
-    <Text
-      key="highlight"
-      style={type === 'original' ? styles.originalHighlight : styles.correctedHighlight}
-    >
-      {target}
-    </Text>,
-    after ? (
-      <Text key="after" style={type === 'original' ? styles.originalPlain : styles.correctedPlain}>
-        {after}
-      </Text>
-    ) : null,
-  ].filter(Boolean);
+  // Merge overlapping highlights
+  const merged: { start: number; end: number }[] = [];
+  for (const h of highlights) {
+    const last = merged[merged.length - 1];
+    if (last && h.start <= last.end) {
+      last.end = Math.max(last.end, h.end);
+    } else {
+      merged.push({ start: h.start, end: h.end });
+    }
+  }
+
+  // Build text segments
+  const parts: React.ReactNode[] = [];
+  let pos = 0;
+
+  for (let i = 0; i < merged.length; i++) {
+    const h = merged[i];
+    if (h.start > pos) {
+      parts.push(correctedText.slice(pos, h.start));
+    }
+    parts.push(
+      <Text key={`h${i}`} style={styles.correctedHighlight}>
+        {correctedText.slice(h.start, h.end)}
+      </Text>,
+    );
+    pos = h.end;
+  }
+
+  if (pos < correctedText.length) {
+    parts.push(correctedText.slice(pos));
+  }
+
+  return parts;
 }
 
 const styles = StyleSheet.create({
-  // Annotation row (inline under bubble)
+  // -- Checking row (spinner + text, gap 8) --
+  checkingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  checkingText: {
+    ...Typography.caption.en,
+    color: Colors.textTertiary,
+  },
+  // -- Wrapper for correction toggle + expanded card --
+  correctionWrapper: {
+    gap: 8,
+  },
+  // -- Annotation row (inline under bubble) --
   annotationRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-    paddingTop: 4,
-    paddingRight: 16,
-    justifyContent: 'flex-end',
+    gap: 5,
   },
-  checkingText: {
-    fontSize: 12,
+  annotationText: {
+    ...Typography.caption.en,
     color: Colors.textSecondary,
   },
-  cleanIcon: {
-    fontSize: 12,
-    color: Colors.correctionGreen,
-    fontWeight: '700',
-  },
-  cleanText: {
-    fontSize: 12,
-    color: Colors.correctionGreen,
-    fontWeight: '500',
-  },
-  warningIcon: {
-    fontSize: 12,
-    color: Colors.correctionOrange,
-  },
-  correctionCountText: {
-    fontSize: 12,
-    color: Colors.correctionOrange,
-    fontWeight: '600',
-  },
 
-  // Expanded correction card
+  // -- Animated accordion container --
+  animatedContainer: {
+    overflow: 'hidden',
+  },
+  // -- Invisible container for measuring content height before first animation --
+  measureContainer: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    opacity: 0,
+  },
+  // -- Expanded correction card --
   expandedCard: {
-    marginTop: 6,
-    marginRight: 16,
-    marginLeft: 40,
-    backgroundColor: Colors.cardBackground,
+    backgroundColor: Colors.statusWarningBg,
+    borderWidth: 1,
+    borderColor: Colors.statusWarning,
     borderRadius: 12,
-    padding: 12,
-    gap: 12,
+    paddingTop: 13,
+    paddingBottom: 15,
+    paddingHorizontal: 15,
+    gap: 10,
   },
-  correctionItem: {
-    gap: 6,
-  },
-  // Original sentence
-  originalSentence: {
-    fontSize: 14,
-    lineHeight: 20,
-    color: Colors.textPrimary,
-  },
-  originalPlain: {
-    color: Colors.textPrimary,
-  },
-  originalHighlight: {
-    color: Colors.correctionOrange,
-    textDecorationLine: 'line-through',
-  },
-  // Corrected sentence
-  correctedSentence: {
-    fontSize: 14,
-    lineHeight: 20,
-    color: Colors.textPrimary,
-  },
-  correctedPlain: {
+  correctedText: {
+    ...Typography.bodySmall.en,
     color: Colors.textPrimary,
   },
   correctedHighlight: {
-    color: Colors.correctionGreen,
-    fontWeight: '600',
-    backgroundColor: '#DCFCE7',
+    backgroundColor: Colors.correctionHighlightBg,
+    color: Colors.correctionHighlightText,
   },
-  // Explanation
-  explanationRow: {
-    flexDirection: 'row',
-    gap: 6,
-    paddingTop: 2,
-  },
-  explanationDiamond: {
-    fontSize: 12,
-    color: Colors.textSecondary,
-    marginTop: 1,
+  cardDivider: {
+    height: 1,
+    backgroundColor: Colors.statusWarning,
   },
   explanationText: {
-    fontSize: 13,
+    ...Typography.bodySmall.ja,
     color: Colors.textSecondary,
-    lineHeight: 18,
-    flex: 1,
   },
 });

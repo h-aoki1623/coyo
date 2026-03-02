@@ -50,14 +50,8 @@ apps/api/openapi.json
 # === Build artifacts ===
 *.tsbuildinfo
 
-# === Maestro E2E test artifacts (screenshots from takeScreenshot steps) ===
-home-screen-launch.png
-home-topic-cards-all.png
-history-list-screen.png
-history-screen-state.png
-talk-screen-after-topic-tap.png
-feedback-flow-*.png
-back-to-home-from-history.png
+# === Maestro E2E test artifacts ===
+apps/mobile/e2e/screenshots/
 
 # === Claude ===
 .claude/

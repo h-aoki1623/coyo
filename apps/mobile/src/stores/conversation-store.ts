@@ -12,6 +12,7 @@ interface ConversationState {
   // Actions
   startConversation: (topic: TopicKey, conversationId: string) => void;
   addTurn: (turn: Turn) => void;
+  updateTurnCorrectionStatus: (turnId: string, status: Turn['correctionStatus']) => void;
   updateCorrection: (turnId: string, correction: TurnCorrection) => void;
   setStatus: (status: ConversationState['status']) => void;
   reset: () => void;
@@ -33,6 +34,13 @@ export const useConversationStore = create<ConversationState>((set) => ({
 
   addTurn: (turn) =>
     set((state) => ({ turns: [...state.turns, turn] })),
+
+  updateTurnCorrectionStatus: (turnId, status) =>
+    set((state) => ({
+      turns: state.turns.map((t) =>
+        t.id === turnId ? { ...t, correctionStatus: status } : t,
+      ),
+    })),
 
   updateCorrection: (turnId, correction) =>
     set((state) => ({

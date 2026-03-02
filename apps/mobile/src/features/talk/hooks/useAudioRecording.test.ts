@@ -15,7 +15,7 @@ describe('buildAudioFormData', () => {
 
     expect(appendSpy).toHaveBeenCalledWith('audio', expect.objectContaining({
       uri: 'file:///recordings/test.m4a',
-      type: 'audio/m4a',
+      type: 'audio/mp4',
     }));
 
     appendSpy.mockRestore();

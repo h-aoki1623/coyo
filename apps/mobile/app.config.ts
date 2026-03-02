@@ -20,6 +20,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   plugins: [
     'expo-secure-store',
+    'expo-font',
+    'expo-localization',
     [
       'expo-av',
       {
@@ -30,5 +32,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   extra: {
     apiBaseUrl: process.env.API_BASE_URL ?? 'http://localhost:8000',
     environment: process.env.APP_ENV ?? 'development',
+    e2eMode: process.env.E2E_MODE === 'true',
   },
 });

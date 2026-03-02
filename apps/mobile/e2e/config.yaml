@@ -13,3 +13,4 @@ flows:
   - history-empty-state.yaml
   - start-conversation.yaml
   - feedback-return-home.yaml
+  - voice-conversation.yaml

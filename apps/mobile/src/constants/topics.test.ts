@@ -1,12 +1,17 @@
-import { findTopic, TOPICS } from './topics';
+import { findTopic, getTopics } from './topics';
 
-describe('TOPICS', () => {
-  it('contains exactly 5 topics', () => {
-    expect(TOPICS).toHaveLength(5);
+// Mock i18n to return predictable values in tests
+jest.mock('@/i18n', () => ({
+  t: (key: string) => key,
+}));
+
+describe('getTopics', () => {
+  it('returns exactly 5 topics', () => {
+    expect(getTopics()).toHaveLength(5);
   });
 
   it('has all expected topic keys', () => {
-    const keys = TOPICS.map((t) => t.key);
+    const keys = getTopics().map((t) => t.key);
     expect(keys).toEqual([
       'sports',
       'business',
@@ -17,15 +22,15 @@ describe('TOPICS', () => {
   });
 
   it('each topic has required fields', () => {
-    for (const topic of TOPICS) {
+    for (const topic of getTopics()) {
       expect(topic).toHaveProperty('key');
       expect(topic).toHaveProperty('label');
-      expect(topic).toHaveProperty('emoji');
+      expect(topic).toHaveProperty('icon');
       expect(topic).toHaveProperty('iconBg');
       expect(topic).toHaveProperty('iconColor');
       expect(typeof topic.key).toBe('string');
       expect(typeof topic.label).toBe('string');
-      expect(typeof topic.emoji).toBe('string');
+      expect(typeof topic.icon).toBe('string');
       expect(typeof topic.iconBg).toBe('string');
       expect(typeof topic.iconColor).toBe('string');
     }
@@ -33,9 +38,16 @@ describe('TOPICS', () => {
 
   it('all iconBg values are valid hex colors', () => {
     const hexColorRegex = /^#[0-9A-Fa-f]{6}$/;
-    for (const topic of TOPICS) {
+    for (const topic of getTopics()) {
       expect(topic.iconBg).toMatch(hexColorRegex);
       expect(topic.iconColor).toMatch(hexColorRegex);
+    }
+  });
+
+  it('has valid icon names', () => {
+    const validIcons = ['globe', 'briefcase', 'building', 'monitor', 'film'];
+    for (const topic of getTopics()) {
+      expect(validIcons).toContain(topic.icon);
     }
   });
 });
@@ -45,7 +57,8 @@ describe('findTopic', () => {
     const result = findTopic('sports');
     expect(result).toBeDefined();
     expect(result?.key).toBe('sports');
-    expect(result?.label).toBe('\u30B9\u30DD\u30FC\u30C4');
+    // With mocked i18n, label is the translation key
+    expect(result?.label).toBe('topics.sports');
   });
 
   it('returns the correct topic for each valid key', () => {

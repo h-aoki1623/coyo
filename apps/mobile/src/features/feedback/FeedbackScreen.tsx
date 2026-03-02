@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -6,15 +6,20 @@ import {
   Pressable,
   ActivityIndicator,
   StyleSheet,
-  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { apiClient } from '@/api/client';
 import { Colors } from '@/constants/colors';
+import { Fonts, Typography } from '@/constants/typography';
+import { t } from '@/i18n';
+import { NavBar } from '@/components/NavBar';
+import { EmptyFeedbackState } from '@/components/EmptyFeedbackState';
+import { CorrectionFeedbackCard } from '@/components/CorrectionFeedbackCard';
+import { groupCorrectionsBySentence } from '@/utils/group-corrections';
 import { useConversationStore } from '@/stores/conversation-store';
 import type { RootStackParamList } from '@/navigation/types';
-import type { FeedbackResponse, TurnCorrection, CorrectionItem } from '@/types/conversation';
+import type { FeedbackResponse, TurnCorrection } from '@/types/conversation';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Feedback'>;
 
@@ -31,9 +36,9 @@ interface SummaryStatsProps {
 function SummaryStats({ totalTurns, totalCorrections, totalClean }: SummaryStatsProps) {
   return (
     <View style={styles.statsRow}>
-      <StatCircle value={totalTurns} label="やりとり" color={Colors.primaryBlue} />
-      <StatCircle value={totalCorrections} label="添削" color={Colors.correctionOrange} />
-      <StatCircle value={totalClean} label="訂正なし" color={Colors.correctionGreen} />
+      <StatCircle value={totalTurns} label={t('feedback.statExchanges')} color={Colors.textPrimary} />
+      <StatCircle value={totalCorrections} label={t('feedback.statCorrections')} color={Colors.statusWarning} />
+      <StatCircle value={totalClean} label={t('feedback.statClean')} color={Colors.statusSuccess} />
     </View>
   );
 }
@@ -58,70 +63,8 @@ function StatCircle({
   );
 }
 
-// -- Correction Card Component --
-
-function FeedbackCorrectionCard({ correction }: { correction: TurnCorrection }) {
-  return (
-    <View style={styles.correctionCard}>
-      {correction.items.map((item) => (
-        <FeedbackCorrectionItem key={item.id} item={item} />
-      ))}
-    </View>
-  );
-}
-
-function FeedbackCorrectionItem({ item }: { item: CorrectionItem }) {
-  return (
-    <View style={styles.correctionItemContainer}>
-      {/* Original sentence with error word in red/strikethrough */}
-      <Text style={styles.sentenceText}>
-        {renderHighlightedOriginal(item.originalSentence, item.original)}
-      </Text>
-
-      {/* Corrected sentence with corrected word in green */}
-      <Text style={styles.sentenceText}>
-        {renderHighlightedCorrected(item.correctedSentence, item.corrected)}
-      </Text>
-
-      {/* Explanation */}
-      <View style={styles.explanationRow}>
-        <Text style={styles.explanationDiamond}>◇</Text>
-        <Text style={styles.explanationText}>{item.explanation}</Text>
-      </View>
-    </View>
-  );
-}
-
-function renderHighlightedOriginal(sentence: string, target: string): React.ReactNode[] {
-  const index = sentence.indexOf(target);
-  if (index === -1) {
-    return [<Text key="plain" style={styles.plainText}>{sentence}</Text>];
-  }
-
-  const before = sentence.slice(0, index);
-  const after = sentence.slice(index + target.length);
-
-  return [
-    before ? <Text key="before" style={styles.plainText}>{before}</Text> : null,
-    <Text key="highlight" style={styles.originalErrorText}>{target}</Text>,
-    after ? <Text key="after" style={styles.plainText}>{after}</Text> : null,
-  ].filter(Boolean);
-}
-
-function renderHighlightedCorrected(sentence: string, target: string): React.ReactNode[] {
-  const index = sentence.indexOf(target);
-  if (index === -1) {
-    return [<Text key="plain" style={styles.plainText}>{sentence}</Text>];
-  }
-
-  const before = sentence.slice(0, index);
-  const after = sentence.slice(index + target.length);
-
-  return [
-    before ? <Text key="before" style={styles.plainText}>{before}</Text> : null,
-    <Text key="highlight" style={styles.correctedGreenText}>{target}</Text>,
-    after ? <Text key="after" style={styles.plainText}>{after}</Text> : null,
-  ].filter(Boolean);
+function ListItemSeparator() {
+  return <View style={styles.listSeparator} />;
 }
 
 // -- Main Screen --
@@ -164,86 +107,77 @@ export function FeedbackScreen({ navigation, route }: Props) {
     fetchFeedback();
   }, [fetchFeedback]);
 
-  // Disable back gesture and customize header
-  useEffect(() => {
-    navigation.setOptions({
-      headerBackVisible: false,
-      gestureEnabled: false,
-      title: 'フィードバック',
-      headerTitleStyle: styles.screenTitle,
-    });
-  }, [navigation]);
+  const sentenceGroups = useMemo(
+    () => groupCorrectionsBySentence(corrections),
+    [corrections],
+  );
 
   const handleBackToHome = useCallback(() => {
     reset();
     navigation.popToTop();
   }, [reset, navigation]);
 
-  if (loadingState === 'loading') {
-    return (
-      <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color={Colors.primaryBlue} />
-        <Text style={styles.loadingText}>Loading feedback...</Text>
-      </View>
-    );
-  }
-
-  if (loadingState === 'error') {
-    return (
-      <View style={styles.centerContainer}>
-        <Text style={styles.errorIcon}>!</Text>
-        <Text style={styles.errorTitle}>Could not load feedback</Text>
-        <Pressable
-          style={styles.retryButton}
-          onPress={fetchFeedback}
-          accessibilityRole="button"
-          accessibilityLabel="Retry loading feedback"
-        >
-          <Text style={styles.retryButtonText}>Try Again</Text>
-        </Pressable>
-      </View>
-    );
-  }
-
   return (
-    <SafeAreaView style={styles.container} edges={['bottom']}>
-      <FlatList
-        data={corrections}
-        renderItem={({ item }) => <FeedbackCorrectionCard correction={item} />}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.list}
-        showsVerticalScrollIndicator={false}
-        ListHeaderComponent={
-          <View style={styles.listHeader}>
-            <SummaryStats
-              totalTurns={stats.totalTurns}
-              totalCorrections={stats.totalCorrections}
-              totalClean={stats.totalClean}
-            />
+    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+      <NavBar title={t('feedback.title')} />
+      {loadingState === 'loading' ? (
+        <View style={styles.centerContent}>
+          <ActivityIndicator size="large" color={Colors.buttonPrimaryBg} />
+          <Text style={styles.loadingText}>{t('feedback.loading')}</Text>
+        </View>
+      ) : loadingState === 'error' ? (
+        <View style={styles.centerContent}>
+          <Text style={styles.errorIcon}>!</Text>
+          <Text style={styles.errorTitle}>{t('feedback.errorTitle')}</Text>
+          <Pressable
+            style={styles.retryButton}
+            onPress={fetchFeedback}
+            accessibilityRole="button"
+            accessibilityLabel={t('feedback.retry')}
+          >
+            <Text style={styles.retryButtonText}>{t('feedback.retry')}</Text>
+          </Pressable>
+        </View>
+      ) : (
+        <>
+          <FlatList
+            data={sentenceGroups}
+            renderItem={({ item }) => <CorrectionFeedbackCard sentenceCorrection={item} />}
+            keyExtractor={(item) => item.key}
+            contentContainerStyle={styles.list}
+            showsVerticalScrollIndicator={false}
+            ItemSeparatorComponent={ListItemSeparator}
+            ListHeaderComponent={
+              <View style={styles.listHeader}>
+                <SummaryStats
+                  totalTurns={stats.totalTurns}
+                  totalCorrections={stats.totalCorrections}
+                  totalClean={stats.totalClean}
+                />
+              </View>
+            }
+            ListEmptyComponent={
+              <View style={styles.emptyContainer}>
+                <EmptyFeedbackState />
+              </View>
+            }
+          />
+          <View style={styles.bottomBar}>
+            <Pressable
+              style={({ pressed }) => [
+                styles.homeButton,
+                pressed && styles.homeButtonPressed,
+              ]}
+              onPress={handleBackToHome}
+              testID="go-home"
+              accessibilityRole="button"
+              accessibilityLabel={t('feedback.goHome')}
+            >
+              <Text style={styles.homeButtonText}>{t('feedback.goHome')}</Text>
+            </Pressable>
           </View>
-        }
-        ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyCheckIcon}>✓</Text>
-            <Text style={styles.emptyTitle}>Perfect!</Text>
-            <Text style={styles.emptySubtitle}>No corrections needed. Great job!</Text>
-          </View>
-        }
-      />
-      <View style={styles.bottomBar}>
-        <Pressable
-          style={({ pressed }) => [
-            styles.homeButton,
-            pressed && styles.homeButtonPressed,
-          ]}
-          onPress={handleBackToHome}
-          testID="go-home"
-          accessibilityRole="button"
-          accessibilityLabel="Go back to home screen"
-        >
-          <Text style={styles.homeButtonText}>ホームに戻る</Text>
-        </Pressable>
-      </View>
+        </>
+      )}
     </SafeAreaView>
   );
 }
@@ -251,47 +185,40 @@ export function FeedbackScreen({ navigation, route }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: Colors.surfacePrimary,
   },
-  screenTitle: {
-    fontSize: 17,
-    fontWeight: '600',
-    color: Colors.textPrimary,
-  },
-  centerContainer: {
+  centerContent: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: Colors.background,
     paddingHorizontal: 40,
   },
   loadingText: {
+    ...Typography.body.ja,
     marginTop: 12,
-    fontSize: 16,
     color: Colors.textSecondary,
   },
   // Error state
   errorIcon: {
     fontSize: 36,
-    fontWeight: '700',
-    color: Colors.errorRed,
+    fontFamily: Fonts.plusJakartaSans.bold,
+    color: Colors.statusError,
     marginBottom: 12,
     textAlign: 'center',
     width: 56,
     height: 56,
     lineHeight: 56,
     borderRadius: 28,
-    backgroundColor: '#FEF2F2',
+    backgroundColor: Colors.statusErrorBg,
     overflow: 'hidden',
   },
   errorTitle: {
-    fontSize: 18,
-    fontWeight: '600',
+    ...Typography.headline.ja,
     color: Colors.textPrimary,
     marginBottom: 20,
   },
   retryButton: {
-    backgroundColor: Colors.primaryBlue,
+    backgroundColor: Colors.buttonPrimaryBg,
     paddingHorizontal: 32,
     paddingVertical: 14,
     borderRadius: 12,
@@ -299,135 +226,75 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   retryButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
+    ...Typography.body.ja,
+    color: Colors.surfaceCard,
   },
   // Stats
   statsRow: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
-    paddingVertical: 20,
+    gap: 12,
   },
   statItem: {
-    alignItems: 'center',
     flex: 1,
+    height: 95,
+    borderWidth: 1,
+    borderColor: Colors.borderDefault,
+    borderRadius: 14,
+    paddingHorizontal: 9,
+    paddingVertical: 17,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.surfaceCard,
   },
   statValue: {
-    fontSize: 28,
-    fontWeight: '700',
+    ...Typography.display.en,
   },
   statLabel: {
-    fontSize: 13,
-    color: Colors.textSecondary,
+    ...Typography.caption.ja,
+    color: Colors.textTertiary,
+    textAlign: 'center',
     marginTop: 4,
   },
   // List
+  listSeparator: {
+    height: 12,
+  },
   list: {
-    padding: 20,
-    paddingBottom: 8,
+    paddingHorizontal: 20,
+    paddingTop: 0,
+    paddingBottom: 16,
   },
   listHeader: {
-    marginBottom: 12,
-  },
-  // Correction cards
-  correctionCard: {
-    backgroundColor: Colors.cardBackground,
-    borderRadius: 14,
-    padding: 16,
-    marginBottom: 12,
-    gap: 16,
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.06,
-        shadowRadius: 6,
-      },
-      android: {
-        elevation: 2,
-      },
-    }),
-  },
-  correctionItemContainer: {
-    gap: 8,
-  },
-  sentenceText: {
-    fontSize: 15,
-    lineHeight: 22,
-    color: Colors.textPrimary,
-  },
-  plainText: {
-    color: Colors.textPrimary,
-  },
-  originalErrorText: {
-    color: Colors.errorRed,
-    textDecorationLine: 'line-through',
-  },
-  correctedGreenText: {
-    color: Colors.correctionGreen,
-    fontWeight: '600',
-    backgroundColor: '#DCFCE7',
-  },
-  explanationRow: {
-    flexDirection: 'row',
-    gap: 6,
-    paddingTop: 2,
-  },
-  explanationDiamond: {
-    fontSize: 12,
-    color: Colors.textSecondary,
-    marginTop: 1,
-  },
-  explanationText: {
-    fontSize: 13,
-    color: Colors.textSecondary,
-    lineHeight: 18,
-    flex: 1,
+    marginBottom: 20,
   },
   // Empty state (no corrections)
   emptyContainer: {
     alignItems: 'center',
-    paddingVertical: 40,
-  },
-  emptyCheckIcon: {
-    fontSize: 40,
-    color: Colors.correctionGreen,
-    fontWeight: '700',
-    marginBottom: 12,
-  },
-  emptyTitle: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: Colors.textPrimary,
-    marginBottom: 8,
-  },
-  emptySubtitle: {
-    fontSize: 15,
-    color: Colors.textSecondary,
-    textAlign: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 32,
   },
   // Bottom bar
   bottomBar: {
     paddingHorizontal: 20,
-    paddingVertical: 12,
+    paddingTop: 17,
+    paddingBottom: 40,
     borderTopWidth: 1,
-    borderTopColor: Colors.borderLight,
-    backgroundColor: Colors.cardBackground,
+    borderTopColor: Colors.borderSubtle,
+    backgroundColor: Colors.surfacePrimary,
   },
   homeButton: {
-    borderWidth: 1.5,
-    borderColor: Colors.primaryBlue,
-    paddingVertical: 16,
-    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: Colors.buttonGhostBorder,
+    height: 48,
+    borderRadius: 12,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   homeButtonPressed: {
-    backgroundColor: '#EFF6FF',
+    backgroundColor: Colors.accentBg,
   },
   homeButtonText: {
-    color: Colors.primaryBlue,
-    fontSize: 17,
-    fontWeight: '600',
+    ...Typography.body.ja,
+    color: Colors.buttonGhostText,
   },
 });

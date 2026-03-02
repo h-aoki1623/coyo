@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, useRef } from 'react';
+import { memo, useCallback, useEffect, useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -9,13 +9,16 @@ import {
   Alert,
   Animated,
   StyleSheet,
-  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { apiClient } from '@/api/client';
 import { Colors } from '@/constants/colors';
+import { Typography } from '@/constants/typography';
+import { t } from '@/i18n';
 import { findTopic } from '@/constants/topics';
+import { TopicIcon, TrashIcon, SpeechBubbleIcon, HintCircleIcon } from '@/components/icons';
+import { NavBar } from '@/components/NavBar';
 import type { RootStackParamList } from '@/navigation/types';
 import type { HistoryListItem, HistoryListResponse } from '@/types/conversation';
 import { formatDuration, formatTime, groupByDate } from './utils/format';
@@ -32,14 +35,14 @@ interface HistoryRowProps {
   onDelete: (id: string) => void;
 }
 
-function HistoryRow({ item, onPress, onDelete }: HistoryRowProps) {
+const HistoryRow = memo(function HistoryRow({ item, onPress, onDelete }: HistoryRowProps) {
   const translateX = useRef(new Animated.Value(0)).current;
   const [swiped, setSwiped] = useState(false);
 
   const topic = findTopic(item.topic);
   const topicLabel = topic?.label ?? item.topic;
-  const iconBg = topic?.iconBg ?? '#E5E7EB';
-  const emoji = topic?.emoji ?? '💬';
+  const topicIcon = topic?.icon ?? 'globe';
+  const topicIconColor = topic?.iconColor ?? Colors.topicSports;
 
   const handlePress = useCallback(() => {
     if (swiped) {
@@ -56,11 +59,11 @@ function HistoryRow({ item, onPress, onDelete }: HistoryRowProps) {
 
   const handleSwipeDelete = useCallback(() => {
     Alert.alert(
-      'トーク履歴を削除',
-      'トーク履歴を削除しますか？この操作は取り消せません。',
+      t('history.deleteTitle'),
+      t('history.deleteMessage'),
       [
         {
-          text: 'キャンセル',
+          text: t('history.deleteCancel'),
           style: 'cancel',
           onPress: () => {
             Animated.spring(translateX, {
@@ -71,7 +74,7 @@ function HistoryRow({ item, onPress, onDelete }: HistoryRowProps) {
           },
         },
         {
-          text: '削除',
+          text: t('history.deleteConfirm'),
           style: 'destructive',
           onPress: () => onDelete(item.id),
         },
@@ -82,7 +85,7 @@ function HistoryRow({ item, onPress, onDelete }: HistoryRowProps) {
   const handleLongPress = useCallback(() => {
     if (!swiped) {
       Animated.spring(translateX, {
-        toValue: -80,
+        toValue: -50,
         useNativeDriver: true,
       }).start();
       setSwiped(true);
@@ -96,9 +99,9 @@ function HistoryRow({ item, onPress, onDelete }: HistoryRowProps) {
         style={styles.deleteBackground}
         onPress={handleSwipeDelete}
         accessibilityRole="button"
-        accessibilityLabel="Delete conversation"
+        accessibilityLabel={t('history.deleteConfirm')}
       >
-        <Text style={styles.deleteIcon}>🗑</Text>
+        <TrashIcon size={20} color={Colors.surfaceCard} />
       </Pressable>
 
       <Animated.View
@@ -109,11 +112,11 @@ function HistoryRow({ item, onPress, onDelete }: HistoryRowProps) {
           onPress={handlePress}
           onLongPress={handleLongPress}
           accessibilityRole="button"
-          accessibilityLabel={`${topicLabel} conversation, ${formatDuration(item.durationSeconds)}, ${item.totalCorrections} corrections`}
+          accessibilityLabel={`${topicLabel}, ${formatDuration(item.durationSeconds)}`}
         >
           <View style={styles.rowLeft}>
-            <View style={[styles.topicIcon, { backgroundColor: iconBg }]}>
-              <Text style={styles.topicEmoji}>{emoji}</Text>
+            <View style={styles.topicIcon}>
+              <TopicIcon icon={topicIcon} size={20} color={topicIconColor} />
             </View>
             <View style={styles.rowInfo}>
               <Text style={styles.rowTopic}>{topicLabel}</Text>
@@ -135,7 +138,7 @@ function HistoryRow({ item, onPress, onDelete }: HistoryRowProps) {
       </Animated.View>
     </View>
   );
-}
+});
 
 // -- Main Screen --
 
@@ -147,12 +150,8 @@ export function HistoryListScreen({ navigation }: Props) {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 
-  // Configure header
   useEffect(() => {
-    navigation.setOptions({
-      title: 'トーク履歴',
-      headerTitleStyle: styles.screenTitle,
-    });
+    navigation.setOptions({ headerShown: false });
   }, [navigation]);
 
   const fetchHistory = useCallback(
@@ -163,7 +162,7 @@ export function HistoryListScreen({ navigation }: Props) {
         );
 
         if (result.error) {
-          Alert.alert('Error', result.error.message);
+          Alert.alert(t('errors.genericError'), result.error.message);
           return;
         }
 
@@ -174,10 +173,7 @@ export function HistoryListScreen({ navigation }: Props) {
           setHasMore(pageNum * PER_PAGE < result.data.total);
         }
       } catch {
-        Alert.alert(
-          'Connection Error',
-          'Could not load conversation history.',
-        );
+        Alert.alert(t('errors.connectionTitle'), t('errors.loadHistoryError'));
       }
     },
     [],
@@ -218,36 +214,51 @@ export function HistoryListScreen({ navigation }: Props) {
         await apiClient.delete(`/api/history/${conversationId}`);
         setItems((prev) => prev.filter((item) => item.id !== conversationId));
       } catch {
-        Alert.alert('Error', 'Could not delete the conversation.');
+        Alert.alert(t('errors.genericError'), t('errors.deleteError'));
       }
     },
     [],
   );
 
+  const handleBack = useCallback(() => navigation.goBack(), [navigation]);
+
   if (isLoading) {
     return (
-      <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color={Colors.primaryBlue} />
-      </View>
+      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+        <NavBar title={t('history.title')} onBack={handleBack} testID="history-title" />
+        <View style={styles.centerContainer}>
+          <ActivityIndicator size="large" color={Colors.buttonPrimaryBg} />
+        </View>
+      </SafeAreaView>
     );
   }
 
   if (items.length === 0) {
     return (
-      <View style={styles.centerContainer}>
-        <Text style={styles.emptyIcon}>💬</Text>
-        <Text style={styles.emptyTitle}>No Conversations Yet</Text>
-        <Text style={styles.emptySubtitle}>
-          Start a conversation from the home screen to see your history here.
-        </Text>
-      </View>
+      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+        <NavBar title={t('history.title')} onBack={handleBack} testID="history-title" />
+        <View style={styles.emptyContainer}>
+          <View style={styles.emptyIconContainer}>
+            <SpeechBubbleIcon size={38} color={Colors.textTertiary} />
+          </View>
+          <Text style={styles.emptyTitle}>{t('history.emptyTitle')}</Text>
+          <Text style={styles.emptySubtitle}>{t('history.emptySubtitle')}</Text>
+          <View style={styles.infoCard}>
+            <View style={styles.infoCardIcon}>
+              <HintCircleIcon size={16} color={Colors.buttonGhostText} />
+            </View>
+            <Text style={styles.infoCardText}>{t('history.emptyHint')}</Text>
+          </View>
+        </View>
+      </SafeAreaView>
     );
   }
 
   const sections = groupByDate(items);
 
   return (
-    <SafeAreaView style={styles.container} edges={['bottom']}>
+    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+      <NavBar title={t('history.title')} onBack={handleBack} testID="history-title" />
       <SectionList
         sections={sections}
         renderItem={({ item }) => (
@@ -270,7 +281,7 @@ export function HistoryListScreen({ navigation }: Props) {
           <RefreshControl
             refreshing={isRefreshing}
             onRefresh={handleRefresh}
-            tintColor={Colors.primaryBlue}
+            tintColor={Colors.buttonPrimaryBg}
           />
         }
         onEndReached={handleLoadMore}
@@ -278,7 +289,7 @@ export function HistoryListScreen({ navigation }: Props) {
         ListFooterComponent={
           isLoadingMore ? (
             <View style={styles.footerLoader}>
-              <ActivityIndicator size="small" color={Colors.primaryBlue} />
+              <ActivityIndicator size="small" color={Colors.buttonPrimaryBg} />
             </View>
           ) : null
         }
@@ -292,39 +303,31 @@ const TOPIC_ICON_SIZE = 40;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
-  },
-  screenTitle: {
-    fontSize: 17,
-    fontWeight: '600',
-    color: Colors.textPrimary,
+    backgroundColor: Colors.surfacePrimary,
   },
   centerContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: Colors.background,
     paddingHorizontal: 40,
   },
   list: {
-    paddingHorizontal: 16,
-    paddingTop: 8,
+    paddingHorizontal: 0,
+    paddingTop: 0,
     paddingBottom: 20,
   },
   // Section headers
   sectionHeader: {
-    paddingVertical: 8,
-    paddingHorizontal: 4,
+    paddingTop: 24,
+    paddingBottom: 12,
+    paddingHorizontal: 20,
   },
   sectionHeaderText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: Colors.textSecondary,
+    ...Typography.captionSmall.ja,
+    color: Colors.textTertiary,
   },
   // Row
   rowWrapper: {
-    marginBottom: 8,
-    borderRadius: 14,
     overflow: 'hidden',
   },
   deleteBackground: {
@@ -332,38 +335,24 @@ const styles = StyleSheet.create({
     right: 0,
     top: 0,
     bottom: 0,
-    width: 80,
-    backgroundColor: Colors.errorRed,
+    width: 50,
+    backgroundColor: Colors.statusError,
     justifyContent: 'center',
     alignItems: 'center',
-    borderTopRightRadius: 14,
-    borderBottomRightRadius: 14,
-  },
-  deleteIcon: {
-    fontSize: 22,
   },
   rowAnimated: {
-    backgroundColor: Colors.cardBackground,
-    borderRadius: 14,
+    backgroundColor: Colors.surfacePrimary,
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: Colors.cardBackground,
-    borderRadius: 14,
-    padding: 14,
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.04,
-        shadowRadius: 4,
-      },
-      android: {
-        elevation: 1,
-      },
-    }),
+    height: 69,
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 13,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.borderSubtle,
   },
   rowPressed: {
     opacity: 0.7,
@@ -377,25 +366,22 @@ const styles = StyleSheet.create({
   topicIcon: {
     width: TOPIC_ICON_SIZE,
     height: TOPIC_ICON_SIZE,
-    borderRadius: TOPIC_ICON_SIZE / 2,
+    borderRadius: 12,
+    backgroundColor: Colors.borderSubtle,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  topicEmoji: {
-    fontSize: 18,
   },
   rowInfo: {
     flex: 1,
     gap: 2,
   },
   rowTopic: {
-    fontSize: 16,
-    fontWeight: '600',
+    ...Typography.bodyLarge.ja,
     color: Colors.textPrimary,
   },
   rowMeta: {
-    fontSize: 13,
-    color: Colors.textSecondary,
+    ...Typography.captionSmall.ja,
+    color: Colors.textTertiary,
   },
   rowRight: {
     marginLeft: 12,
@@ -403,34 +389,72 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   correctionBadge: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: Colors.primaryBlue,
+    backgroundColor: Colors.borderSubtle,
+    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
     justifyContent: 'center',
     alignItems: 'center',
   },
   correctionBadgeText: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#FFFFFF',
+    ...Typography.captionSmall.en,
+    color: Colors.statusWarning,
   },
   // Empty state
-  emptyIcon: {
-    fontSize: 48,
-    marginBottom: 12,
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingBottom: 80,
+    backgroundColor: Colors.surfacePrimary,
+  },
+  emptyIconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 24,
+    backgroundColor: Colors.borderSubtle,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 20,
   },
   emptyTitle: {
-    fontSize: 20,
-    fontWeight: '600',
+    ...Typography.title.ja,
     color: Colors.textPrimary,
-    marginBottom: 8,
+    letterSpacing: -0.3,
+    textAlign: 'center',
+    marginBottom: 12,
   },
   emptySubtitle: {
-    fontSize: 14,
+    ...Typography.caption.ja,
     color: Colors.textSecondary,
     textAlign: 'center',
-    lineHeight: 20,
+    marginBottom: 24,
+    maxWidth: 248,
+  },
+  infoCard: {
+    flexDirection: 'row',
+    backgroundColor: Colors.accentBg,
+    borderWidth: 1,
+    borderColor: Colors.accentBorder,
+    borderRadius: 14,
+    padding: 16,
+    gap: 12,
+    alignItems: 'flex-start',
+    width: '100%',
+  },
+  infoCardIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: Colors.accentBorder,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  infoCardText: {
+    ...Typography.caption.ja,
+    flex: 1,
+    color: Colors.buttonGhostText,
   },
   footerLoader: {
     paddingVertical: 20,

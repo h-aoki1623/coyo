@@ -51,8 +51,12 @@ Analyze the following user text for grammar, expression, and vocabulary errors.
 
 Rules:
 - Only flag genuine errors. Natural, correct English should not be flagged.
-- For each error, provide the original fragment, the corrected fragment, \
-the full original sentence, and the full corrected sentence.
+- Each error MUST be a separate item. Never combine multiple errors into one \
+item, even if they appear in the same sentence.
+- "original" and "corrected" must be the minimal fragment around the single \
+error, not the entire sentence. Include only 1-2 surrounding words for context.
+- For each item, also provide the full original sentence and the full corrected \
+sentence (with ALL corrections for that sentence applied).
 - Classify each error as one of: "grammar", "expression", "vocabulary".
 - Write all explanations in {correction_language_name}.
 - If the text has no errors, set has_errors to false, corrected_text to the \

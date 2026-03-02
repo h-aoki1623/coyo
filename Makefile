@@ -1,4 +1,4 @@
-.PHONY: dev-mobile dev-api lint lint-mobile lint-api test test-mobile test-api migrate migrate-new docker-up docker-down docker-reset generate-api-types
+.PHONY: dev-mobile dev-api dev-ios dev-android dev-both lint lint-mobile lint-api test test-mobile test-api e2e e2e-ios e2e-android migrate migrate-new docker-up docker-down docker-reset generate-api-types
 
 # Infrastructure
 docker-up:
@@ -21,6 +21,16 @@ dev-mobile:
 dev-api:
 	cd apps/api && .venv/bin/uvicorn src.coto.main:app --reload
 
+# Full dev environment (Docker + API + Emulator + Build + Metro)
+dev-ios:
+	cd apps/mobile && ./run-dev.sh ios
+
+dev-android:
+	cd apps/mobile && ./run-dev.sh android
+
+dev-both:
+	cd apps/mobile && ./run-dev.sh both
+
 # Linting
 lint: lint-mobile lint-api
 
@@ -38,6 +48,22 @@ test-mobile:
 
 test-api:
 	cd apps/api && .venv/bin/pytest
+
+# E2E Tests (Maestro)
+# Usage:
+#   make e2e                              # All flows on both platforms
+#   make e2e-ios                          # All flows on iOS
+#   make e2e-android                      # All flows on Android
+#   make e2e-ios FLOW=app-launch.yaml     # Single flow on iOS
+#   make e2e-android FLOW=app-launch.yaml # Single flow on Android
+e2e:
+	cd apps/mobile && ./e2e/run-e2e.sh all $(FLOW)
+
+e2e-ios:
+	cd apps/mobile && ./e2e/run-e2e.sh ios $(FLOW)
+
+e2e-android:
+	cd apps/mobile && ./e2e/run-e2e.sh android $(FLOW)
 
 # Database Migrations
 migrate:

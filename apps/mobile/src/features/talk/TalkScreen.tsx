@@ -7,17 +7,20 @@ import {
   Text,
   Pressable,
   StyleSheet,
-  Platform,
+  type LayoutChangeEvent,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { apiClient } from '@/api/client';
 import { Colors } from '@/constants/colors';
+import { Typography } from '@/constants/typography';
+import { t } from '@/i18n';
 import { useConversationStore } from '@/stores/conversation-store';
 import { useAudioStore } from '@/stores/audio-store';
+import { CotoAvatar, BackIcon } from '@/components/icons';
 import type { RootStackParamList } from '@/navigation/types';
 import type { Turn } from '@/types/conversation';
-import { MessageBubble, TypingBubble } from './components/MessageBubble';
+import { MessageBubble, AiTypingBubble, ProcessingBubble } from './components/MessageBubble';
 import { RecordButton } from './components/RecordButton';
 import { RecordingControls } from './components/RecordingControls';
 import { ErrorBanner } from './components/ErrorBanner';
@@ -32,17 +35,25 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Talk'>;
  */
 function TalkHeader({
   onEnd,
+  onBack,
   isEnding,
 }: {
   onEnd: () => void;
+  onBack: () => void;
   isEnding: boolean;
 }) {
   return (
     <View style={styles.header}>
       <View style={styles.headerLeft}>
-        <View style={styles.headerLogo}>
-          <Text style={styles.headerLogoText}>CO</Text>
-        </View>
+        <Pressable
+          onPress={onBack}
+          style={styles.headerBackButton}
+          accessibilityRole="button"
+          accessibilityLabel={t('common.goBack')}
+        >
+          <BackIcon size={16} color="#3B82F6" />
+        </Pressable>
+        <CotoAvatar size={32} />
         <Text style={styles.headerTitle}>Coto</Text>
       </View>
       <Pressable
@@ -51,13 +62,12 @@ function TalkHeader({
         style={styles.endButton}
         testID="end-conversation"
         accessibilityRole="button"
-        accessibilityLabel="End conversation"
-        accessibilityHint="Ends the conversation and shows feedback"
+        accessibilityLabel={t('talk.endButton')}
       >
         {isEnding ? (
-          <ActivityIndicator size="small" color={Colors.errorRed} />
+          <ActivityIndicator size="small" color={Colors.buttonDangerText} />
         ) : (
-          <Text style={styles.endButtonText}>終了する</Text>
+          <Text style={styles.endButtonText}>{t('talk.endButton')}</Text>
         )}
       </Pressable>
     </View>
@@ -65,33 +75,24 @@ function TalkHeader({
 }
 
 /**
- * Completion footer shown when conversation has ended.
- * Displays duration and a button to view feedback.
+ * Fixed footer bar with "View Feedback" button.
+ * Shown at the bottom of the screen when conversation has ended.
  */
-function CompletionFooter({
-  duration,
-  onViewFeedback,
-}: {
-  duration: string;
-  onViewFeedback: () => void;
-}) {
+function CompletionFooter({ onViewFeedback }: { onViewFeedback: () => void }) {
   return (
-    <View style={styles.completionContainer}>
-      <Text style={styles.completionText}>トーク終了 · {duration}</Text>
-      <View style={styles.completionButtonWrapper}>
-        <Pressable
-          style={({ pressed }) => [
-            styles.feedbackButton,
-            pressed && styles.feedbackButtonPressed,
-          ]}
-          onPress={onViewFeedback}
-          testID="view-feedback"
-          accessibilityRole="button"
-          accessibilityLabel="View feedback"
-        >
-          <Text style={styles.feedbackButtonText}>フィードバックを見る</Text>
-        </Pressable>
-      </View>
+    <View style={styles.completionFooter}>
+      <Pressable
+        style={({ pressed }) => [
+          styles.feedbackButton,
+          pressed && styles.feedbackButtonPressed,
+        ]}
+        onPress={onViewFeedback}
+        testID="view-feedback"
+        accessibilityRole="button"
+        accessibilityLabel={t('talk.viewFeedback')}
+      >
+        <Text style={styles.feedbackButtonText}>{t('talk.viewFeedback')}</Text>
+      </Pressable>
     </View>
   );
 }
@@ -113,7 +114,7 @@ export function TalkScreen({ navigation, route }: Props) {
   const { startRecording, stopRecording } = useAudioRecording();
 
   const activeConversationId = conversationId ?? '';
-  const { typingText, isStreaming, processTurn } = useTurnStreaming(activeConversationId);
+  const { isStreaming, isUserProcessing, isAiThinking, processTurn } = useTurnStreaming(activeConversationId);
 
   // Hide the default navigation header
   useEffect(() => {
@@ -122,33 +123,63 @@ export function TalkScreen({ navigation, route }: Props) {
     });
   }, [navigation]);
 
-  // Scroll to bottom when new turns arrive
+  // Auto-scroll: passively track FlatList dimensions via callbacks,
+  // but ONLY trigger scrolls from specific state changes (useEffects/handlers).
+  // onContentSizeChange updates the ref but never triggers a scroll,
+  // so CorrectionCard open/close won't cause unwanted scrolls.
+  const contentHeightRef = useRef(0);
+  const layoutHeightRef = useRef(0);
+
+  const scrollToBottom = useCallback(() => {
+    const offset = Math.max(0, contentHeightRef.current - layoutHeightRef.current);
+    flatListRef.current?.scrollToOffset({ offset, animated: true });
+  }, []);
+
+  const handleContentSizeChange = useCallback((_w: number, h: number) => {
+    contentHeightRef.current = h;
+  }, []);
+
+  const handleListLayout = useCallback((e: LayoutChangeEvent) => {
+    layoutHeightRef.current = e.nativeEvent.layout.height;
+  }, []);
+
+  // Scroll when new turns are added (user message / AI message)
   useEffect(() => {
     if (turns.length > 0) {
-      const timer = setTimeout(() => {
-        flatListRef.current?.scrollToEnd({ animated: true });
-      }, 100);
+      const timer = setTimeout(scrollToBottom, 200);
       return () => clearTimeout(timer);
     }
-  }, [turns.length, typingText]);
+  }, [turns.length, scrollToBottom]);
+
+  // Scroll when footer bubbles appear (ProcessingBubble / AiTypingBubble)
+  useEffect(() => {
+    if (isUserProcessing || isAiThinking) {
+      const timer = setTimeout(scrollToBottom, 200);
+      return () => clearTimeout(timer);
+    }
+  }, [isUserProcessing, isAiThinking, scrollToBottom]);
 
   const formatDuration = useCallback((): string => {
     const elapsed = Math.floor((Date.now() - conversationStartTime.current) / 1000);
     const mins = Math.floor(elapsed / 60);
-    if (mins === 0) return '1分未満';
-    return `${mins}分間`;
+    if (mins === 0) return t('talk.lessThanMinute');
+    return t('talk.minutesDuration', { mins });
   }, []);
+
+  const handleGoBack = useCallback(() => {
+    navigation.goBack();
+  }, [navigation]);
 
   const handleEndConversation = useCallback(() => {
     if (!activeConversationId) return;
 
     Alert.alert(
-      'End Conversation',
-      'Would you like to end this conversation and see your feedback?',
+      t('endDialog.title'),
+      t('endDialog.message'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('endDialog.cancel'), style: 'cancel' },
         {
-          text: 'End',
+          text: t('endDialog.end'),
           style: 'default',
           onPress: async () => {
             setStatus('ending');
@@ -158,7 +189,7 @@ export function TalkScreen({ navigation, route }: Props) {
               setStatus('completed');
             } catch {
               setStatus('active');
-              Alert.alert('Error', 'Failed to end conversation. Please try again.');
+              Alert.alert(t('errors.genericError'), t('errors.endConversationError'));
             }
           },
         },
@@ -173,7 +204,8 @@ export function TalkScreen({ navigation, route }: Props) {
   const handleStartRecording = useCallback(async () => {
     setErrorMessage(null);
     await startRecording();
-  }, [startRecording]);
+    setTimeout(scrollToBottom, 200);
+  }, [startRecording, scrollToBottom]);
 
   const handleCancelRecording = useCallback(async () => {
     await stopRecording();
@@ -191,47 +223,53 @@ export function TalkScreen({ navigation, route }: Props) {
     setErrorMessage(null);
   }, []);
 
-  const renderTurn = useCallback(
-    ({ item }: { item: Turn }) => {
-      const correction = corrections[item.id];
-      return <MessageBubble turn={item} correction={correction} />;
-    },
-    [corrections],
-  );
-
-  const renderFooter = useCallback(() => {
-    if (typingText) {
-      return <TypingBubble text={typingText} />;
-    }
-    if (isStreaming) {
-      return (
-        <View style={styles.loadingContainer}>
-          <View style={styles.loadingDots}>
-            <View style={[styles.dot, styles.dotActive]} />
-            <View style={[styles.dot, styles.dotActive]} />
-            <View style={[styles.dot, styles.dotActive]} />
-          </View>
-        </View>
-      );
-    }
-    return null;
-  }, [typingText, isStreaming]);
-
   const isEnding = status === 'ending';
   const isCompleted = status === 'completed';
   const isRecording = recordingStatus === 'recording';
   const isProcessing = recordingStatus === 'processing';
   const canRecord = !isStreaming && !isEnding && !isCompleted && !isProcessing;
 
+  const renderTurn = useCallback(
+    ({ item }: { item: Turn }) => {
+      const correction = corrections[item.id];
+      return <MessageBubble turn={item} correction={correction} animate />;
+    },
+    [corrections],
+  );
+
+  const renderFooter = useCallback(() => {
+    const elements: React.ReactElement[] = [];
+
+    // User processing bubble (waiting for STT result)
+    if (isUserProcessing) {
+      elements.push(<ProcessingBubble key="user-processing" />);
+    }
+
+    // AI typing indicator (dots) — shown from stt_result until audio playback starts
+    if (isAiThinking) {
+      elements.push(<AiTypingBubble key="ai-typing" />);
+    }
+
+    // Completion label (inside the scrollable thread, above the fixed footer)
+    if (isCompleted) {
+      elements.push(
+        <View key="completion-label" style={styles.completionLabel}>
+          <Text style={styles.completionLabelText}>
+            {t('talk.completionText', { duration: conversationDuration })}
+          </Text>
+        </View>,
+      );
+    }
+
+    if (elements.length === 0) return null;
+
+    return <View>{elements}</View>;
+  }, [isUserProcessing, isAiThinking, isCompleted, conversationDuration]);
+
   // Determine which bottom control to show
   const renderBottomControls = () => {
     if (isCompleted) {
-      return (
-        <CompletionFooter
-          duration={conversationDuration}
-          onViewFeedback={handleViewFeedback}
-        />
-      );
+      return <CompletionFooter onViewFeedback={handleViewFeedback} />;
     }
 
     if (isRecording) {
@@ -245,35 +283,31 @@ export function TalkScreen({ navigation, route }: Props) {
 
     if (isProcessing || isStreaming) {
       return (
-        <View style={styles.processingContainer}>
-          <Text style={styles.processingText}>
-            {isProcessing ? 'Processing your voice...' : 'Waiting for Coto...'}
-          </Text>
-          <View style={styles.disabledMicContainer}>
-            <View style={styles.disabledMic}>
-              <View style={styles.disabledMicDot} />
-            </View>
-          </View>
-        </View>
+        <RecordButton
+          onPress={handleStartRecording}
+          processing
+          processingText={isProcessing ? t('talk.processingVoice') : t('talk.waitingForCoto')}
+        />
       );
     }
 
     return <RecordButton onPress={handleStartRecording} disabled={!canRecord} />;
   };
 
+  // Get localized topic name for empty state
+  const topicLabel = t(`topics.${topic}`);
+
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
-      <TalkHeader onEnd={handleEndConversation} isEnding={isEnding} />
+      <TalkHeader onEnd={handleEndConversation} onBack={handleGoBack} isEnding={isEnding} />
 
       {/* Message area */}
       {turns.length === 0 && !isStreaming ? (
         <View style={styles.emptyState}>
-          <View style={styles.emptyLogo}>
-            <Text style={styles.emptyLogoText}>CO</Text>
-          </View>
-          <Text style={styles.emptyTitle}>Ready to Practice!</Text>
+          <CotoAvatar size={56} />
+          <Text style={styles.emptyTitle}>{t('talk.emptyTitle')}</Text>
           <Text style={styles.emptySubtitle}>
-            Tap the microphone button below and start speaking about {topic}.
+            {t('talk.emptySubtitle', { topic: topicLabel })}
           </Text>
         </View>
       ) : (
@@ -285,6 +319,8 @@ export function TalkScreen({ navigation, route }: Props) {
           contentContainerStyle={styles.messageList}
           showsVerticalScrollIndicator={false}
           ListFooterComponent={renderFooter}
+          onLayout={handleListLayout}
+          onContentSizeChange={handleContentSizeChange}
         />
       )}
 
@@ -302,181 +338,103 @@ export function TalkScreen({ navigation, route }: Props) {
   );
 }
 
-const HEADER_LOGO_SIZE = 32;
-const EMPTY_LOGO_SIZE = 56;
-const DISABLED_MIC_SIZE = 64;
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: Colors.surfacePrimary,
   },
   // Header
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.borderLight,
-    backgroundColor: Colors.cardBackground,
+    paddingHorizontal: 20,
+    height: 56,
+    backgroundColor: Colors.surfacePrimary,
   },
   headerLeft: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
   },
-  headerLogo: {
-    width: HEADER_LOGO_SIZE,
-    height: HEADER_LOGO_SIZE,
-    borderRadius: HEADER_LOGO_SIZE / 2,
-    backgroundColor: Colors.primaryBlue,
+  headerBackButton: {
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  headerLogoText: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: '#FFFFFF',
-    letterSpacing: 0.5,
+    paddingRight: 4,
   },
   headerTitle: {
-    fontSize: 18,
-    fontWeight: '700',
+    ...Typography.bodyLarge.en,
     color: Colors.textPrimary,
   },
   endButton: {
-    minWidth: 44,
-    minHeight: 44,
+    backgroundColor: Colors.buttonDangerBg,
+    borderRadius: 8,
+    height: 32,
+    paddingHorizontal: 14,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 8,
   },
   endButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: Colors.errorRed,
+    ...Typography.body.ja,
+    color: Colors.buttonDangerText,
+    includeFontPadding: false,
+    textAlignVertical: 'center',
   },
   // Messages
   messageList: {
     paddingTop: 16,
-    paddingBottom: 8,
+    paddingBottom: 16,
+    gap: 16,
   },
   emptyState: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 40,
-  },
-  emptyLogo: {
-    width: EMPTY_LOGO_SIZE,
-    height: EMPTY_LOGO_SIZE,
-    borderRadius: EMPTY_LOGO_SIZE / 2,
-    backgroundColor: Colors.primaryBlue,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  emptyLogoText: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: '#FFFFFF',
-    letterSpacing: 1,
+    gap: 8,
   },
   emptyTitle: {
-    fontSize: 22,
-    fontWeight: '700',
+    ...Typography.title.en,
     color: Colors.textPrimary,
-    marginBottom: 8,
+    marginTop: 8,
   },
   emptySubtitle: {
-    fontSize: 15,
+    ...Typography.bodySmall.en,
     color: Colors.textSecondary,
     textAlign: 'center',
-    lineHeight: 22,
   },
-  // Loading / typing indicator
-  loadingContainer: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-    paddingLeft: 48,
-  },
-  loadingDots: {
-    flexDirection: 'row',
-    gap: 4,
-    backgroundColor: Colors.aiBubbleBg,
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-  },
-  dot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: '#D1D5DB',
-  },
-  dotActive: {
-    backgroundColor: Colors.textSecondary,
-  },
-  // Processing state
-  processingContainer: {
-    alignItems: 'center',
-    paddingVertical: 16,
-    paddingBottom: Platform.OS === 'android' ? 24 : 16,
-    gap: 12,
-  },
-  processingText: {
-    fontSize: 14,
-    color: Colors.textHint,
-  },
-  disabledMicContainer: {
+  // Completion label (inside scrollable thread)
+  completionLabel: {
+    paddingTop: 14,
+    paddingBottom: 13,
     alignItems: 'center',
   },
-  disabledMic: {
-    width: DISABLED_MIC_SIZE,
-    height: DISABLED_MIC_SIZE,
-    borderRadius: DISABLED_MIC_SIZE / 2,
-    backgroundColor: '#D1D5DB',
-    justifyContent: 'center',
-    alignItems: 'center',
+  completionLabelText: {
+    ...Typography.caption.ja,
+    color: Colors.textTertiary,
+    textAlign: 'center',
   },
-  disabledMicDot: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: '#9CA3AF',
-  },
-  // Completion state
-  completionContainer: {
+  // Completion footer (fixed bar below thread)
+  completionFooter: {
+    backgroundColor: Colors.surfacePrimary,
+    borderTopWidth: 1,
+    borderTopColor: Colors.borderSubtle,
+    paddingTop: 17,
+    paddingBottom: 40,
     paddingHorizontal: 20,
-    paddingVertical: 16,
-    paddingBottom: Platform.OS === 'android' ? 24 : 16,
-    gap: 12,
-    alignItems: 'center',
-  },
-  completionText: {
-    fontSize: 14,
-    color: Colors.textSecondary,
-  },
-  completionButtonWrapper: {
-    width: '100%',
   },
   feedbackButton: {
-    backgroundColor: Colors.primaryBlue,
-    borderRadius: 14,
-    paddingVertical: 16,
+    backgroundColor: Colors.buttonPrimaryBg,
+    borderRadius: 12,
+    height: 48,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   feedbackButtonPressed: {
     opacity: 0.8,
   },
   feedbackButtonText: {
-    fontSize: 17,
-    fontWeight: '600',
-    color: '#FFFFFF',
+    ...Typography.body.ja,
+    color: Colors.textInverse,
   },
 });

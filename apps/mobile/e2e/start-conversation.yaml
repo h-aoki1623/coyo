@@ -2,55 +2,43 @@
 # Verifies tapping a topic card initiates a conversation and navigates
 # to the Talk screen. Uses the "Sports" topic as the test case.
 #
-# IMPORTANT: This flow requires the backend API to be running.
-# If the backend is not available, an error alert will appear instead
-# of the Talk screen, and this flow will fail at the Talk screen assertion.
-# This is expected behavior for an offline/no-backend scenario.
+# REQUIRES: Backend API must be running (run-e2e.sh starts it automatically).
 appId: com.coto.app
 ---
-# Launch the application
-- launchApp
+# Launch the application (clearState: false to preserve expo-dev-client settings)
+- launchApp:
+    clearState: false
 
 # Wait for the Home screen to fully render.
-# On Android emulators, the Expo dev client cold start can be slow.
 - extendedWaitUntil:
     visible:
-      text: "こんにちは"
+      id: "home-greeting"
     timeout: 30000
 
 # Verify we are on the Home screen
 - assertVisible:
-    text: "こんにちは"
+    id: "home-greeting"
 
 # Tap the Sports topic card using its testID
 - tapOn:
     id: "topic-sports"
 
 # Wait for the API call and navigation transition.
-# The loading indicator will show briefly on the card.
 - waitForAnimationToEnd
 
-# Wait for the Talk screen to appear.
-# If backend is running, either the empty state or the header should appear.
+# Wait for the Talk screen to appear (backend must respond).
 - extendedWaitUntil:
     visible:
-      text: "Coto|Ready to Practice!|Connection Error"
+      id: "end-conversation"
     timeout: 15000
 
-# If we reached the Talk screen, verify the header elements
+# Verify the Talk screen header
 - assertVisible:
     text: "Coto"
-    optional: true
-
-# Verify the Talk screen empty state (no messages yet)
-- assertVisible:
-    text: "Ready to Practice!"
-    optional: true
 
 # Verify the end conversation button is present via testID
 - assertVisible:
     id: "end-conversation"
-    optional: true
 
 # Capture evidence of the Talk screen
 - takeScreenshot: "talk-screen-after-topic-tap"

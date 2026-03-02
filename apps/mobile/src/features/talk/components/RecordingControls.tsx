@@ -1,6 +1,9 @@
 import { useEffect, useRef } from 'react';
 import { View, Text, Pressable, Animated, StyleSheet, Platform } from 'react-native';
 import { Colors } from '@/constants/colors';
+import { Typography } from '@/constants/typography';
+import { t } from '@/i18n';
+import { CloseIcon, SendIcon } from '@/components/icons';
 
 interface Props {
   onCancel: () => void;
@@ -16,7 +19,7 @@ const BAR_COUNT = 20;
 export function RecordingControls({ onCancel, onSend }: Props) {
   return (
     <View style={styles.container}>
-      <Text style={styles.speakNowText}>Speak now...</Text>
+      <Text style={styles.speakNowText}>{t('talk.speakNow')}</Text>
       <WaveformVisualizer />
       <View style={styles.controlsRow}>
         <Pressable
@@ -25,10 +28,11 @@ export function RecordingControls({ onCancel, onSend }: Props) {
             pressed && styles.buttonPressed,
           ]}
           onPress={onCancel}
+          testID="cancel-recording"
           accessibilityRole="button"
-          accessibilityLabel="Cancel recording"
+          accessibilityLabel={t('common.cancel')}
         >
-          <Text style={styles.cancelIcon}>✕</Text>
+          <CloseIcon size={18} color="#64748B" />
         </Pressable>
         <Pressable
           style={({ pressed }) => [
@@ -36,11 +40,13 @@ export function RecordingControls({ onCancel, onSend }: Props) {
             pressed && styles.buttonPressed,
           ]}
           onPress={onSend}
+          testID="send-recording"
           accessibilityRole="button"
           accessibilityLabel="Send recording"
         >
-          <Text style={styles.sendIcon}>↑</Text>
+          <SendIcon size={26} color="#FFFFFF" />
         </Pressable>
+        <View style={styles.spacer} />
       </View>
     </View>
   );
@@ -56,6 +62,7 @@ function WaveformVisualizer() {
   ).current;
 
   useEffect(() => {
+    const timeouts: ReturnType<typeof setTimeout>[] = [];
     const animations = animatedValues.map((value, index) =>
       Animated.loop(
         Animated.sequence([
@@ -75,10 +82,12 @@ function WaveformVisualizer() {
 
     // Stagger the start of each bar animation
     animations.forEach((anim, index) => {
-      setTimeout(() => anim.start(), index * 40);
+      const timeout = setTimeout(() => anim.start(), index * 40);
+      timeouts.push(timeout);
     });
 
     return () => {
+      timeouts.forEach(clearTimeout);
       animations.forEach((anim) => anim.stop());
     };
   }, [animatedValues]);
@@ -106,65 +115,68 @@ function WaveformVisualizer() {
 }
 
 const CANCEL_SIZE = 44;
-const SEND_SIZE = 44;
+const SEND_SIZE = 62;
 
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
-    paddingVertical: 16,
-    paddingBottom: Platform.OS === 'android' ? 24 : 16,
-    gap: 12,
+    paddingTop: 16,
+    paddingBottom: 40,
+    gap: 16,
   },
   speakNowText: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: Colors.primaryBlue,
+    ...Typography.bodySmall.en,
+    color: Colors.buttonGhostText,
   },
   // Waveform
   waveformContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    height: 40,
+    height: 32,
     gap: 3,
     paddingHorizontal: 32,
   },
   waveformBar: {
     width: 3,
-    borderRadius: 1.5,
-    backgroundColor: Colors.primaryBlue,
+    borderRadius: 2,
+    backgroundColor: Colors.accentMuted,
   },
   // Control buttons
   controlsRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 40,
+    gap: 16,
   },
   cancelButton: {
     width: CANCEL_SIZE,
     height: CANCEL_SIZE,
     borderRadius: CANCEL_SIZE / 2,
-    backgroundColor: '#E5E7EB',
+    backgroundColor: Colors.borderSubtle,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  cancelIcon: {
-    fontSize: 18,
-    color: Colors.textSecondary,
-    fontWeight: '600',
   },
   sendButton: {
     width: SEND_SIZE,
     height: SEND_SIZE,
     borderRadius: SEND_SIZE / 2,
-    backgroundColor: Colors.primaryBlue,
+    backgroundColor: Colors.buttonPrimaryBg,
     justifyContent: 'center',
     alignItems: 'center',
+    ...Platform.select({
+      ios: {
+        shadowColor: 'rgba(59,130,246,1)',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.35,
+        shadowRadius: 20,
+      },
+      android: {
+        elevation: 8,
+      },
+    }),
   },
-  sendIcon: {
-    fontSize: 20,
-    color: '#FFFFFF',
-    fontWeight: '700',
+  spacer: {
+    width: CANCEL_SIZE,
   },
   buttonPressed: {
     opacity: 0.7,

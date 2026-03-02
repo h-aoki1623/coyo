@@ -2,23 +2,23 @@
 # Verifies navigation from the Home screen to the History List screen
 # by tapping the history button, then navigating back to Home.
 #
-# Note: If there are no past conversations, the empty state will be shown.
-# This flow accepts either the header title or the empty state as valid.
+# REQUIRES: Backend API must be running (run-e2e.sh starts it automatically).
+# The history list loads conversations from the API on mount.
 appId: com.coto.app
 ---
-# Launch the application
-- launchApp
+# Launch the application (clearState: false to preserve expo-dev-client settings)
+- launchApp:
+    clearState: false
 
 # Wait for the Home screen to fully render.
-# On Android emulators, the Expo dev client cold start can be slow.
 - extendedWaitUntil:
     visible:
-      text: "こんにちは"
+      id: "home-greeting"
     timeout: 30000
 
 # Verify we start on the Home screen
 - assertVisible:
-    text: "こんにちは"
+    id: "home-greeting"
 
 # Tap the history button using its testID
 - tapOn:
@@ -27,28 +27,32 @@ appId: com.coto.app
 # Wait for the History List screen to load
 - waitForAnimationToEnd
 
-# Verify the History List screen header is shown
+# Verify the History List screen header is shown (uses testID)
+- extendedWaitUntil:
+    visible:
+      id: "history-title"
+    timeout: 10000
+
 - assertVisible:
-    text: "トーク履歴"
+    id: "history-title"
 
 # Capture evidence of the history screen
 - takeScreenshot: "history-list-screen"
 
-# Navigate back to Home screen by tapping the React Navigation back button.
-# On iOS, Maestro's `back` command does not trigger React Navigation's back.
+# Navigate back to Home screen
 - tapOn:
-    point: "7%,6%"
+    id: "nav-back"
 
 # Wait for transition back
 - waitForAnimationToEnd
 - extendedWaitUntil:
     visible:
-      text: "こんにちは"
-    timeout: 5000
+      id: "home-greeting"
+    timeout: 10000
 
 # Verify we returned to the Home screen
 - assertVisible:
-    text: "こんにちは"
+    id: "home-greeting"
 
 # Capture evidence of successful round-trip navigation
 - takeScreenshot: "back-to-home-from-history"

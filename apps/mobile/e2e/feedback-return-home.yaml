@@ -19,18 +19,14 @@ appId: com.coto.app
 ---
 # -- Step 1: Launch and start a conversation --
 
-- launchApp
+- launchApp:
+    clearState: false
 
 # Wait for the Home screen to fully render.
-# On Android emulators, the Expo dev client cold start can be slow.
 - extendedWaitUntil:
     visible:
-      text: "こんにちは"
+      id: "home-greeting"
     timeout: 30000
-
-# Verify Home screen
-- assertVisible:
-    text: "こんにちは"
 
 # Start a conversation on the Sports topic via testID
 - tapOn:
@@ -39,7 +35,7 @@ appId: com.coto.app
 # Wait for API call and navigation
 - extendedWaitUntil:
     visible:
-      text: "Coto"
+      id: "end-conversation"
     timeout: 15000
 
 # Verify the Talk screen loaded
@@ -53,23 +49,30 @@ appId: com.coto.app
 - tapOn:
     id: "end-conversation"
 
-# An Alert dialog will appear asking for confirmation
-# Tap "End" to confirm
-- tapOn: "End"
+# An Alert dialog will appear asking for confirmation.
+# On Android, native AlertDialog auto-uppercases to "END" (unique on screen).
+# On iOS, the button text is "End" (same as the header button, so use index: 1).
+- runFlow:
+    when:
+      visible: "END"
+    commands:
+      - tapOn: "END"
+- runFlow:
+    when:
+      visible:
+        text: "End"
+        index: 1
+    commands:
+      - tapOn:
+          text: "End"
+          index: 1
 
 # Wait for the API call to complete and the completion footer to appear.
-# "トーク終了" is followed by duration text (e.g. "トーク終了 · 1分未満"),
-# so use regex wildcard to match the full accessibilityText.
 - extendedWaitUntil:
     visible:
-      text: "トーク終了.*"
+      id: "view-feedback"
     timeout: 15000
 
-# Verify the completion state is shown
-- assertVisible:
-    text: "トーク終了.*"
-- assertVisible:
-    id: "view-feedback"
 - takeScreenshot: "feedback-flow-02-conversation-ended"
 
 # -- Step 3: Navigate to Feedback screen --
@@ -82,12 +85,8 @@ appId: com.coto.app
 - waitForAnimationToEnd
 - extendedWaitUntil:
     visible:
-      text: "フィードバック|Loading feedback"
+      id: "go-home"
     timeout: 15000
-
-# Verify Feedback screen header
-- assertVisible:
-    text: "フィードバック"
 
 # Verify the "Back to home" button is present via testID
 - assertVisible:
@@ -105,12 +104,12 @@ appId: com.coto.app
 - waitForAnimationToEnd
 - extendedWaitUntil:
     visible:
-      text: "こんにちは"
+      id: "home-greeting"
     timeout: 5000
 
 # Verify we are back on the Home screen
 - assertVisible:
-    text: "こんにちは"
+    id: "home-greeting"
 - assertVisible: "TOPICS"
 
 - takeScreenshot: "feedback-flow-04-returned-home"

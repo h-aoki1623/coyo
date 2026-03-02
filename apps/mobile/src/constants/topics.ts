@@ -1,24 +1,45 @@
+import { t } from '@/i18n';
+import { Colors } from '@/constants/colors';
 import type { TopicKey } from '@/navigation/types';
 
 export interface Topic {
   key: TopicKey;
   label: string;
-  emoji: string;
+  icon: 'globe' | 'briefcase' | 'building' | 'monitor' | 'film';
   iconBg: string;
   iconColor: string;
 }
 
-export const TOPICS: Topic[] = [
-  { key: 'sports', label: 'スポーツ', emoji: '🌐', iconBg: '#DBEAFE', iconColor: '#3B82F6' },
-  { key: 'business', label: 'ビジネス', emoji: '💼', iconBg: '#DCFCE7', iconColor: '#22C55E' },
-  { key: 'politics', label: '政治', emoji: '🏛', iconBg: '#FEF3C7', iconColor: '#F59E0B' },
-  { key: 'technology', label: 'テクノロジー', emoji: '💻', iconBg: '#FEE2E2', iconColor: '#EF4444' },
-  { key: 'entertainment', label: 'エンタメ', emoji: '🎬', iconBg: '#FEF9C3', iconColor: '#EAB308' },
-];
+/**
+ * Returns the list of topics with localized labels.
+ * Called as a function so it picks up the current locale at render time.
+ */
+export function getTopics(): Topic[] {
+  return [
+    { key: 'sports', label: t('topics.sports'), icon: 'globe', iconBg: Colors.topicSportsBg, iconColor: Colors.topicSports },
+    { key: 'business', label: t('topics.business'), icon: 'briefcase', iconBg: Colors.topicBusinessBg, iconColor: Colors.topicBusiness },
+    { key: 'politics', label: t('topics.politics'), icon: 'building', iconBg: Colors.topicPoliticsBg, iconColor: Colors.topicPolitics },
+    { key: 'technology', label: t('topics.technology'), icon: 'monitor', iconBg: Colors.topicTechnologyBg, iconColor: Colors.topicTechnology },
+    { key: 'entertainment', label: t('topics.entertainment'), icon: 'film', iconBg: Colors.topicEntertainmentBg, iconColor: Colors.topicEntertainment },
+  ];
+}
 
 /**
- * Find a topic by its key. Returns undefined if not found.
+ * Static topic data (without labels) for lookups that don't need localization.
+ */
+const TOPIC_META: Record<TopicKey, Omit<Topic, 'label'>> = {
+  sports: { key: 'sports', icon: 'globe', iconBg: Colors.topicSportsBg, iconColor: Colors.topicSports },
+  business: { key: 'business', icon: 'briefcase', iconBg: Colors.topicBusinessBg, iconColor: Colors.topicBusiness },
+  politics: { key: 'politics', icon: 'building', iconBg: Colors.topicPoliticsBg, iconColor: Colors.topicPolitics },
+  technology: { key: 'technology', icon: 'monitor', iconBg: Colors.topicTechnologyBg, iconColor: Colors.topicTechnology },
+  entertainment: { key: 'entertainment', icon: 'film', iconBg: Colors.topicEntertainmentBg, iconColor: Colors.topicEntertainment },
+};
+
+/**
+ * Find a topic by its key with localized label. Returns undefined if not found.
  */
 export function findTopic(key: string): Topic | undefined {
-  return TOPICS.find((t) => t.key === key);
+  const meta = TOPIC_META[key as TopicKey];
+  if (!meta) return undefined;
+  return { ...meta, label: t(`topics.${key}`) };
 }

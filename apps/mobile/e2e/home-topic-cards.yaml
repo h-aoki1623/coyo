@@ -7,8 +7,9 @@
 # cannot reliably find text inside FlatList items on iOS.
 appId: com.coto.app
 ---
-# Launch the application
-- launchApp
+# Launch the application (clearState: false to preserve expo-dev-client settings)
+- launchApp:
+    clearState: false
 
 # Wait for the Home screen to fully render.
 # On Android emulators, the Expo dev client cold start can be slow.

@@ -1,6 +1,7 @@
 """Conversation and turn endpoints."""
 
 import json
+import logging
 import uuid
 
 from fastapi import APIRouter, Depends, UploadFile
@@ -10,6 +11,8 @@ from sse_starlette.sse import EventSourceResponse
 from coto.config import get_settings
 from coto.dependencies import get_current_user, get_db
 from coto.exceptions import ConversationStateError, ValidationError
+
+logger = logging.getLogger(__name__)
 from coto.models.user import User
 from coto.schemas.conversation import (
     ConversationResponse,
@@ -75,13 +78,23 @@ async def submit_turn(
     orchestrator = TurnOrchestrator(db)
 
     async def event_generator():
-        async for event in orchestrator.process_turn(
-            conversation_id=conversation_id,
-            user_id=user.id,
-            audio_data=audio_data,
-            audio_filename=audio_filename,
-        ):
-            yield {"event": event["event"], "data": json.dumps(event["data"])}
+        try:
+            async for event in orchestrator.process_turn(
+                conversation_id=conversation_id,
+                user_id=user.id,
+                audio_data=audio_data,
+                audio_filename=audio_filename,
+            ):
+                yield {"event": event["event"], "data": json.dumps(event["data"])}
+        except Exception as exc:
+            logger.error("Turn pipeline error: %s", exc, exc_info=True)
+            yield {
+                "event": "error",
+                "data": json.dumps({
+                    "code": "TURN_PROCESSING_FAILED",
+                    "message": "An error occurred while processing your turn.",
+                }),
+            }
 
     return EventSourceResponse(event_generator())
 

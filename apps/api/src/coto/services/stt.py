@@ -56,6 +56,7 @@ class STTService:
             transcription = await self._client.audio.transcriptions.create(
                 model="whisper-1",
                 file=(filename, audio_data, content_type),
+                language="en",
             )
         except Exception as exc:
             logger.error("stt_transcribe_failed", error=str(exc))

@@ -1,13 +1,14 @@
 /**
  * Formatting utilities for history screens.
- * Extracted from HistoryListScreen and HistoryDetailScreen for testability.
+ * All user-facing strings use i18n for localization.
  */
+import { t } from '@/i18n';
 
 export function formatDuration(seconds: number | null): string {
-  if (seconds === null || seconds === 0) return '--';
+  if (seconds === null || seconds === 0) return t('duration.none');
   const mins = Math.floor(seconds / 60);
-  if (mins === 0) return '1\u5206\u672A\u6E80';
-  return `${mins}\u5206\u9593`;
+  if (mins === 0) return t('duration.lessThanMinute');
+  return t('duration.minutes', { mins });
 }
 
 export function formatTime(isoString: string): string {
@@ -27,10 +28,10 @@ export function getSectionTitle(isoString: string, now?: Date): string {
   const today = new Date(reference.getFullYear(), reference.getMonth(), reference.getDate());
   const diffDays = Math.floor((today.getTime() - dateDay.getTime()) / (1000 * 60 * 60 * 24));
 
-  if (diffDays === 0) return '\u4ECA\u65E5';
-  if (diffDays === 1) return '\u6628\u65E5';
+  if (diffDays === 0) return t('dates.today');
+  if (diffDays === 1) return t('dates.yesterday');
 
-  return `${date.getMonth() + 1}\u6708${date.getDate()}\u65E5`;
+  return t('dates.dateFormat', { month: date.getMonth() + 1, day: date.getDate() });
 }
 
 export interface SectionData<T> {
@@ -73,9 +74,9 @@ export function formatDetailHeader(
   const diffDays = Math.floor((today.getTime() - dateDay.getTime()) / (1000 * 60 * 60 * 24));
 
   let datePart: string;
-  if (diffDays === 0) datePart = '\u4ECA\u65E5';
-  else if (diffDays === 1) datePart = '\u6628\u65E5';
-  else datePart = `${date.getMonth() + 1}\u6708${date.getDate()}\u65E5`;
+  if (diffDays === 0) datePart = t('dates.today');
+  else if (diffDays === 1) datePart = t('dates.yesterday');
+  else datePart = t('dates.dateFormat', { month: date.getMonth() + 1, day: date.getDate() });
 
   const hours = date.getHours();
   const minutes = date.getMinutes().toString().padStart(2, '0');
