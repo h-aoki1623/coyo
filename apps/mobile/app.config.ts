@@ -11,12 +11,15 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ios: {
     bundleIdentifier: 'com.coto.app',
     supportsTablet: false,
+    deploymentTarget: '16.0',
   },
   android: {
     package: 'com.coto.app',
     adaptiveIcon: {
       backgroundColor: '#ffffff',
     },
+    minSdkVersion: 29,
+    targetSdkVersion: 35,
   },
   plugins: [
     'expo-secure-store',
