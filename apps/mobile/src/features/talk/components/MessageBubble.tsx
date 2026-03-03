@@ -70,16 +70,16 @@ export const MessageBubble = memo(function MessageBubble({ turn, correction, ani
   }
 
   return (
-    <Animated.View
-      style={[styles.aiContainer, bubbleAnimStyle]}
+    <View
+      style={styles.aiContainer}
       accessibilityRole="text"
       accessibilityLabel={`Coto said: ${turn.text}`}
     >
       <CotoAvatar size={28} variant="sub" />
-      <View style={styles.aiBubble}>
+      <Animated.View style={[styles.aiBubble, bubbleAnimStyle]}>
         <Text style={[styles.text, styles.aiText]}>{turn.text}</Text>
-      </View>
-    </Animated.View>
+      </Animated.View>
+    </View>
   );
 });
 
@@ -134,20 +134,20 @@ export const AiTypingBubble = memo(function AiTypingBubble() {
   };
 
   return (
-    <Animated.View
-      style={[styles.aiContainer, animStyle]}
+    <View
+      style={styles.aiContainer}
       accessibilityRole="text"
       accessibilityLabel="Coto is typing"
     >
       <CotoAvatar size={28} variant="sub" />
-      <View style={[styles.aiBubble, styles.typingIndicatorBubble]}>
+      <Animated.View style={[styles.aiBubble, styles.typingIndicatorBubble, animStyle]}>
         <View style={styles.typingDots}>
           <View style={[styles.typingDot, styles.typingDotMuted]} />
           <View style={styles.typingDot} />
           <View style={[styles.typingDot, styles.typingDotMuted]} />
         </View>
-      </View>
-    </Animated.View>
+      </Animated.View>
+    </View>
   );
 });
 
