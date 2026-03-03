@@ -56,14 +56,15 @@ test-api:
 #   make e2e-android                      # All flows on Android
 #   make e2e-ios FLOW=app-launch.yaml     # Single flow on iOS
 #   make e2e-android FLOW=app-launch.yaml # Single flow on Android
+#   make e2e-ios SKIP_BUILD=1             # Skip native build (app already installed)
 e2e:
-	cd apps/mobile && ./e2e/run-e2e.sh all $(FLOW)
+	cd apps/mobile && ./e2e/run-e2e.sh all $(if $(SKIP_BUILD),--skip-build) $(FLOW)
 
 e2e-ios:
-	cd apps/mobile && ./e2e/run-e2e.sh ios $(FLOW)
+	cd apps/mobile && ./e2e/run-e2e.sh ios $(if $(SKIP_BUILD),--skip-build) $(FLOW)
 
 e2e-android:
-	cd apps/mobile && ./e2e/run-e2e.sh android $(FLOW)
+	cd apps/mobile && ./e2e/run-e2e.sh android $(if $(SKIP_BUILD),--skip-build) $(FLOW)
 
 # Database Migrations
 migrate:
