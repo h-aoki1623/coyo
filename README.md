@@ -20,6 +20,13 @@ coto/
 
 ## Getting Started
 
+### Platform Support
+
+| Platform | Min Version | Target Version | Coverage |
+|---|---|---|---|
+| iOS | 16.0 | 18 | ~98% |
+| Android | API 29 (Android 10) | API 35 (Android 15) | ~90% |
+
 ### Prerequisites
 
 - Python 3.12+
