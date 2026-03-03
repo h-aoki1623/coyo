@@ -53,6 +53,10 @@ make e2e-android   # All flows on Android Emulator only
 # Single flow (useful for debugging or iterating on one test)
 make e2e-ios FLOW=app-launch.yaml
 make e2e-android FLOW=navigate-to-history.yaml
+
+# Skip native build (app already installed from a previous run)
+make e2e-ios SKIP_BUILD=1
+make e2e-ios SKIP_BUILD=1 FLOW=app-launch.yaml
 ```
 
 ### Prerequisites
@@ -65,14 +69,15 @@ make e2e-android FLOW=navigate-to-history.yaml
 
 ### What the script does automatically
 
-1. Sweeps rogue Maestro/Metro processes from previous runs or manual invocations
-2. Starts Docker (Postgres + Redis) if not running
-3. Runs database migrations
-4. Starts backend API (`uvicorn`) if not running — stops it on exit
-5. Builds and installs the app on the target device
-6. Starts Metro and waits for JS bundle compilation to complete before launching the app
-7. Runs all Maestro test flows
-8. Cleans up Metro and backend on exit (including Ctrl+C / kill)
+1. Detects git worktree and symlinks `node_modules`/`.venv` from the main repo
+2. Sweeps rogue Maestro/Metro processes from previous runs or manual invocations
+3. Starts Docker (Postgres + Redis) if not running
+4. Runs database migrations
+5. Starts backend API (`uvicorn`) if not running — stops it on exit
+6. Builds and installs the app on the target device (unless `SKIP_BUILD=1`)
+7. Starts Metro and waits for JS bundle compilation to complete before launching the app
+8. Runs all Maestro test flows
+9. Cleans up Metro and backend on exit (including Ctrl+C / kill)
 
 ### Rules
 

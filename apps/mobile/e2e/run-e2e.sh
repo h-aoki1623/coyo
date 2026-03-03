@@ -7,6 +7,7 @@
 #   ./e2e/run-e2e.sh all                        # Run all flows on both (iOS, then Android)
 #   ./e2e/run-e2e.sh ios app-launch.yaml        # Run a single flow on iOS
 #   ./e2e/run-e2e.sh android navigate-to-history.yaml  # Run a single flow on Android
+#   ./e2e/run-e2e.sh ios --skip-build           # Skip native build (app already installed)
 #
 # Prerequisites:
 #   - Maestro CLI installed (maestro --version)
@@ -14,20 +15,25 @@
 #   - For Android: a running Android Emulator (adb devices)
 #
 # The script automatically:
-#   1. Validates prerequisites (Maestro, devices, Docker, Python venv)
-#   2. Starts Docker (Postgres + Redis) and backend API if not running
-#   3. Kills stale Maestro driver processes to avoid port conflicts
-#   4. Builds and installs the app via `npx expo run:*`
-#   5. Ensures Maestro driver APKs are installed (Android)
-#   6. Sets up adb reverse port forwarding (Android)
-#   7. Runs all Maestro flows in the e2e/ directory
-#   8. Reports results
+#   1. Detects git worktree and symlinks node_modules/.venv from main repo
+#   2. Validates prerequisites (Maestro, devices, Docker, Python venv)
+#   3. Starts Docker (Postgres + Redis) and backend API if not running
+#   4. Kills stale Maestro driver processes to avoid port conflicts
+#   5. Builds and installs the app via `npx expo run:*` (unless --skip-build)
+#   6. Ensures Maestro driver APKs are installed (Android)
+#   7. Sets up adb reverse port forwarding (Android)
+#   8. Runs all Maestro flows in the e2e/ directory
+#   9. Reports results
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 MOBILE_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 REPO_ROOT="$(cd "$MOBILE_DIR/../.." && pwd)"
+# Main repo root (overridden if in a worktree)
+_MAIN_REPO_ROOT="$REPO_ROOT"
+# Docker Compose project name (consistent across main repo and worktrees)
+_COMPOSE_PROJECT="$(basename "$REPO_ROOT")"
 API_DIR="$REPO_ROOT/apps/api"
 E2E_DIR="$SCRIPT_DIR"
 SCREENSHOTS_DIR="$E2E_DIR/screenshots"
@@ -43,6 +49,7 @@ export E2E_MODE=true
 # Track whether we started the backend/Metro (for cleanup)
 _API_STARTED_BY_SCRIPT=false
 _METRO_PID=""
+_SKIP_BUILD=false
 
 # Colors for output
 RED='\033[0;31m'
@@ -53,6 +60,68 @@ NC='\033[0m' # No Color
 log()  { echo -e "${GREEN}[e2e]${NC} $*"; }
 warn() { echo -e "${YELLOW}[e2e]${NC} $*"; }
 err()  { echo -e "${RED}[e2e]${NC} $*" >&2; }
+
+# ===========================================================================
+# Worktree support
+# ===========================================================================
+
+# Detect if running inside a git worktree and symlink node_modules/.venv
+# from the main repo so that builds and backend startup work correctly.
+ensure_worktree_deps() {
+  local main_repo
+  main_repo="$(git -C "$REPO_ROOT" worktree list --porcelain | head -1 | sed 's/^worktree //')"
+
+  # Not in a worktree — nothing to do
+  if [[ "$main_repo" == "$REPO_ROOT" ]]; then
+    return
+  fi
+
+  log "Detected worktree. Main repo: $main_repo"
+  _MAIN_REPO_ROOT="$main_repo"
+  _COMPOSE_PROJECT="$(basename "$main_repo")"
+
+  # Symlink node_modules (remove broken symlinks first)
+  if [[ -L "$MOBILE_DIR/node_modules" && ! -d "$MOBILE_DIR/node_modules" ]]; then
+    warn "Removing broken node_modules symlink."
+    rm "$MOBILE_DIR/node_modules"
+  fi
+  if [[ ! -d "$MOBILE_DIR/node_modules" && ! -L "$MOBILE_DIR/node_modules" ]]; then
+    if [[ ! -d "$main_repo/apps/mobile/node_modules" ]]; then
+      err "node_modules not found in main repo. Run: cd $main_repo/apps/mobile && npm install"
+      exit 1
+    fi
+    ln -s "$main_repo/apps/mobile/node_modules" "$MOBILE_DIR/node_modules"
+    log "Symlinked node_modules from main repo."
+  fi
+
+  # Symlink .venv (remove broken symlinks first)
+  if [[ -L "$API_DIR/.venv" && ! -d "$API_DIR/.venv" ]]; then
+    warn "Removing broken .venv symlink."
+    rm "$API_DIR/.venv"
+  fi
+  if [[ ! -d "$API_DIR/.venv" && ! -L "$API_DIR/.venv" ]]; then
+    if [[ ! -d "$main_repo/apps/api/.venv" ]]; then
+      err ".venv not found in main repo. Run: cd $main_repo/apps/api && python3 -m venv .venv"
+      exit 1
+    fi
+    ln -s "$main_repo/apps/api/.venv" "$API_DIR/.venv"
+    log "Symlinked .venv from main repo."
+  fi
+
+  # Symlink .env (remove broken symlinks first)
+  if [[ -L "$API_DIR/.env" && ! -f "$API_DIR/.env" ]]; then
+    warn "Removing broken .env symlink."
+    rm "$API_DIR/.env"
+  fi
+  if [[ ! -f "$API_DIR/.env" && ! -L "$API_DIR/.env" ]]; then
+    if [[ ! -f "$main_repo/apps/api/.env" ]]; then
+      err ".env not found in main repo. Create: $main_repo/apps/api/.env"
+      exit 1
+    fi
+    ln -s "$main_repo/apps/api/.env" "$API_DIR/.env"
+    log "Symlinked .env from main repo."
+  fi
+}
 
 # ===========================================================================
 # Prerequisites
@@ -186,12 +255,12 @@ check_prerequisites() {
 
 ensure_docker() {
   log "Checking Docker services (Postgres + Redis)..."
-  if ! docker compose -f "$REPO_ROOT/docker-compose.yml" ps --status running 2>/dev/null | grep -q "postgres"; then
+  if ! docker compose -f "$REPO_ROOT/docker-compose.yml" -p "$_COMPOSE_PROJECT" ps --status running 2>/dev/null | grep -q "postgres"; then
     log "Starting Docker services..."
-    docker compose -f "$REPO_ROOT/docker-compose.yml" up -d
+    docker compose -f "$REPO_ROOT/docker-compose.yml" -p "$_COMPOSE_PROJECT" up -d
     # Wait for Postgres to be ready
     local retries=10
-    while ! docker compose -f "$REPO_ROOT/docker-compose.yml" exec -T postgres pg_isready -U coto -d coto > /dev/null 2>&1; do
+    while ! docker compose -f "$REPO_ROOT/docker-compose.yml" -p "$_COMPOSE_PROJECT" exec -T postgres pg_isready -U coto -d coto > /dev/null 2>&1; do
       retries=$((retries - 1))
       if [[ $retries -le 0 ]]; then
         err "Postgres did not become ready in time."
@@ -471,19 +540,27 @@ run_ios() {
   fi
   log "Using iOS Simulator: $udid"
 
-  # Build and install (--no-bundler: build only, don't start Metro)
-  log "Building iOS app..."
-  cd "$MOBILE_DIR"
-  if ! npx expo run:ios --device "$udid" --no-bundler 2>&1 | tail -20; then
-    warn "Build command exited with non-zero status. Checking if app was installed..."
-  fi
+  if [[ "$_SKIP_BUILD" != "true" ]]; then
+    # Build and install (--no-bundler: build only, don't start Metro)
+    log "Building iOS app..."
+    cd "$MOBILE_DIR"
+    if ! npx expo run:ios --device "$udid" --no-bundler 2>&1 | tail -20; then
+      warn "Build command exited with non-zero status. Checking if app was installed..."
+    fi
 
-  # Verify installation
-  if ! xcrun simctl listapps "$udid" 2>/dev/null | grep -q "com.coto.app"; then
-    err "iOS app not installed on simulator. Build may have failed."
-    exit 1
+    # Verify installation
+    if ! xcrun simctl listapps "$udid" 2>/dev/null | grep -q "com.coto.app"; then
+      err "iOS app not installed on simulator. Build may have failed."
+      exit 1
+    fi
+    log "iOS app installed successfully."
+  else
+    log "Skipping iOS build (--skip-build)."
+    if ! xcrun simctl listapps "$udid" 2>/dev/null | grep -q "com.coto.app"; then
+      err "iOS app not installed on simulator. Cannot skip build."
+      exit 1
+    fi
   fi
-  log "iOS app installed successfully."
 
   # Start Metro bundler in the background (--dev-client matches expo-dev-client URL scheme)
   log "Starting Metro bundler..."
@@ -592,17 +669,25 @@ run_android() {
   # Set up reverse port forwarding for Metro and API
   setup_adb_reverse "$device_id"
 
-  # Build and install (--no-bundler: build only, don't start Metro)
-  log "Building Android app..."
-  cd "$MOBILE_DIR"
-  npx expo run:android --no-bundler 2>&1 | tail -5
+  if [[ "$_SKIP_BUILD" != "true" ]]; then
+    # Build and install (--no-bundler: build only, don't start Metro)
+    log "Building Android app..."
+    cd "$MOBILE_DIR"
+    npx expo run:android --no-bundler 2>&1 | tail -5
 
-  # Verify installation
-  if ! adb -s "$device_id" shell pm list packages 2>/dev/null | grep -q "com.coto.app"; then
-    err "Android app not installed on emulator. Build may have failed."
-    exit 1
+    # Verify installation
+    if ! adb -s "$device_id" shell pm list packages 2>/dev/null | grep -q "com.coto.app"; then
+      err "Android app not installed on emulator. Build may have failed."
+      exit 1
+    fi
+    log "Android app installed successfully."
+  else
+    log "Skipping Android build (--skip-build)."
+    if ! adb -s "$device_id" shell pm list packages 2>/dev/null | grep -q "com.coto.app"; then
+      err "Android app not installed on emulator. Cannot skip build."
+      exit 1
+    fi
   fi
-  log "Android app installed successfully."
 
   # Re-establish reverse port forwarding (build/install can clear adb state)
   verify_adb_reverse "$device_id"
@@ -693,11 +778,14 @@ run_android() {
 # ===========================================================================
 
 usage() {
-  echo "Usage: $0 {ios|android|all} [flow.yaml]"
+  echo "Usage: $0 {ios|android|all} [--skip-build] [flow.yaml]"
   echo ""
   echo "  ios      Run E2E tests on iOS Simulator"
   echo "  android  Run E2E tests on Android Emulator"
   echo "  all      Run on both (iOS first, then Android)"
+  echo ""
+  echo "Options:"
+  echo "  --skip-build  Skip native build+install (use already-installed app)"
   echo ""
   echo "  Optional: specify a single flow file (e.g., app-launch.yaml)"
   echo "            to run only that flow instead of the full suite."
@@ -711,21 +799,52 @@ if [[ $# -lt 1 ]]; then
   usage
 fi
 
-# Determine which flow(s) to run
+# Parse target (first positional arg)
+_TARGET="$1"
+shift
+
+case "$_TARGET" in
+  ios|android|all) ;;
+  *) usage ;;
+esac
+
+# Parse remaining args: [--skip-build] [flow.yaml]
 _FLOW_TARGET=""
-if [[ $# -ge 2 && -n "$2" ]]; then
-  if [[ ! -f "$E2E_DIR/$2" ]]; then
-    err "Flow file not found: $E2E_DIR/$2"
-    exit 1
-  fi
-  _FLOW_TARGET="$E2E_DIR/$2"
-  log "Single flow mode: $2"
-else
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --skip-build)
+      _SKIP_BUILD=true
+      shift
+      ;;
+    -*)
+      err "Unknown option: $1"
+      usage
+      ;;
+    *)
+      if [[ -n "$_FLOW_TARGET" ]]; then
+        err "Only one flow file can be specified."
+        usage
+      fi
+      if [[ ! -f "$E2E_DIR/$1" ]]; then
+        err "Flow file not found: $E2E_DIR/$1"
+        exit 1
+      fi
+      _FLOW_TARGET="$E2E_DIR/$1"
+      log "Single flow mode: $1"
+      shift
+      ;;
+  esac
+done
+
+if [[ -z "$_FLOW_TARGET" ]]; then
   _FLOW_TARGET="$E2E_DIR/"
 fi
 
+# Symlink dependencies if running inside a git worktree
+ensure_worktree_deps
+
 # Validate all prerequisites upfront before doing any work
-check_prerequisites "$1"
+check_prerequisites "$_TARGET"
 
 # Kill any existing Metro process on port 8081 to avoid "Use port 8082?" prompt
 kill_existing_metro() {
@@ -758,7 +877,7 @@ cleanup_maestro
 # Always ensure backend is running before E2E tests
 ensure_backend
 
-case "$1" in
+case "$_TARGET" in
   ios)
     run_ios
     ;;
