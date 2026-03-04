@@ -27,6 +27,10 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 MOBILE_DIR="$SCRIPT_DIR"
 REPO_ROOT="$(cd "$MOBILE_DIR/../.." && pwd)"
+# Main repo root (overridden if in a worktree)
+_MAIN_REPO_ROOT="$REPO_ROOT"
+# Docker Compose project name (consistent across main repo and worktrees)
+_COMPOSE_PROJECT="$(basename "$REPO_ROOT")"
 API_DIR="$REPO_ROOT/apps/api"
 
 API_PORT=8000
@@ -47,6 +51,70 @@ log()  { echo -e "${GREEN}[dev]${NC} $*"; }
 warn() { echo -e "${YELLOW}[dev]${NC} $*"; }
 err()  { echo -e "${RED}[dev]${NC} $*" >&2; }
 info() { echo -e "${CYAN}[dev]${NC} $*"; }
+
+# ===========================================================================
+# Worktree support
+# ===========================================================================
+
+# Detect if running inside a git worktree and symlink node_modules/.venv
+# from the main repo so that builds and backend startup work correctly.
+ensure_worktree_deps() {
+  local main_repo
+  main_repo="$(git -C "$REPO_ROOT" worktree list --porcelain | head -1 | sed 's/^worktree //')"
+
+  # Not in a worktree — nothing to do
+  if [[ "$main_repo" == "$REPO_ROOT" ]]; then
+    return
+  fi
+
+  log "Detected worktree. Main repo: $main_repo"
+  _MAIN_REPO_ROOT="$main_repo"
+  _COMPOSE_PROJECT="$(basename "$main_repo")"
+
+  # Symlink node_modules (remove broken symlinks first)
+  if [[ -L "$MOBILE_DIR/node_modules" && ! -d "$MOBILE_DIR/node_modules" ]]; then
+    warn "Removing broken node_modules symlink."
+    rm "$MOBILE_DIR/node_modules"
+  fi
+  if [[ ! -d "$MOBILE_DIR/node_modules" && ! -L "$MOBILE_DIR/node_modules" ]]; then
+    if [[ ! -d "$main_repo/apps/mobile/node_modules" ]]; then
+      err "node_modules not found in main repo. Run: cd $main_repo/apps/mobile && npm install"
+      exit 1
+    fi
+    ln -s "$main_repo/apps/mobile/node_modules" "$MOBILE_DIR/node_modules"
+    log "Symlinked node_modules from main repo."
+  fi
+
+  # Symlink .venv (remove broken symlinks first)
+  if [[ -L "$API_DIR/.venv" && ! -d "$API_DIR/.venv" ]]; then
+    warn "Removing broken .venv symlink."
+    rm "$API_DIR/.venv"
+  fi
+  if [[ ! -d "$API_DIR/.venv" && ! -L "$API_DIR/.venv" ]]; then
+    if [[ ! -d "$main_repo/apps/api/.venv" ]]; then
+      err ".venv not found in main repo. Run: cd $main_repo/apps/api && python3 -m venv .venv"
+      exit 1
+    fi
+    ln -s "$main_repo/apps/api/.venv" "$API_DIR/.venv"
+    log "Symlinked .venv from main repo."
+  fi
+
+  # Symlink .env (remove broken symlinks first)
+  if [[ -L "$API_DIR/.env" && ! -f "$API_DIR/.env" ]]; then
+    warn "Removing broken .env symlink."
+    rm "$API_DIR/.env"
+  fi
+  if [[ ! -f "$API_DIR/.env" && ! -L "$API_DIR/.env" ]]; then
+    if [[ ! -f "$main_repo/apps/api/.env" ]]; then
+      err ".env not found in main repo. Create: $main_repo/apps/api/.env"
+      exit 1
+    fi
+    ln -s "$main_repo/apps/api/.env" "$API_DIR/.env"
+    log "Symlinked .env from main repo."
+  fi
+}
+
+ensure_worktree_deps
 
 # ===========================================================================
 # Cleanup
@@ -130,13 +198,13 @@ ensure_docker() {
     log "Docker Desktop started."
   fi
 
-  if docker compose -f "$REPO_ROOT/docker-compose.yml" ps --status running 2>/dev/null | grep -q "postgres"; then
+  if docker compose -f "$REPO_ROOT/docker-compose.yml" -p "$_COMPOSE_PROJECT" ps --status running 2>/dev/null | grep -q "postgres"; then
     log "Docker services already running."
   else
     log "Starting Docker services (Postgres + Redis)..."
-    docker compose -f "$REPO_ROOT/docker-compose.yml" up -d
+    docker compose -f "$REPO_ROOT/docker-compose.yml" -p "$_COMPOSE_PROJECT" up -d
     local retries=10
-    while ! docker compose -f "$REPO_ROOT/docker-compose.yml" exec -T postgres pg_isready -U coto -d coto > /dev/null 2>&1; do
+    while ! docker compose -f "$REPO_ROOT/docker-compose.yml" -p "$_COMPOSE_PROJECT" exec -T postgres pg_isready -U coto -d coto > /dev/null 2>&1; do
       retries=$((retries - 1))
       if [[ $retries -le 0 ]]; then
         err "Postgres did not become ready."
