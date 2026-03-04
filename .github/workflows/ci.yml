@@ -51,7 +51,7 @@ jobs:
       DATABASE_URL: "sqlite+aiosqlite:///"
       REDIS_URL: "redis://localhost:6379"
       OPENAI_API_KEY: "sk-test-dummy-key-for-ci"
-      ENVIRONMENT: "test"
+      ENVIRONMENT: "development"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

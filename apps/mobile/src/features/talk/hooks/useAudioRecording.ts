@@ -41,13 +41,14 @@ const RECORDING_OPTIONS: Audio.RecordingOptions = {
 
 // E2E test audio assets — only bundled in dev builds.
 // Clean audio first (no corrections), then error audio (has corrections).
-// eslint-disable-next-line @typescript-eslint/no-require-imports
+/* eslint-disable @typescript-eslint/no-require-imports */
 const testAudioModules: number[] = __DEV__
   ? [
       require('../../../../e2e/fixtures/test-audio-clean.m4a'),
       require('../../../../e2e/fixtures/test-audio-errors.m4a'),
     ]
   : [];
+/* eslint-enable @typescript-eslint/no-require-imports */
 
 /**
  * Resolve a test audio file URI from the bundled asset.
