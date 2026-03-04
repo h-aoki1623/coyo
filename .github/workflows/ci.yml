@@ -47,6 +47,11 @@ jobs:
     defaults:
       run:
         working-directory: apps/api
+    env:
+      DATABASE_URL: "sqlite+aiosqlite:///"
+      REDIS_URL: "redis://localhost:6379"
+      OPENAI_API_KEY: "sk-test-dummy-key-for-ci"
+      ENVIRONMENT: "test"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

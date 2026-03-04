@@ -1,5 +1,5 @@
 import { useRef, useCallback } from 'react';
-import { Alert, Platform } from 'react-native';
+import { Alert } from 'react-native';
 import { Audio } from 'expo-av';
 import { Asset } from 'expo-asset';
 import { File as ExpoFile } from 'expo-file-system/next';
@@ -41,7 +41,7 @@ const RECORDING_OPTIONS: Audio.RecordingOptions = {
 
 // E2E test audio assets — only bundled in dev builds.
 // Clean audio first (no corrections), then error audio (has corrections).
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const testAudioModules: number[] = __DEV__
   ? [
       require('../../../../e2e/fixtures/test-audio-clean.m4a'),
