@@ -12,6 +12,7 @@ Thumbs.db
 .env
 .env.local
 .env.*.local
+.env.production
 
 # === Python ===
 __pycache__/
@@ -52,6 +53,9 @@ apps/api/openapi.json
 
 # === Maestro E2E test artifacts ===
 apps/mobile/e2e/screenshots/
+
+# === Google Play service account key ===
+apps/mobile/google-play-service-account.json
 
 # === Claude ===
 .claude/

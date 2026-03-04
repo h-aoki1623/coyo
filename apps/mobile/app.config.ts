@@ -36,5 +36,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     apiBaseUrl: process.env.API_BASE_URL ?? 'http://localhost:8000',
     environment: process.env.APP_ENV ?? 'development',
     e2eMode: process.env.E2E_MODE === 'true',
+    eas: {
+      projectId: process.env.EAS_PROJECT_ID ?? '',
+    },
   },
+  owner: process.env.EXPO_OWNER ?? undefined,
 });
