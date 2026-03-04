@@ -11,8 +11,6 @@ from sse_starlette.sse import EventSourceResponse
 from coto.config import get_settings
 from coto.dependencies import get_current_user, get_db
 from coto.exceptions import ConversationStateError, ValidationError
-
-logger = logging.getLogger(__name__)
 from coto.models.user import User
 from coto.schemas.conversation import (
     ConversationResponse,
@@ -21,6 +19,8 @@ from coto.schemas.conversation import (
 from coto.schemas.correction import FeedbackResponse, TurnCorrectionResponse
 from coto.services.conversation import ConversationService
 from coto.services.turn_orchestrator import TurnOrchestrator
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/conversations", tags=["conversations"])
 
@@ -71,7 +71,8 @@ async def submit_turn(
     settings = get_settings()
     if len(audio_data) > settings.max_audio_size_bytes:
         raise ValidationError(
-            f"Audio file exceeds maximum size of {settings.max_audio_size_bytes // (1024 * 1024)} MB"
+            f"Audio file exceeds maximum size of "
+            f"{settings.max_audio_size_bytes // (1024 * 1024)} MB"
         )
 
     audio_filename = audio.filename or "audio.m4a"
