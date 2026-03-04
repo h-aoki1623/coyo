@@ -37,8 +37,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     environment: process.env.APP_ENV ?? 'development',
     e2eMode: process.env.E2E_MODE === 'true',
     eas: {
-      projectId: process.env.EAS_PROJECT_ID ?? '',
+      projectId: 'a7364322-bc5a-48f6-a0cd-11eb89fe074c',
     },
   },
-  owner: process.env.EXPO_OWNER ?? undefined,
+  owner: 'coto-app',
 });
