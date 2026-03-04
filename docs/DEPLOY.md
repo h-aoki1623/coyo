@@ -15,8 +15,8 @@ This guide covers deploying Coto to production: API on Cloud Run, mobile apps vi
 
 ```bash
 # Create project
-gcloud projects create coto-prod --name="Coto Production"
-gcloud config set project coto-prod
+gcloud projects create coto-app-prod --name="Coto Production"
+gcloud config set project coto-app-prod
 
 # Enable required APIs
 gcloud services enable \
@@ -92,7 +92,7 @@ echo -n "rediss://..." | gcloud secrets create redis-url --data-file=-
 echo -n "sk-..." | gcloud secrets create openai-api-key --data-file=-
 
 # Grant Cloud Run access to secrets
-PROJECT_NUMBER=$(gcloud projects describe coto-prod --format='value(projectNumber)')
+PROJECT_NUMBER=$(gcloud projects describe coto-app-prod --format='value(projectNumber)')
 gcloud secrets add-iam-policy-binding database-url \
   --member="serviceAccount:${PROJECT_NUMBER}-compute@developer.gserviceaccount.com" \
   --role="roles/secretmanager.secretAccessor"
@@ -130,7 +130,7 @@ DATABASE_URL="postgresql+asyncpg://..." alembic upgrade head
 
 ```bash
 # Build image
-IMAGE="asia-northeast1-docker.pkg.dev/coto-prod/coto/coto-api:v0.1.0"
+IMAGE="asia-northeast1-docker.pkg.dev/coto-app-prod/coto/coto-api:v0.1.0"
 docker build -t "${IMAGE}" -f apps/api/Dockerfile apps/api/
 docker push "${IMAGE}"
 
@@ -236,7 +236,7 @@ npx eas submit --platform android --profile production
 Set up WIF to allow GitHub Actions to deploy to Cloud Run without service account keys:
 
 ```bash
-PROJECT_ID="coto-prod"
+PROJECT_ID="coto-app-prod"
 PROJECT_NUMBER=$(gcloud projects describe ${PROJECT_ID} --format='value(projectNumber)')
 
 # Create Workload Identity Pool
@@ -281,14 +281,14 @@ Add these secrets in GitHub Settings > Secrets and variables > Actions:
 | Secret | Value |
 |--------|-------|
 | `WIF_PROVIDER` | `projects/<PROJECT_NUMBER>/locations/global/workloadIdentityPools/github/providers/github-actions` |
-| `WIF_SERVICE_ACCOUNT` | `github-actions-deploy@coto-prod.iam.gserviceaccount.com` |
+| `WIF_SERVICE_ACCOUNT` | `github-actions-deploy@coto-app-prod.iam.gserviceaccount.com` |
 | `DATABASE_URL` | Production database URL (for migrations) |
 
 Add these variables in GitHub Settings > Secrets and variables > Actions > Variables:
 
 | Variable | Value |
 |----------|-------|
-| `GCP_PROJECT_ID` | `coto-prod` |
+| `GCP_PROJECT_ID` | `coto-app-prod` |
 | `CLOUD_RUN_REGION` | `asia-northeast1` |
 | `CLOUD_RUN_SERVICE` | `coto-api` |
 | `GCS_BUCKET_NAME` | `coto-audio-prod` |

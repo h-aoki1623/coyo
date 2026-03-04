@@ -15,7 +15,7 @@
 set -euo pipefail
 
 # --- Configuration ---
-PROJECT_ID="${GCP_PROJECT_ID:-coto-prod}"
+PROJECT_ID="${GCP_PROJECT_ID:-coto-app-prod}"
 REGION="${CLOUD_RUN_REGION:-asia-northeast1}"
 SERVICE_NAME="${CLOUD_RUN_SERVICE:-coto-api}"
 REPO_NAME="coto"
