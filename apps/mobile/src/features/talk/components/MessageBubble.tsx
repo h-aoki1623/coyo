@@ -31,14 +31,17 @@ export const MessageBubble = memo(function MessageBubble({ turn, correction, ani
         toValue: 1,
         tension: 40,
         friction: 5,
-        useNativeDriver: true,
+        useNativeDriver: false,
       }).start();
     }, delay);
     return () => clearTimeout(timer);
   }, [animate, springAnim, turn.role]);
 
+  const isUser = turn.role === 'user';
+
   const bubbleAnimStyle = {
     opacity: springAnim,
+    transformOrigin: isUser ? 'right top' : 'left top',
     transform: [
       {
         scale: springAnim.interpolate({
@@ -48,8 +51,6 @@ export const MessageBubble = memo(function MessageBubble({ turn, correction, ani
       },
     ],
   };
-
-  const isUser = turn.role === 'user';
 
   if (isUser) {
     return (
@@ -115,7 +116,7 @@ export const AiTypingBubble = memo(function AiTypingBubble() {
         toValue: 1,
         tension: 40,
         friction: 5,
-        useNativeDriver: true,
+        useNativeDriver: false,
       }).start();
     }, 400);
     return () => clearTimeout(timer);
@@ -123,6 +124,7 @@ export const AiTypingBubble = memo(function AiTypingBubble() {
 
   const animStyle = {
     opacity: springAnim,
+    transformOrigin: 'left top' as const,
     transform: [
       {
         scale: springAnim.interpolate({
@@ -164,12 +166,13 @@ export const ProcessingBubble = memo(function ProcessingBubble() {
       toValue: 1,
       tension: 40,
       friction: 5,
-      useNativeDriver: true,
+      useNativeDriver: false,
     }).start();
   }, [springAnim]);
 
   const animStyle = {
     opacity: springAnim,
+    transformOrigin: 'right top' as const,
     transform: [
       {
         scale: springAnim.interpolate({
