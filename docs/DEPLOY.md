@@ -109,12 +109,18 @@ gcloud secrets add-iam-policy-binding openai-api-key \
 ### 2.1 Run Database Migrations
 
 ```bash
-# Install dependencies locally (for migration only)
 cd apps/api
+
+# Create virtual environment and install dependencies
+python3 -m venv .venv
+source .venv/bin/activate
 pip install -e .
 
 # Run migrations against production database
 DATABASE_URL="postgresql+asyncpg://..." alembic upgrade head
+
+# Deactivate when done
+deactivate
 ```
 
 ### 2.2 Build and Deploy
