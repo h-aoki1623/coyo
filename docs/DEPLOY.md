@@ -117,7 +117,11 @@ source .venv/bin/activate
 pip install -e .
 
 # Run migrations against production database
-DATABASE_URL="postgresql+asyncpg://..." alembic upgrade head
+# NOTE: Use single quotes to avoid shell interpretation of special characters in password
+DATABASE_URL='postgresql+asyncpg://<user>:<password>@<host>:6543/<database>?ssl=require' \
+REDIS_URL='redis://localhost:6379' \
+OPENAI_API_KEY='dummy' \
+alembic upgrade head
 
 # Deactivate when done
 deactivate
