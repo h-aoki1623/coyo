@@ -9,12 +9,12 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   scheme: 'coto',
   newArchEnabled: true,
   ios: {
-    bundleIdentifier: 'com.coto.app',
+    bundleIdentifier: 'live.coto.app',
     supportsTablet: false,
     deploymentTarget: '16.0',
   },
   android: {
-    package: 'com.coto.app',
+    package: 'live.coto.app',
     adaptiveIcon: {
       backgroundColor: '#ffffff',
     },
