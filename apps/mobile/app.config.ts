@@ -6,6 +6,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   slug: 'coyo',
   version: '0.1.0',
   orientation: 'portrait',
+  icon: './assets/icon.png',
   scheme: 'coyo',
   newArchEnabled: true,
   ios: {
@@ -16,7 +17,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   android: {
     package: 'to.coyo.app',
     adaptiveIcon: {
-      backgroundColor: '#ffffff',
+      foregroundImage: './assets/icon.png',
+      backgroundColor: '#4A90E2',
     },
     minSdkVersion: 29,
     targetSdkVersion: 35,
