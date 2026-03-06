@@ -1,6 +1,6 @@
 # E2E Testing (Maestro)
 
-End-to-end tests for the Coto mobile app using [Maestro](https://maestro.mobile.dev/).
+End-to-end tests for the Coyo mobile app using [Maestro](https://maestro.mobile.dev/).
 
 ## Prerequisites
 

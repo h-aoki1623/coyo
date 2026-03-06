@@ -3,7 +3,7 @@
 # to the Talk screen. Uses the "Sports" topic as the test case.
 #
 # REQUIRES: Backend API must be running (run-e2e.sh starts it automatically).
-appId: com.coto.app
+appId: com.coyo.app
 ---
 # Launch the application (clearState: false to preserve expo-dev-client settings)
 - launchApp:
@@ -34,7 +34,7 @@ appId: com.coto.app
 
 # Verify the Talk screen header
 - assertVisible:
-    text: "Coto"
+    text: "Coyo"
 
 # Verify the end conversation button is present via testID
 - assertVisible:

@@ -1,1 +1,1 @@
-"""Unit tests for the Coto API."""
+"""Unit tests for the Coyo API."""

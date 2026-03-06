@@ -4,7 +4,7 @@
 docker-up:
 	docker compose up -d
 	@echo "Waiting for Postgres to be ready..."
-	@docker compose exec postgres pg_isready -U coto -d coto > /dev/null 2>&1 || sleep 3
+	@docker compose exec postgres pg_isready -U coyo -d coyo > /dev/null 2>&1 || sleep 3
 	@echo "Postgres and Redis are running."
 
 docker-down:
@@ -19,7 +19,7 @@ dev-mobile:
 	cd apps/mobile && npx expo start --dev-client
 
 dev-api:
-	cd apps/api && .venv/bin/uvicorn src.coto.main:app --reload
+	cd apps/api && .venv/bin/uvicorn src.coyo.main:app --reload
 
 # Full dev environment (Docker + API + Emulator + Build + Metro)
 dev-ios:

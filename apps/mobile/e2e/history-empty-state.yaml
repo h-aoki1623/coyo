@@ -5,7 +5,7 @@
 # This flow is designed to pass regardless of backend state:
 # - Fresh install: shows empty state
 # - After conversations: shows conversation list
-appId: com.coto.app
+appId: com.coyo.app
 ---
 # Launch the application (clearState: false to preserve expo-dev-client settings)
 - launchApp:

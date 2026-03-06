@@ -1,4 +1,4 @@
-# Contributing to Coto
+# Contributing to Coyo
 
 ## Prerequisites
 
@@ -45,10 +45,10 @@ Source: `.env.example`
 
 | Variable | Purpose | Example |
 |---|---|---|
-| `DATABASE_URL` | PostgreSQL connection string (async driver) | `postgresql+asyncpg://coto:coto_local@localhost:5432/coto` |
+| `DATABASE_URL` | PostgreSQL connection string (async driver) | `postgresql+asyncpg://coyo:coyo_local@localhost:5432/coyo` |
 | `REDIS_URL` | Redis connection string | `redis://localhost:6379` |
 | `OPENAI_API_KEY` | OpenAI API key for conversation AI | `sk-xxx` |
-| `GCS_BUCKET_NAME` | Google Cloud Storage bucket for audio files | `coto-audio-dev` |
+| `GCS_BUCKET_NAME` | Google Cloud Storage bucket for audio files | `coyo-audio-dev` |
 | `API_BASE_URL` | Backend URL for mobile app | `http://localhost:8000` |
 | `APP_ENV` | App environment identifier | `development` |
 

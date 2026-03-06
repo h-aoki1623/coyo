@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Animated } from 'react-native';
 import { Colors } from '@/constants/colors';
 import { Typography } from '@/constants/typography';
 import { t } from '@/i18n';
-import { CotoAvatar, SpinnerIcon } from '@/components/icons';
+import { CoyoAvatar, SpinnerIcon } from '@/components/icons';
 import type { Turn, TurnCorrection } from '@/types/conversation';
 import { CorrectionAnnotation } from './CorrectionCard';
 
@@ -74,9 +74,9 @@ export const MessageBubble = memo(function MessageBubble({ turn, correction, ani
     <View
       style={styles.aiContainer}
       accessibilityRole="text"
-      accessibilityLabel={`Coto said: ${turn.text}`}
+      accessibilityLabel={`Coyo said: ${turn.text}`}
     >
-      <CotoAvatar size={28} variant="sub" />
+      <CoyoAvatar size={28} variant="sub" />
       <Animated.View style={[styles.aiBubble, bubbleAnimStyle]}>
         <Text style={[styles.text, styles.aiText]}>{turn.text}</Text>
       </Animated.View>
@@ -95,7 +95,7 @@ interface TypingBubbleProps {
 export const TypingBubble = memo(function TypingBubble({ text }: TypingBubbleProps) {
   return (
     <View style={styles.aiContainer}>
-      <CotoAvatar size={28} variant="sub" />
+      <CoyoAvatar size={28} variant="sub" />
       <View style={styles.aiBubble}>
         <Text style={[styles.text, styles.aiText]}>{text}</Text>
       </View>
@@ -139,9 +139,9 @@ export const AiTypingBubble = memo(function AiTypingBubble() {
     <View
       style={styles.aiContainer}
       accessibilityRole="text"
-      accessibilityLabel="Coto is typing"
+      accessibilityLabel="Coyo is typing"
     >
-      <CotoAvatar size={28} variant="sub" />
+      <CoyoAvatar size={28} variant="sub" />
       <Animated.View style={[styles.aiBubble, styles.typingIndicatorBubble, animStyle]}>
         <View style={styles.typingDots}>
           <View style={[styles.typingDot, styles.typingDotMuted]} />

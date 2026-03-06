@@ -1,1 +1,1 @@
-"""Coto API test suite."""
+"""Coyo API test suite."""

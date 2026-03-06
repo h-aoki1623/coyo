@@ -15,7 +15,7 @@
 # NOTE: This is an advanced flow that depends on backend availability
 # and may need longer timeouts for API responses. If the backend is not
 # running, the flow will fail at the topic tap step.
-appId: com.coto.app
+appId: com.coyo.app
 ---
 # -- Step 1: Launch and start a conversation --
 
@@ -40,7 +40,7 @@ appId: com.coto.app
 
 # Verify the Talk screen loaded
 - assertVisible:
-    text: "Coto"
+    text: "Coyo"
 - takeScreenshot: "feedback-flow-01-talk-screen"
 
 # -- Step 2: End the conversation --

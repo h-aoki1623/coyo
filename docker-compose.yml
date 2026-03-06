@@ -1,24 +1,24 @@
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: coto-postgres
+    container_name: coyo-postgres
     environment:
-      POSTGRES_USER: coto
-      POSTGRES_PASSWORD: coto_local
-      POSTGRES_DB: coto
+      POSTGRES_USER: coyo
+      POSTGRES_PASSWORD: coyo_local
+      POSTGRES_DB: coyo
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U coto -d coto"]
+      test: ["CMD-SHELL", "pg_isready -U coyo -d coyo"]
       interval: 5s
       timeout: 5s
       retries: 5
 
   redis:
     image: redis:7-alpine
-    container_name: coto-redis
+    container_name: coyo-redis
     ports:
       - "6379:6379"
     healthcheck:

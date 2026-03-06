@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet } from 'react-native';
-import { TrophyIcon, CotoAvatar } from '@/components/icons';
+import { TrophyIcon, CoyoAvatar } from '@/components/icons';
 import { Colors } from '@/constants/colors';
 import { Fonts, Typography } from '@/constants/typography';
 import { t } from '@/i18n';
@@ -12,7 +12,7 @@ export function EmptyFeedbackState() {
       </View>
       <Text style={styles.title}>{t('emptyFeedback.title')}</Text>
       <View style={styles.praiseCard}>
-        <CotoAvatar size={32} />
+        <CoyoAvatar size={32} />
         <View style={styles.praiseCardContent}>
           <Text style={styles.praiseCardTitle}>{t('emptyFeedback.messageFrom')}</Text>
           <Text style={styles.praiseCardBody}>{t('emptyFeedback.body')}</Text>
