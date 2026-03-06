@@ -14,13 +14,32 @@ env:
   IMAGE_NAME: coyo-api
 
 jobs:
-  deploy:
-    name: Build & Deploy to Cloud Run
+  changes:
+    name: Detect backend changes
     runs-on: ubuntu-latest
-    # Only deploy if CI passed (skip check for manual dispatch)
     if: >-
       github.event_name == 'workflow_dispatch' ||
       github.event.workflow_run.conclusion == 'success'
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            backend:
+              - 'apps/api/**'
+              - 'docker-compose.yml'
+              - '.github/workflows/deploy-api.yml'
+
+  deploy:
+    name: Build & Deploy to Cloud Run
+    needs: changes
+    runs-on: ubuntu-latest
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      needs.changes.outputs.backend == 'true'
     permissions:
       contents: read
       id-token: write  # Required for Workload Identity Federation
