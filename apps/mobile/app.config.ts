@@ -2,19 +2,19 @@ import { ExpoConfig, ConfigContext } from 'expo/config';
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
-  name: 'Coto',
-  slug: 'coto',
+  name: 'Coyo',
+  slug: 'coyo',
   version: '0.1.0',
   orientation: 'portrait',
-  scheme: 'coto',
+  scheme: 'coyo',
   newArchEnabled: true,
   ios: {
-    bundleIdentifier: 'live.coto.app',
+    bundleIdentifier: 'to.coyo.app',
     supportsTablet: false,
     deploymentTarget: '16.0',
   },
   android: {
-    package: 'live.coto.app',
+    package: 'to.coyo.app',
     adaptiveIcon: {
       backgroundColor: '#ffffff',
     },
@@ -28,7 +28,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     [
       'expo-av',
       {
-        microphonePermission: 'Allow Coto to access your microphone for English conversation practice.',
+        microphonePermission: 'Allow Coyo to access your microphone for English conversation practice.',
       },
     ],
   ],
@@ -37,8 +37,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     environment: process.env.APP_ENV ?? 'development',
     e2eMode: process.env.E2E_MODE === 'true',
     eas: {
-      projectId: 'a7364322-bc5a-48f6-a0cd-11eb89fe074c',
+      projectId: '02a4e9f2-99fa-4744-b12c-b77926090402',
     },
   },
-  owner: 'coto-app',
+  owner: 'coyo-app',
 });
