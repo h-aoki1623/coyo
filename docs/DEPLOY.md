@@ -1,6 +1,6 @@
 # Production Deployment Guide
 
-This guide covers deploying Coto to production: API on Cloud Run, mobile apps via EAS Build.
+This guide covers deploying Coyo to production: API on Cloud Run, mobile apps via EAS Build.
 
 ## Prerequisites
 
@@ -15,8 +15,8 @@ This guide covers deploying Coto to production: API on Cloud Run, mobile apps vi
 
 ```bash
 # Create project
-gcloud projects create coto-app-prod --name="Coto Production"
-gcloud config set project coto-app-prod
+gcloud projects create coyo-app-prod --name="Coyo Production"
+gcloud config set project coyo-app-prod
 
 # Enable required APIs
 gcloud services enable \
@@ -26,7 +26,7 @@ gcloud services enable \
   storage.googleapis.com
 
 # Create Artifact Registry repository
-gcloud artifacts repositories create coto \
+gcloud artifacts repositories create coyo \
   --repository-format=docker \
   --location=asia-northeast1
 
@@ -53,7 +53,7 @@ gcloud auth configure-docker asia-northeast1-docker.pkg.dev
 
 ```bash
 # Create bucket with auto-delete lifecycle
-gcloud storage buckets create gs://coto-audio-prod \
+gcloud storage buckets create gs://coyo-audio-prod \
   --location=asia-northeast1 \
   --uniform-bucket-level-access
 
@@ -70,7 +70,7 @@ cat > /tmp/lifecycle.json << 'EOF'
   ]
 }
 EOF
-gcloud storage buckets update gs://coto-audio-prod --lifecycle-file=/tmp/lifecycle.json
+gcloud storage buckets update gs://coyo-audio-prod --lifecycle-file=/tmp/lifecycle.json
 ```
 
 ### 1.5 OpenAI API Key
@@ -92,7 +92,7 @@ echo -n "rediss://..." | gcloud secrets create redis-url --data-file=-
 echo -n "sk-..." | gcloud secrets create openai-api-key --data-file=-
 
 # Grant Cloud Run access to secrets
-PROJECT_NUMBER=$(gcloud projects describe coto-app-prod --format='value(projectNumber)')
+PROJECT_NUMBER=$(gcloud projects describe coyo-app-prod --format='value(projectNumber)')
 gcloud secrets add-iam-policy-binding database-url \
   --member="serviceAccount:${PROJECT_NUMBER}-compute@developer.gserviceaccount.com" \
   --role="roles/secretmanager.secretAccessor"
@@ -140,12 +140,12 @@ deactivate
 
 ```bash
 # Build image
-IMAGE="asia-northeast1-docker.pkg.dev/coto-app-prod/coto/coto-api:v0.1.0"
+IMAGE="asia-northeast1-docker.pkg.dev/coyo-app-prod/coyo/coyo-api:v0.1.0"
 docker build --platform linux/amd64 -t "${IMAGE}" -f apps/api/Dockerfile apps/api/
 docker push "${IMAGE}"
 
 # Deploy
-gcloud run deploy coto-api \
+gcloud run deploy coyo-api \
   --image "${IMAGE}" \
   --region asia-northeast1 \
   --port 8080 \
@@ -158,7 +158,7 @@ gcloud run deploy coto-api \
   --execution-environment gen2 \
   --no-cpu-throttling \
   --allow-unauthenticated \
-  --set-env-vars "ENVIRONMENT=production,GCS_BUCKET_NAME=coto-audio-prod,RATE_LIMIT_PER_MINUTE=30" \
+  --set-env-vars "ENVIRONMENT=production,GCS_BUCKET_NAME=coyo-audio-prod,RATE_LIMIT_PER_MINUTE=30" \
   --set-secrets "DATABASE_URL=database-url:latest,REDIS_URL=redis-url:latest,OPENAI_API_KEY=openai-api-key:latest"
 ```
 
@@ -166,7 +166,7 @@ gcloud run deploy coto-api \
 
 ```bash
 # Get service URL
-URL=$(gcloud run services describe coto-api --region asia-northeast1 --format 'value(status.url)')
+URL=$(gcloud run services describe coyo-api --region asia-northeast1 --format 'value(status.url)')
 
 # Health check
 curl "${URL}/health"
@@ -178,7 +178,7 @@ curl "${URL}/health"
 Update the `CORS_ALLOWED_ORIGINS` environment variable if needed:
 
 ```bash
-gcloud run services update coto-api \
+gcloud run services update coyo-api \
   --region asia-northeast1 \
   --set-env-vars "CORS_ALLOWED_ORIGINS=[\"${URL}\"]"
 ```
@@ -246,7 +246,7 @@ npx eas submit --platform android --profile production
 Set up WIF to allow GitHub Actions to deploy to Cloud Run without service account keys:
 
 ```bash
-PROJECT_ID="coto-app-prod"
+PROJECT_ID="coyo-app-prod"
 PROJECT_NUMBER=$(gcloud projects describe ${PROJECT_ID} --format='value(projectNumber)')
 
 # Create Workload Identity Pool
@@ -277,7 +277,7 @@ for ROLE in run.admin artifactregistry.writer secretmanager.secretAccessor iam.s
 done
 
 # Allow GitHub to impersonate the service account
-REPO="your-github-org/coto"  # Replace with your repo
+REPO="your-github-org/coyo"  # Replace with your repo
 gcloud iam service-accounts add-iam-policy-binding ${SA_EMAIL} \
   --project="${PROJECT_ID}" \
   --role="roles/iam.workloadIdentityUser" \
@@ -291,17 +291,17 @@ Add these secrets in GitHub Settings > Secrets and variables > Actions:
 | Secret | Value |
 |--------|-------|
 | `WIF_PROVIDER` | `projects/<PROJECT_NUMBER>/locations/global/workloadIdentityPools/github/providers/github-actions` |
-| `WIF_SERVICE_ACCOUNT` | `github-actions-deploy@coto-app-prod.iam.gserviceaccount.com` |
+| `WIF_SERVICE_ACCOUNT` | `github-actions-deploy@coyo-app-prod.iam.gserviceaccount.com` |
 | `DATABASE_URL` | Production database URL (for migrations) |
 
 Add these variables in GitHub Settings > Secrets and variables > Actions > Variables:
 
 | Variable | Value |
 |----------|-------|
-| `GCP_PROJECT_ID` | `coto-app-prod` |
+| `GCP_PROJECT_ID` | `coyo-app-prod` |
 | `CLOUD_RUN_REGION` | `asia-northeast1` |
-| `CLOUD_RUN_SERVICE` | `coto-api` |
-| `GCS_BUCKET_NAME` | `coto-audio-prod` |
+| `CLOUD_RUN_SERVICE` | `coyo-api` |
+| `GCS_BUCKET_NAME` | `coyo-audio-prod` |
 
 ## Verification Checklist
 
@@ -329,10 +329,10 @@ Add these variables in GitHub Settings > Secrets and variables > Actions > Varia
 
 ```bash
 # List revisions
-gcloud run revisions list --service coto-api --region asia-northeast1
+gcloud run revisions list --service coyo-api --region asia-northeast1
 
 # Rollback to previous revision
-gcloud run services update-traffic coto-api \
+gcloud run services update-traffic coyo-api \
   --region asia-northeast1 \
   --to-revisions PREVIOUS_REVISION=100
 ```

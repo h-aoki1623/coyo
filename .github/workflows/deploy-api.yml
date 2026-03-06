@@ -10,8 +10,8 @@ on:
 env:
   GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
   REGION: ${{ vars.CLOUD_RUN_REGION || 'asia-northeast1' }}
-  SERVICE_NAME: ${{ vars.CLOUD_RUN_SERVICE || 'coto-api' }}
-  IMAGE_NAME: coto-api
+  SERVICE_NAME: ${{ vars.CLOUD_RUN_SERVICE || 'coyo-api' }}
+  IMAGE_NAME: coyo-api
 
 jobs:
   deploy:
@@ -43,7 +43,7 @@ jobs:
       # Build and push Docker image
       - name: Build and push
         run: |
-          IMAGE="${REGION}-docker.pkg.dev/${GCP_PROJECT_ID}/coto/${IMAGE_NAME}:${GITHUB_SHA::8}"
+          IMAGE="${REGION}-docker.pkg.dev/${GCP_PROJECT_ID}/coyo/${IMAGE_NAME}:${GITHUB_SHA::8}"
           docker build -t "${IMAGE}" -f apps/api/Dockerfile apps/api/
           docker push "${IMAGE}"
           echo "IMAGE=${IMAGE}" >> $GITHUB_ENV
@@ -76,7 +76,7 @@ jobs:
             --allow-unauthenticated
           env_vars: |
             ENVIRONMENT=production
-            GCS_BUCKET_NAME=${{ vars.GCS_BUCKET_NAME || 'coto-audio-prod' }}
+            GCS_BUCKET_NAME=${{ vars.GCS_BUCKET_NAME || 'coyo-audio-prod' }}
             RATE_LIMIT_PER_MINUTE=30
             CORS_ALLOWED_ORIGINS=${{ vars.CORS_ALLOWED_ORIGINS || '[]' }}
           secrets: |

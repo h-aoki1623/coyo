@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Deploy Coto API to Google Cloud Run
+# Deploy Coyo API to Google Cloud Run
 #
 # Prerequisites:
 #   1. gcloud CLI installed and authenticated: gcloud auth login
@@ -15,11 +15,11 @@
 set -euo pipefail
 
 # --- Configuration ---
-PROJECT_ID="${GCP_PROJECT_ID:-coto-app-prod}"
+PROJECT_ID="${GCP_PROJECT_ID:-coyo-app-prod}"
 REGION="${CLOUD_RUN_REGION:-asia-northeast1}"
-SERVICE_NAME="${CLOUD_RUN_SERVICE:-coto-api}"
-REPO_NAME="coto"
-IMAGE_NAME="coto-api"
+SERVICE_NAME="${CLOUD_RUN_SERVICE:-coyo-api}"
+REPO_NAME="coyo"
+IMAGE_NAME="coyo-api"
 
 # Parse arguments
 TAG="${TAG:-latest}"
@@ -33,7 +33,7 @@ done
 REGISTRY="${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPO_NAME}"
 IMAGE="${REGISTRY}/${IMAGE_NAME}:${TAG}"
 
-echo "=== Coto API Deployment ==="
+echo "=== Coyo API Deployment ==="
 echo "Project:  ${PROJECT_ID}"
 echo "Region:   ${REGION}"
 echo "Image:    ${IMAGE}"
@@ -66,7 +66,7 @@ gcloud run deploy "${SERVICE_NAME}" \
   --max-instances 5 \
   --timeout 300 \
   --concurrency 80 \
-  --set-env-vars "ENVIRONMENT=production,GCS_BUCKET_NAME=coto-audio-prod,RATE_LIMIT_PER_MINUTE=30,CORS_ALLOWED_ORIGINS=[]" \
+  --set-env-vars "ENVIRONMENT=production,GCS_BUCKET_NAME=coyo-audio-prod,RATE_LIMIT_PER_MINUTE=30,CORS_ALLOWED_ORIGINS=[]" \
   --set-secrets "DATABASE_URL=database-url:latest,REDIS_URL=redis-url:latest,OPENAI_API_KEY=openai-api-key:latest" \
   --allow-unauthenticated \
   --execution-environment gen2 \
