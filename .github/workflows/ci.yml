@@ -11,8 +11,29 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  changes:
+    name: Detect Changes
+    runs-on: ubuntu-latest
+    outputs:
+      api: ${{ steps.filter.outputs.api }}
+      mobile: ${{ steps.filter.outputs.mobile }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            api:
+              - 'apps/api/**'
+              - '.github/workflows/ci.yml'
+            mobile:
+              - 'apps/mobile/**'
+              - '.github/workflows/ci.yml'
+
   lint-api:
     name: Lint API
+    needs: changes
+    if: needs.changes.outputs.api == 'true'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -27,6 +48,8 @@ jobs:
 
   lint-mobile:
     name: Lint Mobile
+    needs: changes
+    if: needs.changes.outputs.mobile == 'true'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -43,6 +66,8 @@ jobs:
 
   test-api:
     name: Test API
+    needs: changes
+    if: needs.changes.outputs.api == 'true'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -62,6 +87,8 @@ jobs:
 
   test-mobile:
     name: Test Mobile
+    needs: changes
+    if: needs.changes.outputs.mobile == 'true'
     runs-on: ubuntu-latest
     defaults:
       run:
