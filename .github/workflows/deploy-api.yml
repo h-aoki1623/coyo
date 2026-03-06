@@ -55,6 +55,8 @@ jobs:
           cd apps/api && alembic upgrade head
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          REDIS_URL: "redis://localhost:6379"
+          OPENAI_API_KEY: "sk-dummy-for-migrations"
 
       # Deploy to Cloud Run
       - name: Deploy to Cloud Run
