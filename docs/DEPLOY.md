@@ -262,6 +262,7 @@ gcloud iam workload-identity-pools providers create-oidc "github-actions" \
   --workload-identity-pool="github" \
   --display-name="GitHub Actions" \
   --attribute-mapping="google.subject=assertion.sub,attribute.repository=assertion.repository" \
+  --attribute-condition="assertion.repository=='h-aoki1623/coyo'" \
   --issuer-uri="https://token.actions.githubusercontent.com"
 
 # Create service account for deployments
@@ -277,7 +278,7 @@ for ROLE in run.admin artifactregistry.writer secretmanager.secretAccessor iam.s
 done
 
 # Allow GitHub to impersonate the service account
-REPO="your-github-org/coyo"  # Replace with your repo
+REPO="h-aoki1623/coyo"  # Replace with your repo
 gcloud iam service-accounts add-iam-policy-binding ${SA_EMAIL} \
   --project="${PROJECT_ID}" \
   --role="roles/iam.workloadIdentityUser" \
