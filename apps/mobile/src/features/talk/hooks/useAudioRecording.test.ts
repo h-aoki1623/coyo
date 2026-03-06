@@ -23,7 +23,7 @@ describe('buildAudioFormData', () => {
   });
 
   it('creates an ExpoFile from the given URI', () => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { File: MockFile } = require('expo-file-system/next');
 
     buildAudioFormData('file:///recordings/test.m4a');

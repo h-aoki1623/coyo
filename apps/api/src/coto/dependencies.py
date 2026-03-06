@@ -27,8 +27,8 @@ async def get_device_id(x_device_id: str = Header(...)) -> str:
     """
     try:
         uuid.UUID(x_device_id, version=4)
-    except (ValueError, AttributeError):
-        raise ValidationError("X-Device-Id must be a valid UUID v4")
+    except (ValueError, AttributeError) as err:
+        raise ValidationError("X-Device-Id must be a valid UUID v4") from err
     return x_device_id
 
 
