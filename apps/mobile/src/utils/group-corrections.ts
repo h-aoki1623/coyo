@@ -1,6 +1,5 @@
 import type {
   TurnCorrection,
-  CorrectionItem,
   SentenceCorrection,
 } from '@/types/conversation';
 
