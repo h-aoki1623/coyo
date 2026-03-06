@@ -199,11 +199,46 @@ npx eas init
 # Update app.config.ts with the EAS project ID from the output above
 ```
 
-### 3.2 Update eas.json
+### 3.2 Configure EAS Secrets
 
-Edit `apps/mobile/eas.json` and replace placeholder values:
-- `API_BASE_URL` in the `production` profile → your Cloud Run service URL
-- Apple/Google credentials in `submit.production`
+Sensitive values (API URLs, Apple credentials) are NOT stored in `eas.json`.
+Set them as EAS Secrets so they are injected at build/submit time:
+
+```bash
+cd apps/mobile
+
+# API URL for preview and production builds
+eas secret:create --name API_BASE_URL --value "https://<your-cloud-run-url>" --scope project
+
+# Apple ID for App Store submission
+eas secret:create --name APPLE_ID --value "your-apple-id@example.com" --scope project
+```
+
+For **local development**, create `apps/mobile/eas.local.json` (gitignored) to override values:
+
+```json
+{
+  "build": {
+    "preview": {
+      "env": {
+        "API_BASE_URL": "https://<your-cloud-run-url>"
+      }
+    },
+    "production": {
+      "env": {
+        "API_BASE_URL": "https://<your-cloud-run-url>"
+      }
+    }
+  },
+  "submit": {
+    "production": {
+      "ios": {
+        "appleId": "your-apple-id@example.com"
+      }
+    }
+  }
+}
+```
 
 ### 3.3 Build for iOS
 

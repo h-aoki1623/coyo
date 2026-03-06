@@ -18,8 +18,7 @@
     "preview": {
       "distribution": "internal",
       "env": {
-        "APP_ENV": "staging",
-        "API_BASE_URL": "***REMOVED***"
+        "APP_ENV": "staging"
       },
       "ios": {
         "enterpriseProvisioning": "adhoc"
@@ -28,15 +27,13 @@
     "production": {
       "autoIncrement": true,
       "env": {
-        "APP_ENV": "production",
-        "API_BASE_URL": "***REMOVED***"
+        "APP_ENV": "production"
       }
     }
   },
   "submit": {
     "production": {
       "ios": {
-        "appleId": "***REMOVED***",
         "ascAppId": "6760171388",
         "appleTeamId": "4535US4KHP"
       },
