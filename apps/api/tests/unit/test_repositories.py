@@ -6,13 +6,13 @@ from datetime import UTC, datetime
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from coto.models.conversation import Conversation
-from coto.models.turn import Turn
-from coto.models.user import User
-from coto.repositories.conversation import ConversationRepository
-from coto.repositories.history import HistoryRepository
-from coto.repositories.turn import TurnRepository
-from coto.repositories.user import UserRepository
+from coyo.models.conversation import Conversation
+from coyo.models.turn import Turn
+from coyo.models.user import User
+from coyo.repositories.conversation import ConversationRepository
+from coyo.repositories.history import HistoryRepository
+from coyo.repositories.turn import TurnRepository
+from coyo.repositories.user import UserRepository
 
 
 # ---------------------------------------------------------------------------

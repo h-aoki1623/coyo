@@ -5,20 +5,20 @@ from datetime import UTC, datetime
 
 import pytest
 
-from coto.schemas.base import CamelModel
-from coto.schemas.conversation import ConversationResponse, CreateConversationRequest
-from coto.schemas.correction import (
+from coyo.schemas.base import CamelModel
+from coyo.schemas.conversation import ConversationResponse, CreateConversationRequest
+from coyo.schemas.correction import (
     CorrectionItemResponse,
     FeedbackResponse,
     TurnCorrectionResponse,
 )
-from coto.schemas.history import (
+from coyo.schemas.history import (
     BatchDeleteRequest,
     HistoryDetailResponse,
     HistoryListItem,
     HistoryListResponse,
 )
-from coto.schemas.turn import TurnResponse
+from coyo.schemas.turn import TurnResponse
 
 
 # ---------------------------------------------------------------------------

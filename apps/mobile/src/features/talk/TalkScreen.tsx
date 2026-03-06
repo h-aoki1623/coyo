@@ -17,7 +17,7 @@ import { Typography } from '@/constants/typography';
 import { t } from '@/i18n';
 import { useConversationStore } from '@/stores/conversation-store';
 import { useAudioStore } from '@/stores/audio-store';
-import { CotoAvatar, BackIcon } from '@/components/icons';
+import { CoyoAvatar, BackIcon } from '@/components/icons';
 import type { RootStackParamList } from '@/navigation/types';
 import type { Turn } from '@/types/conversation';
 import { MessageBubble, AiTypingBubble, ProcessingBubble } from './components/MessageBubble';
@@ -53,8 +53,8 @@ function TalkHeader({
         >
           <BackIcon size={16} color="#3B82F6" />
         </Pressable>
-        <CotoAvatar size={32} />
-        <Text style={styles.headerTitle}>Coto</Text>
+        <CoyoAvatar size={32} />
+        <Text style={styles.headerTitle}>Coyo</Text>
       </View>
       <Pressable
         onPress={onEnd}
@@ -286,7 +286,7 @@ export function TalkScreen({ navigation, route }: Props) {
         <RecordButton
           onPress={handleStartRecording}
           processing
-          processingText={isProcessing ? t('talk.processingVoice') : t('talk.waitingForCoto')}
+          processingText={isProcessing ? t('talk.processingVoice') : t('talk.waitingForCoyo')}
         />
       );
     }
@@ -304,7 +304,7 @@ export function TalkScreen({ navigation, route }: Props) {
       {/* Message area */}
       {turns.length === 0 && !isStreaming ? (
         <View style={styles.emptyState}>
-          <CotoAvatar size={56} />
+          <CoyoAvatar size={56} />
           <Text style={styles.emptyTitle}>{t('talk.emptyTitle')}</Text>
           <Text style={styles.emptySubtitle}>
             {t('talk.emptySubtitle', { topic: topicLabel })}

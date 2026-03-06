@@ -1,8 +1,8 @@
-# Coto — Project Instructions
+# Coyo — Project Instructions
 
 ## OpenAPI TypeScript Type Generation
 
-When backend API schemas change (Pydantic models in `apps/api/src/coto/schemas/`), you MUST regenerate the mobile TypeScript types to keep them in sync.
+When backend API schemas change (Pydantic models in `apps/api/src/coyo/schemas/`), you MUST regenerate the mobile TypeScript types to keep them in sync.
 
 ### Workflow
 

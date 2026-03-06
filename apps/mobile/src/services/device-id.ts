@@ -1,7 +1,7 @@
 import * as SecureStore from 'expo-secure-store';
 import * as Crypto from 'expo-crypto';
 
-const DEVICE_ID_KEY = 'coto_device_id';
+const DEVICE_ID_KEY = 'coyo_device_id';
 
 /**
  * Retrieve or generate a persistent device identifier.

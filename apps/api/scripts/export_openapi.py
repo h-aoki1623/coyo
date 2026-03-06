@@ -15,7 +15,7 @@ from pathlib import Path
 # Ensure src/ is importable when running from apps/api/
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
-from coto.main import app  # noqa: E402
+from coyo.main import app  # noqa: E402
 
 output = sys.argv[1] if len(sys.argv) > 1 else "openapi.json"
 spec = app.openapi()

@@ -7,10 +7,10 @@ from sqlalchemy import pool
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
-from coto.config import get_settings
+from coyo.config import get_settings
 
 # Import all models so Alembic can detect schema changes
-from coto.models import Base  # noqa: F401
+from coyo.models import Base  # noqa: F401
 
 # Alembic Config object for access to .ini values
 config = context.config

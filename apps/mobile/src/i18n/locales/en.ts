@@ -33,7 +33,7 @@ const en = {
     speakNow: 'Speak now...',
     processing: 'Processing...',
     processingVoice: 'Processing your voice...',
-    waitingForCoto: 'Waiting for Coto...',
+    waitingForCoyo: 'Waiting for Coyo...',
     completionText: 'Talk ended \u00B7 {{duration}}',
     viewFeedback: 'View Feedback',
     lessThanMinute: 'Less than 1 min',
@@ -71,7 +71,7 @@ const en = {
   // Empty Feedback (Perfect English)
   emptyFeedback: {
     title: 'Your English was perfect!',
-    messageFrom: 'Message from Coto',
+    messageFrom: 'Message from Coyo',
     body: "Your English is at a native level. We're looking forward to your next talk!",
   },
 
@@ -133,7 +133,7 @@ const en = {
     recordingError: 'Failed to start recording. Please try again.',
     micPermissionTitle: 'Microphone Permission Required',
     micPermissionMessage:
-      'Coto needs access to your microphone for conversation practice. Please enable it in Settings.',
+      'Coyo needs access to your microphone for conversation practice. Please enable it in Settings.',
   },
 
   // Common

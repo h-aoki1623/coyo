@@ -23,7 +23,7 @@ describe('getOrCreateDeviceId', () => {
     const result = await getOrCreateDeviceId();
 
     expect(result).toBe('existing-device-id-abc');
-    expect(mockGetItemAsync).toHaveBeenCalledWith('coto_device_id', {
+    expect(mockGetItemAsync).toHaveBeenCalledWith('coyo_device_id', {
       keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
     });
     expect(mockRandomUUID).not.toHaveBeenCalled();
@@ -39,7 +39,7 @@ describe('getOrCreateDeviceId', () => {
     expect(result).toBe('new-uuid-5678');
     expect(mockRandomUUID).toHaveBeenCalledTimes(1);
     expect(mockSetItemAsync).toHaveBeenCalledWith(
-      'coto_device_id',
+      'coyo_device_id',
       'new-uuid-5678',
       { keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK },
     );
@@ -52,13 +52,13 @@ describe('getOrCreateDeviceId', () => {
     await getOrCreateDeviceId();
 
     expect(mockGetItemAsync).toHaveBeenCalledWith(
-      'coto_device_id',
+      'coyo_device_id',
       expect.objectContaining({
         keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
       }),
     );
     expect(mockSetItemAsync).toHaveBeenCalledWith(
-      'coto_device_id',
+      'coyo_device_id',
       'test-uuid',
       expect.objectContaining({
         keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,

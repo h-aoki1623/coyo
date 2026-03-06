@@ -1,4 +1,4 @@
-"""Shared test fixtures for the Coto API test suite.
+"""Shared test fixtures for the Coyo API test suite.
 
 Provides an async in-memory SQLite database, a FastAPI TestClient,
 mock dependencies, and reusable data fixtures.
@@ -14,11 +14,11 @@ from httpx import ASGITransport, AsyncClient
 from sqlalchemy import event
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-from coto.models.base import Base
-from coto.models.conversation import Conversation
-from coto.models.correction import CorrectionItem, TurnCorrection
-from coto.models.turn import Turn
-from coto.models.user import User
+from coyo.models.base import Base
+from coyo.models.conversation import Conversation
+from coyo.models.correction import CorrectionItem, TurnCorrection
+from coyo.models.turn import Turn
+from coyo.models.user import User
 
 # ---------------------------------------------------------------------------
 # Database fixtures
@@ -243,7 +243,7 @@ def mock_settings():
     mock.max_audio_size_bytes = 10 * 1024 * 1024
     mock.rate_limit_per_minute = 30
 
-    with patch("coto.config.get_settings", return_value=mock):
+    with patch("coyo.config.get_settings", return_value=mock):
         yield mock
 
 
@@ -262,8 +262,8 @@ async def client(
     Overrides get_db to use the test session and get_current_user to
     return the test user, bypassing the X-Device-Id header requirement.
     """
-    from coto.dependencies import get_current_user, get_db
-    from coto.main import app
+    from coyo.dependencies import get_current_user, get_db
+    from coyo.main import app
 
     async def override_get_db():
         yield db_session

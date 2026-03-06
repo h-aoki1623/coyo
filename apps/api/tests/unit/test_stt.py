@@ -4,8 +4,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from coto.exceptions import ExternalServiceError, STTRecognitionError
-from coto.services.stt import STTService
+from coyo.exceptions import ExternalServiceError, STTRecognitionError
+from coyo.services.stt import STTService
 
 
 class TestSTTService:
@@ -14,7 +14,7 @@ class TestSTTService:
     @pytest.fixture
     def stt_service(self, mock_openai_client):
         """Create an STTService with a mocked OpenAI client."""
-        with patch("coto.services.stt.AsyncOpenAI", return_value=mock_openai_client):
+        with patch("coyo.services.stt.AsyncOpenAI", return_value=mock_openai_client):
             service = STTService()
             service._client = mock_openai_client
             return service

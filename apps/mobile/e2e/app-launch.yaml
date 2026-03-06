@@ -3,7 +3,7 @@
 # with the greeting text, subtitle, and TOPICS section header.
 #
 # Expected result: Home screen visible with greeting and topic section.
-appId: com.coto.app
+appId: com.coyo.app
 ---
 # Launch the application (clearState: false to preserve expo-dev-client settings)
 - launchApp:
