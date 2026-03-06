@@ -5,9 +5,9 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from pydantic import BaseModel
 
-from coto.exceptions import ExternalServiceError
-from coto.services.llm.base import ChatMessage, ChatOptions, ModelInfo
-from coto.services.llm.openai_client import OpenAIClient
+from coyo.exceptions import ExternalServiceError
+from coyo.services.llm.base import ChatMessage, ChatOptions, ModelInfo
+from coyo.services.llm.openai_client import OpenAIClient
 
 
 # ---------------------------------------------------------------------------
@@ -78,7 +78,7 @@ class TestOpenAIClient:
     def openai_client(self, mock_openai_client):
         """Create an OpenAIClient with a mocked underlying client."""
         with patch(
-            "coto.services.llm.openai_client.AsyncOpenAI",
+            "coyo.services.llm.openai_client.AsyncOpenAI",
             return_value=mock_openai_client,
         ):
             client = OpenAIClient(model="gpt-5-mini")

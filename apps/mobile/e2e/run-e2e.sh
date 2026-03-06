@@ -260,7 +260,7 @@ ensure_docker() {
     docker compose -f "$REPO_ROOT/docker-compose.yml" -p "$_COMPOSE_PROJECT" up -d
     # Wait for Postgres to be ready
     local retries=10
-    while ! docker compose -f "$REPO_ROOT/docker-compose.yml" -p "$_COMPOSE_PROJECT" exec -T postgres pg_isready -U coto -d coto > /dev/null 2>&1; do
+    while ! docker compose -f "$REPO_ROOT/docker-compose.yml" -p "$_COMPOSE_PROJECT" exec -T postgres pg_isready -U coyo -d coyo > /dev/null 2>&1; do
       retries=$((retries - 1))
       if [[ $retries -le 0 ]]; then
         err "Postgres did not become ready in time."
@@ -292,7 +292,7 @@ ensure_backend() {
   # Start uvicorn in the background
   log "Starting backend API..."
   cd "$API_DIR"
-  .venv/bin/uvicorn src.coto.main:app --port "$API_PORT" &
+  .venv/bin/uvicorn src.coyo.main:app --port "$API_PORT" &
   local api_pid=$!
   _API_STARTED_BY_SCRIPT=true
 
@@ -549,14 +549,14 @@ run_ios() {
     fi
 
     # Verify installation
-    if ! xcrun simctl listapps "$udid" 2>/dev/null | grep -q "com.coto.app"; then
+    if ! xcrun simctl listapps "$udid" 2>/dev/null | grep -q "com.coyo.app"; then
       err "iOS app not installed on simulator. Build may have failed."
       exit 1
     fi
     log "iOS app installed successfully."
   else
     log "Skipping iOS build (--skip-build)."
-    if ! xcrun simctl listapps "$udid" 2>/dev/null | grep -q "com.coto.app"; then
+    if ! xcrun simctl listapps "$udid" 2>/dev/null | grep -q "com.coyo.app"; then
       err "iOS app not installed on simulator. Cannot skip build."
       exit 1
     fi
@@ -599,7 +599,7 @@ run_ios() {
 
   # Launch the app so it connects to Metro before Maestro takes over
   log "Launching app to connect to Metro..."
-  xcrun simctl launch "$udid" com.coto.app 2>/dev/null || true
+  xcrun simctl launch "$udid" com.coyo.app 2>/dev/null || true
   sleep 3
 
   # Dismiss expo-dev-client onboarding dialog if present (first launch only)
@@ -635,7 +635,7 @@ run_ios() {
     sleep 3
 
     # Re-launch the app to reconnect to Metro
-    xcrun simctl launch "$udid" com.coto.app 2>/dev/null || true
+    xcrun simctl launch "$udid" com.coyo.app 2>/dev/null || true
     sleep 3
 
     exit_code=0
@@ -676,14 +676,14 @@ run_android() {
     npx expo run:android --no-bundler 2>&1 | tail -5
 
     # Verify installation
-    if ! adb -s "$device_id" shell pm list packages 2>/dev/null | grep -q "com.coto.app"; then
+    if ! adb -s "$device_id" shell pm list packages 2>/dev/null | grep -q "com.coyo.app"; then
       err "Android app not installed on emulator. Build may have failed."
       exit 1
     fi
     log "Android app installed successfully."
   else
     log "Skipping Android build (--skip-build)."
-    if ! adb -s "$device_id" shell pm list packages 2>/dev/null | grep -q "com.coto.app"; then
+    if ! adb -s "$device_id" shell pm list packages 2>/dev/null | grep -q "com.coyo.app"; then
       err "Android app not installed on emulator. Cannot skip build."
       exit 1
     fi
@@ -736,8 +736,8 @@ run_android() {
   # Launch the app so it connects to Metro before Maestro takes over
   log "Launching app to connect to Metro..."
   adb -s "$device_id" shell am start -a android.intent.action.VIEW \
-    -d "exp+coto://expo-development-client/?url=http%3A%2F%2Flocalhost%3A8081" \
-    com.coto.app 2>/dev/null || true
+    -d "exp+coyo://expo-development-client/?url=http%3A%2F%2Flocalhost%3A8081" \
+    com.coyo.app 2>/dev/null || true
   sleep 3
 
   # Dismiss expo-dev-client onboarding dialog if present (first launch only)

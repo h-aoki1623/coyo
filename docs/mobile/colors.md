@@ -1,6 +1,6 @@
 # Colors
 
-Coto mobile app color system based on the [Figma design](https://www.figma.com/design/4YmG7DmJneY2CAewswbJHT/Coto?node-id=89-1149).
+Coyo mobile app color system based on the [Figma design](https://www.figma.com/design/4YmG7DmJneY2CAewswbJHT/Coto?node-id=89-1149).
 
 ## Architecture
 

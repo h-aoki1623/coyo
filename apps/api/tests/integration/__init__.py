@@ -1,1 +1,1 @@
-"""Integration tests for the Coto API."""
+"""Integration tests for the Coyo API."""

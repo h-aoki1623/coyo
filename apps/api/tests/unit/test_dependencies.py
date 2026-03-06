@@ -16,8 +16,8 @@ class TestGetDeviceIdDependency:
         """
         from httpx import ASGITransport, AsyncClient as AC
 
-        from coto.dependencies import get_db
-        from coto.main import app
+        from coyo.dependencies import get_db
+        from coyo.main import app
 
         async def override_get_db():
             yield db_session
@@ -38,8 +38,8 @@ class TestGetDeviceIdDependency:
         """Verify that providing a valid UUID X-Device-Id creates a user and succeeds."""
         from httpx import ASGITransport, AsyncClient as AC
 
-        from coto.dependencies import get_db
-        from coto.main import app
+        from coyo.dependencies import get_db
+        from coyo.main import app
 
         async def override_get_db():
             yield db_session
@@ -62,8 +62,8 @@ class TestGetDeviceIdDependency:
         """Verify that an invalid (non-UUID) X-Device-Id returns 422."""
         from httpx import ASGITransport, AsyncClient as AC
 
-        from coto.dependencies import get_db
-        from coto.main import app
+        from coyo.dependencies import get_db
+        from coyo.main import app
 
         async def override_get_db():
             yield db_session

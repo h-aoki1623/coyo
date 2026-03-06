@@ -6,7 +6,7 @@
 # If the dialog is not visible, the conditional block is simply skipped.
 #
 # This file is NOT listed in config.yaml and is NOT a test flow.
-appId: com.coto.app
+appId: com.coyo.app
 ---
 - launchApp:
     clearState: false

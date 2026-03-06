@@ -1,5 +1,5 @@
 export { LogoIcon } from './LogoIcon';
-export { CotoAvatar } from './CotoAvatar';
+export { CoyoAvatar } from './CoyoAvatar';
 export { TopicIcon } from './TopicIcon';
 export { HistoryIcon } from './HistoryIcon';
 export { MicIcon } from './MicIcon';

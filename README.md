@@ -1,11 +1,11 @@
-# Coto
+# Coyo
 
 AI English conversation practice app.
 
 ## Project Structure
 
 ```
-coto/
+coyo/
 ├── apps/
 │   ├── mobile/          # React Native (Expo) app
 │   └── api/             # FastAPI backend
@@ -49,7 +49,7 @@ source .venv/bin/activate
 pip install -e ".[dev]"
 cp ../../.env.example .env  # Edit OPENAI_API_KEY with your real key
 make -C ../.. migrate       # Run database migrations
-uvicorn src.coto.main:app --reload
+uvicorn src.coyo.main:app --reload
 ```
 
 ### 3. Mobile

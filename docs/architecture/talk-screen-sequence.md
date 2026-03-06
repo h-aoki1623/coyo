@@ -100,6 +100,6 @@ sequenceDiagram
 - `apps/mobile/src/stores/conversation-store.ts` — Zustand state
 
 ### Backend (API)
-- `apps/api/src/coto/routers/conversations.py` — API endpoints
-- `apps/api/src/coto/services/turn_orchestrator.py` — SSE orchestration
-- `apps/api/src/coto/services/correction.py` — Correction analysis
+- `apps/api/src/coyo/routers/conversations.py` — API endpoints
+- `apps/api/src/coyo/services/turn_orchestrator.py` — SSE orchestration
+- `apps/api/src/coyo/services/correction.py` — Correction analysis

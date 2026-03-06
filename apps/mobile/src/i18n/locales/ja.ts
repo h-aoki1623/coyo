@@ -33,7 +33,7 @@ const ja = {
     speakNow: '話してください...',
     processing: '処理中...',
     processingVoice: '音声を処理中...',
-    waitingForCoto: 'Coto が考え中...',
+    waitingForCoyo: 'Coyo が考え中...',
     completionText: 'トーク終了 · {{duration}}',
     viewFeedback: 'フィードバックを見る',
     lessThanMinute: '1分未満',
@@ -71,7 +71,7 @@ const ja = {
   // Empty Feedback (Perfect English)
   emptyFeedback: {
     title: '完璧な英語でした！',
-    messageFrom: 'Coto からのメッセージ',
+    messageFrom: 'Coyo からのメッセージ',
     body: 'あなたの英語はネイティブも納得のレベルです。次のトークも楽しみにしています！',
   },
 
@@ -132,7 +132,7 @@ const ja = {
     recordingError: '録音を開始できませんでした。もう一度お試しください。',
     micPermissionTitle: 'マイクの許可が必要です',
     micPermissionMessage:
-      'Coto で英会話を練習するにはマイクへのアクセスが必要です。設定から許可してください。',
+      'Coyo で英会話を練習するにはマイクへのアクセスが必要です。設定から許可してください。',
   },
 
   // Common

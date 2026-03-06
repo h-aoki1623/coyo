@@ -204,7 +204,7 @@ ensure_docker() {
     log "Starting Docker services (Postgres + Redis)..."
     docker compose -f "$REPO_ROOT/docker-compose.yml" -p "$_COMPOSE_PROJECT" up -d
     local retries=10
-    while ! docker compose -f "$REPO_ROOT/docker-compose.yml" -p "$_COMPOSE_PROJECT" exec -T postgres pg_isready -U coto -d coto > /dev/null 2>&1; do
+    while ! docker compose -f "$REPO_ROOT/docker-compose.yml" -p "$_COMPOSE_PROJECT" exec -T postgres pg_isready -U coyo -d coyo > /dev/null 2>&1; do
       retries=$((retries - 1))
       if [[ $retries -le 0 ]]; then
         err "Postgres did not become ready."
@@ -250,7 +250,7 @@ ensure_backend() {
   # Start uvicorn in background
   log "Starting backend API..."
   cd "$API_DIR"
-  .venv/bin/uvicorn src.coto.main:app --port "$API_PORT" &
+  .venv/bin/uvicorn src.coyo.main:app --port "$API_PORT" &
   local api_pid=$!
   _PIDS_TO_KILL+=("$api_pid")
   _API_STARTED_BY_SCRIPT=true
@@ -339,7 +339,7 @@ run_ios() {
   npx expo run:ios --no-bundler --device "$udid" 2>&1 | tail -5 || true
 
   # Terminate any instance that expo may have partially launched.
-  xcrun simctl terminate "$udid" com.coto.app 2>/dev/null || true
+  xcrun simctl terminate "$udid" com.coyo.app 2>/dev/null || true
 
   # Mark expo-dev-client onboarding as finished BEFORE launching.
   # Without this, the dev menu auto-shows on every fresh install because
@@ -350,9 +350,9 @@ run_ios() {
   # wrong location (/data/Library/Preferences/) — the app reads from its
   # sandbox (/data/Containers/Data/Application/<UUID>/Library/Preferences/).
   local app_container
-  app_container=$(xcrun simctl get_app_container "$udid" com.coto.app data 2>/dev/null || true)
+  app_container=$(xcrun simctl get_app_container "$udid" com.coyo.app data 2>/dev/null || true)
   if [[ -n "$app_container" ]]; then
-    local plist="$app_container/Library/Preferences/com.coto.app.plist"
+    local plist="$app_container/Library/Preferences/com.coyo.app.plist"
     /usr/libexec/PlistBuddy -c "Add :EXDevMenuIsOnboardingFinished bool true" "$plist" 2>/dev/null || \
     /usr/libexec/PlistBuddy -c "Set :EXDevMenuIsOnboardingFinished true" "$plist" 2>/dev/null || true
   fi
@@ -360,7 +360,7 @@ run_ios() {
   # Launch via deep link so the app connects to Metro immediately.
   sleep 1
   xcrun simctl openurl "$udid" \
-    "com.coto.app://expo-development-client/?url=http%3A%2F%2Flocalhost%3A8081" \
+    "com.coyo.app://expo-development-client/?url=http%3A%2F%2Flocalhost%3A8081" \
     2>/dev/null || true
 
   log "iOS app installed and running."
@@ -471,7 +471,7 @@ TARGET="$1"
 
 echo ""
 info "====================================="
-info "  Coto Development Environment"
+info "  Coyo Development Environment"
 info "====================================="
 echo ""
 

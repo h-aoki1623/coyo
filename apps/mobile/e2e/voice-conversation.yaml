@@ -14,7 +14,7 @@
 # - Backend API must be running and reachable
 # - e2e/fixtures/test-audio-clean.m4a must exist (bundled at build time)
 # - e2e/fixtures/test-audio-errors.m4a must exist (bundled at build time)
-appId: com.coto.app
+appId: com.coyo.app
 ---
 # -- Step 1: Launch and navigate to Talk screen --
 
@@ -31,7 +31,7 @@ appId: com.coto.app
 
 - extendedWaitUntil:
     visible:
-      text: "Coto"
+      text: "Coyo"
     timeout: 15000
 
 - assertVisible:

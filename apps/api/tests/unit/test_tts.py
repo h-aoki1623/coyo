@@ -5,8 +5,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from coto.exceptions import ExternalServiceError
-from coto.services.tts import TTSService
+from coyo.exceptions import ExternalServiceError
+from coyo.services.tts import TTSService
 
 
 class TestTTSService:
@@ -15,7 +15,7 @@ class TestTTSService:
     @pytest.fixture
     def tts_service(self, mock_openai_client):
         """Create a TTSService with a mocked OpenAI client."""
-        with patch("coto.services.tts.AsyncOpenAI", return_value=mock_openai_client):
+        with patch("coyo.services.tts.AsyncOpenAI", return_value=mock_openai_client):
             service = TTSService()
             service._client = mock_openai_client
             return service

@@ -1,6 +1,6 @@
 # Typography
 
-Coto mobile app typography system based on the [Figma design](https://www.figma.com/design/4YmG7DmJneY2CAewswbJHT/Coto?node-id=89-1149).
+Coyo mobile app typography system based on the [Figma design](https://www.figma.com/design/4YmG7DmJneY2CAewswbJHT/Coto?node-id=89-1149).
 
 ## Font Families
 
@@ -88,7 +88,7 @@ const styles = StyleSheet.create({
 Pick the variant based on the **content language**, not the user's locale:
 
 ```typescript
-// English content (AI messages, "Coto", statistics)
+// English content (AI messages, "Coyo", statistics)
 headerTitle: { ...Typography.bodyLarge.en, color: Colors.textPrimary },
 statValue:   { ...Typography.display.en },
 

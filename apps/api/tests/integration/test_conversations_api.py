@@ -8,10 +8,10 @@ import pytest
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from coto.models.conversation import Conversation
-from coto.models.correction import CorrectionItem, TurnCorrection
-from coto.models.turn import Turn
-from coto.models.user import User
+from coyo.models.conversation import Conversation
+from coyo.models.correction import CorrectionItem, TurnCorrection
+from coyo.models.turn import Turn
+from coyo.models.user import User
 
 
 # ---------------------------------------------------------------------------
