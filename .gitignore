@@ -60,5 +60,6 @@ apps/mobile/google-play-service-account.json
 # === EAS local overrides (contains secrets) ===
 apps/mobile/eas.local.json
 
-# === Claude ===
-.claude/
+# === Claude Code (user-specific files only) ===
+.claude/settings.local.json
+.claude/worktrees/
