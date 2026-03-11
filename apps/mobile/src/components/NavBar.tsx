@@ -4,7 +4,7 @@ import { Colors } from '@/constants/colors';
 import { Typography } from '@/constants/typography';
 
 interface Props {
-  title: string;
+  title?: string;
   onBack?: () => void;
   testID?: string;
 }
@@ -25,7 +25,11 @@ export function NavBar({ title, onBack, testID }: Props) {
       ) : (
         <View style={styles.spacer} />
       )}
-      <Text style={styles.title} testID={testID}>{title}</Text>
+      {title ? (
+        <Text style={styles.title} testID={testID}>{title}</Text>
+      ) : (
+        <View style={styles.spacer} />
+      )}
       <View style={styles.spacer} />
     </View>
   );

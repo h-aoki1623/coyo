@@ -1,0 +1,41 @@
+# auth-sign-in.yaml
+# Verifies the email/password sign-in flow: Welcome → Auth Modal → Sign In Form → Home.
+# This flow MUST run first in the test suite because subsequent flows
+# depend on the persisted auth session (clearState: false).
+#
+# Prerequisites:
+# - E2E test user must exist in Firebase with email_verified=True
+#   (created by: apps/api/scripts/create_e2e_user.py)
+# - Backend API must be running (run-e2e.sh starts it automatically)
+appId: to.coyo.app
+---
+# Launch the application
+- launchApp:
+    clearState: false
+
+# Wait for the Welcome screen (auth gate — user is not signed in yet)
+- extendedWaitUntil:
+    visible:
+      id: "welcome-get-started"
+    timeout: 30000
+
+# Verify Welcome screen elements
+- assertVisible:
+    id: "welcome-get-started"
+- assertVisible:
+    id: "welcome-sign-in"
+
+- takeScreenshot: "auth-01-welcome-screen"
+
+# Run the sign-in sub-flow
+- runFlow:
+    file: helpers/sign-in.yaml
+
+# Verify the Home screen is fully rendered after sign-in
+- assertVisible:
+    id: "home-greeting"
+- assertVisible: "TOPICS"
+- assertVisible:
+    id: "topic-sports"
+
+- takeScreenshot: "auth-02-home-after-sign-in"

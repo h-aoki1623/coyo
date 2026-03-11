@@ -1,15 +1,38 @@
 import Constants from 'expo-constants';
-import { getOrCreateDeviceId } from '@/services/device-id';
+
+import { getAuthToken } from '@/services/token-provider';
 import type { ApiResponse } from '@/types/api';
 
 const API_BASE_URL = Constants.expoConfig?.extra?.apiBaseUrl ?? 'http://localhost:8000';
 
+/**
+ * Build request headers with Firebase auth token.
+ */
 async function getHeaders(): Promise<Record<string, string>> {
-  const deviceId = await getOrCreateDeviceId();
-  return {
+  const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    'X-Device-Id': deviceId,
   };
+
+  const token = await getAuthToken();
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  return headers;
+}
+
+/**
+ * Build auth-only headers (no Content-Type) for FormData requests.
+ */
+async function getAuthHeaders(): Promise<Record<string, string>> {
+  const headers: Record<string, string> = {};
+
+  const token = await getAuthToken();
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  return headers;
 }
 
 async function handleResponse<T>(response: Response): Promise<ApiResponse<T>> {
@@ -43,19 +66,20 @@ export const apiClient = {
     return handleResponse<T>(response);
   },
 
-  async delete(path: string): Promise<void> {
+  async delete<T = void>(path: string): Promise<ApiResponse<T>> {
     const headers = await getHeaders();
-    await fetch(`${API_BASE_URL}${path}`, {
+    const response = await fetch(`${API_BASE_URL}${path}`, {
       method: 'DELETE',
       headers,
     });
+    return handleResponse<T>(response);
   },
 
   async postStream(path: string, formData: FormData): Promise<Response> {
-    const deviceId = await getOrCreateDeviceId();
+    const headers = await getAuthHeaders();
     return fetch(`${API_BASE_URL}${path}`, {
       method: 'POST',
-      headers: { 'X-Device-Id': deviceId },
+      headers,
       body: formData,
     });
   },

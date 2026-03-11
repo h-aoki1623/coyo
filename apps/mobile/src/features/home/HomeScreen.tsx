@@ -17,6 +17,7 @@ import { Typography } from '@/constants/typography';
 import { t } from '@/i18n';
 import { useConversationStore } from '@/stores/conversation-store';
 import { useAppStore } from '@/stores/app-store';
+import { useAuthStore } from '@/stores/auth-store';
 import { LogoIcon, HistoryIcon, TopicIcon, ResumeIcon } from '@/components/icons';
 import type { RootStackParamList, TopicKey } from '@/navigation/types';
 import type { Topic } from '@/constants/topics';
@@ -107,6 +108,7 @@ export function HomeScreen({ navigation }: Props) {
   const startConversation = useConversationStore((s) => s.startConversation);
   const pausedConversationId = useAppStore((s) => s.pausedConversationId);
   const setPausedConversationId = useAppStore((s) => s.setPausedConversationId);
+  const handleSignOut = useAuthStore((s) => s.handleSignOut);
 
   const topics = useMemo(() => getTopics(), []);
 
@@ -232,6 +234,17 @@ export function HomeScreen({ navigation }: Props) {
         contentContainerStyle={styles.list}
         showsVerticalScrollIndicator={false}
       />
+
+      {/* Sign out */}
+      <Pressable
+        style={styles.signOutContainer}
+        onPress={handleSignOut}
+        accessibilityRole="button"
+        accessibilityLabel={t('home.signOut')}
+        testID="sign-out-button"
+      >
+        <Text style={styles.signOutText}>{t('home.signOut')}</Text>
+      </Pressable>
     </SafeAreaView>
   );
 }
@@ -383,5 +396,16 @@ const styles = StyleSheet.create({
   chevron: {
     ...Typography.body.en,
     color: Colors.chevron,
+  },
+  // Sign out
+  signOutContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+  },
+  signOutText: {
+    ...Typography.body.ja,
+    color: Colors.buttonDangerText,
   },
 });

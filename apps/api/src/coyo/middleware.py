@@ -119,7 +119,7 @@ def setup_middleware(app: FastAPI) -> None:
         allow_origins=settings.cors_allowed_origins,
         allow_credentials=True,
         allow_methods=["GET", "POST", "DELETE"],
-        allow_headers=["X-Device-Id", "X-Request-Id", "Content-Type"],
+        allow_headers=["X-Request-Id", "Content-Type", "Authorization"],
     )
 
     # Exception handlers

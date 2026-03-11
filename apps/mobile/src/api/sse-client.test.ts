@@ -5,10 +5,6 @@ jest.mock('expo-constants', () => ({
   expoConfig: { extra: { apiBaseUrl: 'http://test-api' } },
 }));
 
-jest.mock('@/services/device-id', () => ({
-  getOrCreateDeviceId: jest.fn(() => Promise.resolve('test-device-123')),
-}));
-
 // Mock expo/fetch
 const mockFetch = jest.fn();
 jest.mock('expo/fetch', () => ({
@@ -358,7 +354,7 @@ describe('streamTurnEvents', () => {
     const [url, options] = mockFetch.mock.calls[0];
     expect(url).toBe('http://test-api/api/conversations/conv-123/turns');
     expect(options.method).toBe('POST');
-    expect(options.headers['X-Device-Id']).toBe('test-device-123');
+    expect(options.headers).not.toHaveProperty('X-Device-Id');
     expect(options.headers['Accept']).toBe('text/event-stream');
     expect(options.body).toBeInstanceOf(FormData);
   });
