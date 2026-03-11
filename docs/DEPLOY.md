@@ -340,6 +340,18 @@ Add these variables in GitHub Settings > Secrets and variables > Actions > Varia
 | `GCS_BUCKET_NAME` | Your GCS bucket name |
 | `ARTIFACT_REPO` | Your Artifact Registry repository name |
 
+## Phase 5: Firebase Authentication Setup
+
+See [DEPLOY-FIREBASE-AUTH.md](./DEPLOY-FIREBASE-AUTH.md) for the full Firebase authentication setup guide.
+
+Key steps:
+- Create Firebase project and enable auth providers (Email, Google, Apple)
+- Place Firebase config files (`google-services.json`, `GoogleService-Info.plist`)
+- Add `FIREBASE_PROJECT_ID` environment variable to Cloud Run
+- Grant IAM role `roles/firebase.sdkAdminServiceAgent` to the service account
+- Run database migrations (0003, 0004)
+- Register `GOOGLE_WEB_CLIENT_ID` and `GID_CLIENT_ID` as EAS Secrets
+
 ## Verification Checklist
 
 ### Backend
@@ -350,8 +362,15 @@ Add these variables in GitHub Settings > Secrets and variables > Actions > Varia
 - [ ] OpenAI API calls succeed (STT, LLM, TTS)
 - [ ] Redis connection works (rate limiting active)
 
+### Authentication
+- [ ] Firebase Admin SDK initializes successfully (`firebase_initialized` in logs)
+- [ ] Email/password, Google, and Apple sign-in all succeed
+- [ ] Invalid tokens return 401
+- [ ] See [DEPLOY-FIREBASE-AUTH.md](./DEPLOY-FIREBASE-AUTH.md#phase-d-verification-checklist) for details
+
 ### Mobile
 - [ ] App connects to production API
+- [ ] Authentication flow works (sign-up, sign-in, sign-out)
 - [ ] Audio recording works
 - [ ] Conversation flow completes end-to-end
 - [ ] History screen loads correctly

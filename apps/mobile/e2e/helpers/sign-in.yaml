@@ -1,0 +1,49 @@
+# sign-in.yaml
+# Helper flow: signs in with the E2E test user via email/password.
+#
+# Prerequisites:
+# - E2E test user must exist in Firebase with email_verified=True
+#   (created by: apps/api/scripts/create_e2e_user.py)
+# - The app must be on the Welcome screen (unauthenticated)
+#
+# This file is NOT listed in config.yaml and is NOT a test flow.
+appId: to.coyo.app
+---
+# Tap "サインイン" on the Welcome screen
+- tapOn:
+    id: "welcome-sign-in"
+
+# Wait for the Auth Modal (Sign In mode) to appear
+- extendedWaitUntil:
+    visible:
+      id: "auth-email-button"
+    timeout: 5000
+
+# Tap "メールで続ける" to go to the email sign-in form
+- tapOn:
+    id: "auth-email-button"
+
+# Wait for the Sign In form to appear
+- extendedWaitUntil:
+    visible:
+      id: "signin-email-input"
+    timeout: 5000
+
+# Enter E2E test user credentials
+- tapOn:
+    id: "signin-email-input"
+- inputText: "e2e-test@coyo.to"
+
+- tapOn:
+    id: "signin-password-input"
+- inputText: "e2e-test-password-2026"
+
+# Submit the sign-in form
+- tapOn:
+    id: "signin-submit-button"
+
+# Wait for sign-in to complete and Home screen to appear
+- extendedWaitUntil:
+    visible:
+      id: "home-greeting"
+    timeout: 15000

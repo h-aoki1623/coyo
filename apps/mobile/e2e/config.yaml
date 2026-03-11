@@ -7,6 +7,7 @@
 
 # Flows to include when running the entire e2e directory
 flows:
+  - auth-sign-in.yaml
   - app-launch.yaml
   - home-topic-cards.yaml
   - navigate-to-history.yaml

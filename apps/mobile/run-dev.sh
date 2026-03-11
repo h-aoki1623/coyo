@@ -243,14 +243,16 @@ ensure_backend() {
   fi
 
   # Run migrations
+  # When running in a worktree, the .venv editable install points to the
+  # main repo's src/. Override PYTHONPATH so the worktree's src/ takes priority.
   log "Running database migrations..."
   cd "$API_DIR"
-  .venv/bin/alembic upgrade head 2>&1 | tail -3
+  PYTHONPATH="$API_DIR/src:${PYTHONPATH:-}" .venv/bin/alembic upgrade head 2>&1 | tail -3
 
   # Start uvicorn in background
   log "Starting backend API..."
   cd "$API_DIR"
-  .venv/bin/uvicorn src.coyo.main:app --port "$API_PORT" &
+  PYTHONPATH="$API_DIR/src:${PYTHONPATH:-}" .venv/bin/uvicorn src.coyo.main:app --port "$API_PORT" &
   local api_pid=$!
   _PIDS_TO_KILL+=("$api_pid")
   _API_STARTED_BY_SCRIPT=true
@@ -333,13 +335,43 @@ run_ios() {
 
   log "Building iOS app..."
   cd "$MOBILE_DIR"
-  # --no-bundler: Metro is already running (started in Step 3).
-  # expo run:ios's own app launch fails on macOS due to osascript permission
-  # errors, so we handle launch explicitly below.
-  npx expo run:ios --no-bundler --device "$udid" 2>&1 | tail -5 || true
+
+  # Prebuild native project if needed
+  if [[ ! -d "ios" ]]; then
+    log "Running expo prebuild..."
+    npx expo prebuild --platform ios --clean 2>&1 | tail -5
+  fi
+
+  # Xcode 17 workaround: pre-generate FirebaseAuth-Swift.h
+  if [[ ! -f "ios/Pods/Headers/Public/FirebaseAuth/FirebaseAuth-Swift.h" ]]; then
+    if [[ -f "scripts/fix-firebase-swift-header.sh" ]]; then
+      log "Generating FirebaseAuth-Swift.h (Xcode 17 workaround)..."
+      bash scripts/fix-firebase-swift-header.sh
+    fi
+  fi
+
+  # Build with xcodebuild (expo run:ios fails on Xcode 17 beta due to
+  # devicectl JSON format changes that misidentify simulator as physical device)
+  # --no-bundler not needed: Metro is already running (started in Step 3).
+  log "Building with xcodebuild..."
+  xcodebuild \
+    -workspace ios/Coyo.xcworkspace \
+    -scheme Coyo \
+    -destination "platform=iOS Simulator,id=$udid" \
+    -configuration Debug \
+    build \
+    -quiet 2>&1 | tail -5 || true
+
+  # Find and install the built app
+  local app_path
+  app_path=$(find ~/Library/Developer/Xcode/DerivedData -name "Coyo.app" \
+    -path "*Debug-iphonesimulator*" -newer ios/Podfile 2>/dev/null | head -1)
+  if [[ -n "$app_path" ]]; then
+    xcrun simctl install "$udid" "$app_path"
+  fi
 
   # Terminate any instance that expo may have partially launched.
-  xcrun simctl terminate "$udid" com.coyo.app 2>/dev/null || true
+  xcrun simctl terminate "$udid" to.coyo.app 2>/dev/null || true
 
   # Mark expo-dev-client onboarding as finished BEFORE launching.
   # Without this, the dev menu auto-shows on every fresh install because
@@ -350,9 +382,9 @@ run_ios() {
   # wrong location (/data/Library/Preferences/) — the app reads from its
   # sandbox (/data/Containers/Data/Application/<UUID>/Library/Preferences/).
   local app_container
-  app_container=$(xcrun simctl get_app_container "$udid" com.coyo.app data 2>/dev/null || true)
+  app_container=$(xcrun simctl get_app_container "$udid" to.coyo.app data 2>/dev/null || true)
   if [[ -n "$app_container" ]]; then
-    local plist="$app_container/Library/Preferences/com.coyo.app.plist"
+    local plist="$app_container/Library/Preferences/to.coyo.app.plist"
     /usr/libexec/PlistBuddy -c "Add :EXDevMenuIsOnboardingFinished bool true" "$plist" 2>/dev/null || \
     /usr/libexec/PlistBuddy -c "Set :EXDevMenuIsOnboardingFinished true" "$plist" 2>/dev/null || true
   fi
@@ -360,7 +392,7 @@ run_ios() {
   # Launch via deep link so the app connects to Metro immediately.
   sleep 1
   xcrun simctl openurl "$udid" \
-    "com.coyo.app://expo-development-client/?url=http%3A%2F%2Flocalhost%3A8081" \
+    "to.coyo.app://expo-development-client/?url=http%3A%2F%2Flocalhost%3A8081" \
     2>/dev/null || true
 
   log "iOS app installed and running."

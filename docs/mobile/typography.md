@@ -28,6 +28,23 @@ Each role defines `.en` (English) and `.ja` (Japanese) variants. The only differ
 
 > **Note**: `bodyLarge` uses different weights for EN (SemiBold 600) and JA (Bold 700). This is intentional as Plus Jakarta Sans SemiBold is visually closer to Noto Sans JP Bold at the same size.
 
+## Figma Token → Code Mapping
+
+When implementing Figma designs, use this table to translate Figma typography tokens to code:
+
+| Figma Token | Code |
+|---|---|
+| `Display/JA` (28px Bold) | `Typography.display.ja` |
+| `Display/EN` (28px Bold) | `Typography.display.en` |
+| `Title/JA` (20px Bold) | `Typography.title.ja` |
+| `Title/EN` (20px Bold) | `Typography.title.en` |
+| `Headline/JA` (18px Bold) | `Typography.headline.ja` |
+| `Headline/EN` (18px Bold) | `Typography.headline.en` |
+| `Body/JA` (16px Regular) | `Typography.body.ja` |
+| `Body/EN` (16px Regular) | `Typography.body.en` |
+| `Caption/JA` (13px Regular) | `Typography.caption.ja` |
+| `Caption/EN` (13px Regular) | `Typography.caption.en` |
+
 ## Source File
 
 `src/constants/typography.ts` exports:

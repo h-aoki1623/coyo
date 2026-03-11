@@ -36,6 +36,13 @@ class ConversationStateError(CoyoError):
         super().__init__(message, "INVALID_STATE", 409)
 
 
+class AuthenticationError(CoyoError):
+    """Raised when authentication fails."""
+
+    def __init__(self, message: str = "Authentication required") -> None:
+        super().__init__(message, "AUTHENTICATION_ERROR", 401)
+
+
 class ExternalServiceError(CoyoError):
     """Raised when an external service (LLM, TTS, GCS) fails."""
 

@@ -57,6 +57,13 @@ apps/mobile/e2e/screenshots/
 # === Google Play service account key ===
 apps/mobile/google-play-service-account.json
 
+# === Firebase configuration (contains API keys, per-environment) ===
+apps/mobile/GoogleService-Info.plist
+apps/mobile/google-services.json
+
+# === Firebase Admin SDK service account key ===
+apps/api/firebase-service-account.json
+
 # === EAS local overrides (contains secrets) ===
 apps/mobile/eas.local.json
 

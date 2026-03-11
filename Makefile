@@ -1,4 +1,4 @@
-.PHONY: dev-mobile dev-api dev-ios dev-android dev-both lint lint-mobile lint-api test test-mobile test-api e2e e2e-ios e2e-android migrate migrate-new docker-up docker-down docker-reset generate-api-types
+.PHONY: dev-mobile dev-api dev-ios dev-android dev-both lint lint-mobile lint-api test test-mobile test-api e2e e2e-ios e2e-android migrate migrate-new docker-up docker-down docker-reset generate-api-types db-clean-users
 
 # Infrastructure
 docker-up:
@@ -72,6 +72,12 @@ migrate:
 
 migrate-new:
 	cd apps/api && .venv/bin/alembic revision --autogenerate -m "$(MSG)"
+
+# Cleanup (development only)
+db-clean-users:
+	@echo "Deleting all users from the local database..."
+	docker compose exec postgres psql -U coyo -d coyo -c "DELETE FROM users;"
+	@echo "Done. Remember to also delete users in Firebase Console."
 
 # OpenAPI TypeScript type generation
 generate-api-types:

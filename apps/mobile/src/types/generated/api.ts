@@ -4,6 +4,30 @@
  */
 
 export interface paths {
+    "/api/auth/session": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create Session
+         * @description Create or sync a backend user record from a Firebase token.
+         *
+         *     Called by the mobile app immediately after Firebase authentication
+         *     so the user row exists in the database from the start.
+         *     Idempotent: calling repeatedly for the same user is a no-op.
+         */
+        post: operations["create_session_api_auth_session_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/conversations": {
         parameters: {
             query?: never;
@@ -17,7 +41,7 @@ export interface paths {
          * Create Conversation
          * @description Start a new conversation session.
          *
-         *     Requires X-Device-Id header for user identification.
+         *     Requires Firebase authentication.
          */
         post: operations["create_conversation_api_conversations_post"];
         delete?: never;
@@ -232,10 +256,7 @@ export interface components {
         };
         /** Body_submit_turn_api_conversations__conversation_id__turns_post */
         Body_submit_turn_api_conversations__conversation_id__turns_post: {
-            /**
-             * Audio
-             * Format: binary
-             */
+            /** Audio */
             audio: string;
         };
         /**
@@ -393,6 +414,20 @@ export interface components {
             perPage: number;
         };
         /**
+         * SessionResponse
+         * @description Response for session creation/sync.
+         */
+        SessionResponse: {
+            /** Userid */
+            userId: string;
+            /** Email */
+            email: string | null;
+            /** Displayname */
+            displayName: string | null;
+            /** Authprovider */
+            authProvider: string;
+        };
+        /**
          * TurnCorrectionResponse
          * @description Response schema for a turn-level correction with all items.
          */
@@ -467,11 +502,42 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    create_session_api_auth_session_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     create_conversation_api_conversations_post: {
         parameters: {
             query?: never;
-            header: {
-                "x-device-id": string;
+            header?: {
+                authorization?: string | null;
             };
             path?: never;
             cookie?: never;
@@ -505,8 +571,8 @@ export interface operations {
     submit_turn_api_conversations__conversation_id__turns_post: {
         parameters: {
             query?: never;
-            header: {
-                "x-device-id": string;
+            header?: {
+                authorization?: string | null;
             };
             path: {
                 conversation_id: string;
@@ -542,8 +608,8 @@ export interface operations {
     get_conversation_api_conversations__conversation_id__get: {
         parameters: {
             query?: never;
-            header: {
-                "x-device-id": string;
+            header?: {
+                authorization?: string | null;
             };
             path: {
                 conversation_id: string;
@@ -575,8 +641,8 @@ export interface operations {
     get_feedback_api_conversations__conversation_id__feedback_get: {
         parameters: {
             query?: never;
-            header: {
-                "x-device-id": string;
+            header?: {
+                authorization?: string | null;
             };
             path: {
                 conversation_id: string;
@@ -608,8 +674,8 @@ export interface operations {
     end_conversation_api_conversations__conversation_id__end_post: {
         parameters: {
             query?: never;
-            header: {
-                "x-device-id": string;
+            header?: {
+                authorization?: string | null;
             };
             path: {
                 conversation_id: string;
@@ -641,8 +707,8 @@ export interface operations {
     resume_conversation_api_conversations__conversation_id__resume_post: {
         parameters: {
             query?: never;
-            header: {
-                "x-device-id": string;
+            header?: {
+                authorization?: string | null;
             };
             path: {
                 conversation_id: string;
@@ -679,8 +745,8 @@ export interface operations {
                 /** @description Items per page */
                 per_page?: number;
             };
-            header: {
-                "x-device-id": string;
+            header?: {
+                authorization?: string | null;
             };
             path?: never;
             cookie?: never;
@@ -710,8 +776,8 @@ export interface operations {
     get_history_detail_api_history__conversation_id__get: {
         parameters: {
             query?: never;
-            header: {
-                "x-device-id": string;
+            header?: {
+                authorization?: string | null;
             };
             path: {
                 conversation_id: string;
@@ -743,8 +809,8 @@ export interface operations {
     delete_history_api_history__conversation_id__delete: {
         parameters: {
             query?: never;
-            header: {
-                "x-device-id": string;
+            header?: {
+                authorization?: string | null;
             };
             path: {
                 conversation_id: string;
@@ -774,8 +840,8 @@ export interface operations {
     batch_delete_history_api_history_batch_delete_post: {
         parameters: {
             query?: never;
-            header: {
-                "x-device-id": string;
+            header?: {
+                authorization?: string | null;
             };
             path?: never;
             cookie?: never;

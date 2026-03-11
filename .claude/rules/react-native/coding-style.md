@@ -2,12 +2,26 @@
 
 > This file extends [common/coding-style.md](../common/coding-style.md) and [typescript/coding-style.md](../typescript/coding-style.md) with React Native specific content.
 
+## Design System (MUST)
+
+All UI components MUST use the project's design tokens. NEVER hardcode colors, font families, or font sizes.
+
+- **Colors**: ALWAYS use `Colors.*` semantic tokens. NEVER use raw hex values. See `docs/mobile/colors.md`.
+- **Typography**: ALWAYS use `Typography.*` presets. NEVER set `fontFamily` / `fontSize` directly. See `docs/mobile/typography.md`.
+
+## Internationalization (MUST)
+
+All user-facing text MUST use the i18n translation system. NEVER hardcode display strings — even if the Figma design shows only one language. See `docs/mobile/i18n.md`.
+
 ## Component Structure
 
 Use functional components with typed props:
 
 ```typescript
 import { StyleSheet, Pressable, Text } from 'react-native'
+
+import { Colors } from '@/constants/colors'
+import { Typography } from '@/constants/typography'
 
 interface Props {
   title: string
@@ -25,10 +39,11 @@ export function FeatureCard({ title, onPress }: Props) {
 const styles = StyleSheet.create({
   container: {
     padding: 16,
+    backgroundColor: Colors.surfaceCard,
   },
   title: {
-    fontSize: 18,
-    fontWeight: '600',
+    ...Typography.headline.ja,
+    color: Colors.textPrimary,
   },
 })
 ```

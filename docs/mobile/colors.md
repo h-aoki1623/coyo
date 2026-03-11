@@ -147,6 +147,26 @@ status.error #EF4444   ──────▶  statusError
 |-------|-------|-----------|---------|
 | `chevron` | `#CBD5E1` | `neutral.400` | Navigation chevron icons |
 
+## Figma Token → Code Mapping
+
+When implementing Figma designs, use this table to translate Figma token names to code:
+
+| Figma Token | Code |
+|---|---|
+| `semantic/text/primary` | `Colors.textPrimary` |
+| `semantic/text/secondary` | `Colors.textSecondary` |
+| `semantic/text/tertiary` | `Colors.textTertiary` |
+| `semantic/text/brand` | `Colors.buttonPrimaryBg` |
+| `semantic/text/inverse` | `Colors.textInverse` |
+| `semantic/surface/bg-primary` | `Colors.surfacePrimary` |
+| `semantic/surface/bg-card` | `Colors.surfaceCard` |
+| `semantic/surface/border-subtle` | `Colors.surfaceElevated` |
+| `semantic/surface/bg-info` | `Colors.accentBg` |
+| `semantic/surface/bg-info-icon` | `Colors.accentIconBg` |
+| `semantic/button/primary-bg` | `Colors.buttonPrimaryBg` |
+| `primitive/nutral/900` | `Colors.textPrimary` |
+| `primitive/nutral/300` | `Colors.borderDefault` |
+
 ## Source File
 
 `src/constants/colors.ts` exports:
