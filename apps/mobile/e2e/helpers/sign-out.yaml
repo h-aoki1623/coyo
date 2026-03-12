@@ -1,0 +1,19 @@
+# sign-out.yaml
+# Helper flow: signs out the current user from the Home screen.
+#
+# Prerequisites:
+# - The app must be on the Home screen (authenticated)
+# - The sign-out button (testID: sign-out-button) must be visible
+#
+# This file is NOT listed in config.yaml and is NOT a test flow.
+appId: to.coyo.app
+---
+# Tap the sign-out button on the Home screen
+- tapOn:
+    id: "sign-out-button"
+
+# Wait for the Welcome screen to appear after sign-out
+- extendedWaitUntil:
+    visible:
+      id: "welcome-get-started"
+    timeout: 15000
