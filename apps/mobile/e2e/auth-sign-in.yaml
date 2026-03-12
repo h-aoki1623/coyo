@@ -1,7 +1,9 @@
 # auth-sign-in.yaml
 # Verifies the email/password sign-in flow: Welcome → Auth Modal → Sign In Form → Home.
-# This flow MUST run first in the test suite because subsequent flows
-# depend on the persisted auth session (clearState: false).
+#
+# This flow handles both states:
+#   - Already signed in → signs out first to reach the Welcome screen
+#   - Not signed in → proceeds directly to Welcome screen
 #
 # Prerequisites:
 # - E2E test user must exist in Firebase with email_verified=True
@@ -9,11 +11,19 @@
 # - Backend API must be running (run-e2e.sh starts it automatically)
 appId: to.coyo.app
 ---
-# Launch the application
+# Launch the application (clearState: false to preserve expo-dev-client settings)
 - launchApp:
     clearState: false
 
-# Wait for the Welcome screen (auth gate — user is not signed in yet)
+# If already signed in (Home screen visible), sign out first.
+# This handles the case where parallel test execution signed in before us.
+- runFlow:
+    when:
+      visible:
+        id: "sign-out-button"
+    file: helpers/sign-out.yaml
+
+# Wait for the Welcome screen (auth gate — user is not signed in)
 - extendedWaitUntil:
     visible:
       id: "welcome-get-started"

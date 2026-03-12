@@ -7,7 +7,7 @@ Usage:
 
 Requires:
     - FIREBASE_PROJECT_ID environment variable or .env file
-    - Application Default Credentials (gcloud auth application-default login)
+    - FIREBASE_SERVICE_ACCOUNT_PATH (preferred) or Application Default Credentials
 
 The script creates a user with email_verified=True so E2E tests
 can sign in without going through the email verification flow.
@@ -41,8 +41,18 @@ def main() -> None:
         print("ERROR: FIREBASE_PROJECT_ID environment variable is not set.")
         sys.exit(1)
 
-    # Initialize Firebase Admin SDK with ADC
-    cred = credentials.ApplicationDefault()
+    # Initialize Firebase Admin SDK
+    # Prefer service account key file; fall back to ADC (Cloud Run, etc.)
+    service_account_path = os.environ.get("FIREBASE_SERVICE_ACCOUNT_PATH")
+    api_dir = os.path.join(os.path.dirname(__file__), "..")
+
+    if service_account_path:
+        if not os.path.isabs(service_account_path):
+            service_account_path = os.path.join(api_dir, service_account_path)
+        cred = credentials.Certificate(service_account_path)
+    else:
+        cred = credentials.ApplicationDefault()
+
     firebase_admin.initialize_app(cred, {"projectId": project_id})
 
     # Check if user already exists
