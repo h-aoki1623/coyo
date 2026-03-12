@@ -1,6 +1,9 @@
 """Unit tests for UserRepository auth-related methods."""
 
+from unittest.mock import AsyncMock, patch
+
 import pytest
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from coyo.models.user import User
@@ -160,4 +163,111 @@ class TestFindOrCreateByAuthUid:
         assert user.email is None
         assert user.display_name is None
 
+    @pytest.mark.unit
+    async def test_updates_multiple_fields_at_once(self, db_session: AsyncSession):
+        """When email, display_name, and auth_provider all differ, all are updated."""
+        existing = User(
+            auth_uid="fb-uid-multi-update",
+            email="old@example.com",
+            display_name="Old Name",
+            auth_provider="email",
+        )
+        db_session.add(existing)
+        await db_session.commit()
+        await db_session.refresh(existing)
 
+        repo = UserRepository(db_session)
+
+        user = await repo.find_or_create_by_auth_uid(
+            auth_uid="fb-uid-multi-update",
+            email="new@example.com",
+            display_name="New Name",
+            auth_provider="google",
+        )
+
+        assert user.id == existing.id
+        assert user.email == "new@example.com"
+        assert user.display_name == "New Name"
+        assert user.auth_provider == "google"
+
+
+class TestFindOrCreateRaceCondition:
+    """Tests for the IntegrityError race condition retry path."""
+
+    @pytest.mark.unit
+    async def test_integrity_error_retries_and_finds_user(
+        self, db_session: AsyncSession
+    ):
+        """Simulate concurrent insert: commit raises IntegrityError, retry finds user."""
+        # Pre-insert the user that the "other process" created
+        existing = User(
+            auth_uid="fb-race-uid",
+            email="race@example.com",
+            display_name="Race User",
+            auth_provider="email",
+        )
+        db_session.add(existing)
+        await db_session.commit()
+        await db_session.refresh(existing)
+
+        repo = UserRepository(db_session)
+
+        with (
+            patch.object(
+                repo,
+                "find_by_auth_uid",
+                new_callable=AsyncMock,
+                side_effect=[None, existing],
+            ),
+            patch.object(
+                db_session,
+                "commit",
+                side_effect=IntegrityError(
+                    statement="INSERT",
+                    params={},
+                    orig=Exception("UNIQUE constraint failed"),
+                ),
+            ),
+            patch.object(db_session, "rollback", new_callable=AsyncMock),
+            patch.object(db_session, "add"),
+        ):
+            user = await repo.find_or_create_by_auth_uid(
+                auth_uid="fb-race-uid",
+                email="race@example.com",
+                display_name="Race User",
+                auth_provider="email",
+            )
+
+        assert user.id == existing.id
+        assert user.auth_uid == "fb-race-uid"
+
+    @pytest.mark.unit
+    async def test_integrity_error_reraises_when_retry_returns_none(
+        self, db_session: AsyncSession
+    ):
+        """IntegrityError is re-raised if the retry find also returns None."""
+        repo = UserRepository(db_session)
+
+        async def mock_find(auth_uid: str) -> User | None:
+            return None  # Both first and retry calls return None
+
+        async def mock_commit() -> None:
+            raise IntegrityError(
+                statement="INSERT",
+                params={},
+                orig=Exception("UNIQUE constraint failed"),
+            )
+
+        with (
+            patch.object(repo, "find_by_auth_uid", side_effect=mock_find),
+            patch.object(db_session, "commit", side_effect=mock_commit),
+            patch.object(db_session, "rollback", new_callable=AsyncMock),
+            patch.object(db_session, "add"),
+            pytest.raises(IntegrityError),
+        ):
+            await repo.find_or_create_by_auth_uid(
+                auth_uid="fb-nonexistent-uid",
+                email="ghost@example.com",
+                display_name="Ghost",
+                auth_provider="email",
+            )
