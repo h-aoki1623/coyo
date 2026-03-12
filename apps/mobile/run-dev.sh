@@ -56,65 +56,13 @@ info() { echo -e "${CYAN}[dev]${NC} $*"; }
 # Worktree support
 # ===========================================================================
 
-# Detect if running inside a git worktree and symlink node_modules/.venv
-# from the main repo so that builds and backend startup work correctly.
-ensure_worktree_deps() {
-  local main_repo
-  main_repo="$(git -C "$REPO_ROOT" worktree list --porcelain | head -1 | sed 's/^worktree //')"
-
-  # Not in a worktree — nothing to do
-  if [[ "$main_repo" == "$REPO_ROOT" ]]; then
-    return
-  fi
-
-  log "Detected worktree. Main repo: $main_repo"
-  _MAIN_REPO_ROOT="$main_repo"
-  _COMPOSE_PROJECT="$(basename "$main_repo")"
-
-  # Symlink node_modules (remove broken symlinks first)
-  if [[ -L "$MOBILE_DIR/node_modules" && ! -d "$MOBILE_DIR/node_modules" ]]; then
-    warn "Removing broken node_modules symlink."
-    rm "$MOBILE_DIR/node_modules"
-  fi
-  if [[ ! -d "$MOBILE_DIR/node_modules" && ! -L "$MOBILE_DIR/node_modules" ]]; then
-    if [[ ! -d "$main_repo/apps/mobile/node_modules" ]]; then
-      err "node_modules not found in main repo. Run: cd $main_repo/apps/mobile && npm install"
-      exit 1
-    fi
-    ln -s "$main_repo/apps/mobile/node_modules" "$MOBILE_DIR/node_modules"
-    log "Symlinked node_modules from main repo."
-  fi
-
-  # Symlink .venv (remove broken symlinks first)
-  if [[ -L "$API_DIR/.venv" && ! -d "$API_DIR/.venv" ]]; then
-    warn "Removing broken .venv symlink."
-    rm "$API_DIR/.venv"
-  fi
-  if [[ ! -d "$API_DIR/.venv" && ! -L "$API_DIR/.venv" ]]; then
-    if [[ ! -d "$main_repo/apps/api/.venv" ]]; then
-      err ".venv not found in main repo. Run: cd $main_repo/apps/api && python3 -m venv .venv"
-      exit 1
-    fi
-    ln -s "$main_repo/apps/api/.venv" "$API_DIR/.venv"
-    log "Symlinked .venv from main repo."
-  fi
-
-  # Symlink .env (remove broken symlinks first)
-  if [[ -L "$API_DIR/.env" && ! -f "$API_DIR/.env" ]]; then
-    warn "Removing broken .env symlink."
-    rm "$API_DIR/.env"
-  fi
-  if [[ ! -f "$API_DIR/.env" && ! -L "$API_DIR/.env" ]]; then
-    if [[ ! -f "$main_repo/apps/api/.env" ]]; then
-      err ".env not found in main repo. Create: $main_repo/apps/api/.env"
-      exit 1
-    fi
-    ln -s "$main_repo/apps/api/.env" "$API_DIR/.env"
-    log "Symlinked .env from main repo."
-  fi
-}
-
-ensure_worktree_deps
+# Source the shared worktree setup script. It detects if we're in a worktree
+# and copies .env, credentials, installs node_modules and .venv independently.
+# Exports: WORKTREE_MAIN_REPO, WORKTREE_COMPOSE_PROJECT
+source "$REPO_ROOT/scripts/setup-worktree.sh"
+setup_worktree
+_MAIN_REPO_ROOT="$WORKTREE_MAIN_REPO"
+_COMPOSE_PROJECT="$WORKTREE_COMPOSE_PROJECT"
 
 # ===========================================================================
 # Cleanup
