@@ -85,7 +85,7 @@ Claude MUST use the following branch prefixes and meanings:
 
 ## Message Language (MUST)
 
-Commit messages and PR titles/descriptions MUST be written in the same language as the repository's `README.md`. Before writing any commit message or PR description, check the language used in `README.md` and match it.
+Commit messages, PR titles/descriptions, and PR review comments MUST be written in the same language as the repository's `README.md`. Before writing any commit message or PR description, check the language used in `README.md` and match it.
 
 ## Pre-Commit Checklist (MUST)
 
