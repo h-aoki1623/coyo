@@ -50,21 +50,21 @@ test-api:
 	cd apps/api && .venv/bin/pytest
 
 # E2E Tests (Maestro)
+# Requires: dev environment running in another terminal (make dev-ios / make dev-android)
 # Usage:
 #   make e2e                              # All flows on both platforms
 #   make e2e-ios                          # All flows on iOS
 #   make e2e-android                      # All flows on Android
 #   make e2e-ios FLOW=app-launch.yaml     # Single flow on iOS
 #   make e2e-android FLOW=app-launch.yaml # Single flow on Android
-#   make e2e-ios SKIP_BUILD=1             # Skip native build (app already installed)
 e2e:
-	cd apps/mobile && ./e2e/run-e2e.sh all $(if $(SKIP_BUILD),--skip-build) $(FLOW)
+	cd apps/mobile && ./e2e/run-e2e.sh all $(FLOW)
 
 e2e-ios:
-	cd apps/mobile && ./e2e/run-e2e.sh ios $(if $(SKIP_BUILD),--skip-build) $(FLOW)
+	cd apps/mobile && ./e2e/run-e2e.sh ios $(FLOW)
 
 e2e-android:
-	cd apps/mobile && ./e2e/run-e2e.sh android $(if $(SKIP_BUILD),--skip-build) $(FLOW)
+	cd apps/mobile && ./e2e/run-e2e.sh android $(FLOW)
 
 # Database Migrations
 migrate:
