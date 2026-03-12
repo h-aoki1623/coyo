@@ -247,6 +247,12 @@ export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
         /**
+         * AuthProvider
+         * @description Supported authentication providers.
+         * @enum {string}
+         */
+        AuthProvider: "email" | "google" | "apple";
+        /**
          * BatchDeleteRequest
          * @description Request body for batch-deleting conversations.
          */
@@ -424,8 +430,7 @@ export interface components {
             email: string | null;
             /** Displayname */
             displayName: string | null;
-            /** Authprovider */
-            authProvider: string;
+            authProvider: components["schemas"]["AuthProvider"];
         };
         /**
          * TurnCorrectionResponse
