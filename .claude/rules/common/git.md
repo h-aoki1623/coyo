@@ -4,13 +4,15 @@
 
 - **Before making any file modifications or creating new files**, Claude MUST check the current git branch.
 - If the current git branch is `main` or `develop`, Claude MUST:
-  1. Create a new worktree with a new branch using git commands:
+  1. Create a new worktree with a new branch using git commands.
+     The worktree directory name MUST replace `/` in the branch name with `-` to keep a flat directory structure:
      ```bash
-     git worktree add .claude/worktrees/<branch-name> -b <branch-name>
+     # Branch: feat/add-login → Directory: feat-add-login
+     git worktree add .claude/worktrees/<dir-name> -b <branch-name>
      ```
   2. Move into the worktree directory:
      ```bash
-     cd <repo-root>/.claude/worktrees/<branch-name>
+     cd <repo-root>/.claude/worktrees/<dir-name>
      ```
   3. Only then start making changes
 
@@ -116,9 +118,12 @@ When creating PRs:
 3. Draft comprehensive PR summary (in the same language as `README.md`)
 4. Include test plan with TODOs
 5. Push with `-u` flag if new branch
-6. After the PR is created, clean up the worktree and local branch:
+6. After the PR is created, clean up **only the worktree you created in this session**:
    ```bash
    cd <repo-root>
-   git worktree remove .claude/worktrees/<branch-name>
+   git worktree remove .claude/worktrees/<dir-name>
    git branch -d <branch-name>
    ```
+   - NEVER run `rm -rf .claude/worktrees/` or delete the entire worktrees directory
+   - NEVER remove worktrees for branches you did not create in this session
+   - Before removing, verify with `git worktree list` that the target exists
