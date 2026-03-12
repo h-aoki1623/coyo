@@ -45,13 +45,7 @@ When backend API schemas change (Pydantic models in `apps/api/src/coyo/schemas/`
 
 ### Running E2E Tests
 
-E2E tests require the dev environment running in a separate terminal.
-
 ```bash
-# Step 1: Start dev environment (in terminal 1)
-make dev-ios       # or: make dev-android / make dev-both
-
-# Step 2: Run E2E tests (in terminal 2)
 make e2e-ios       # All flows on iOS Simulator
 make e2e-android   # All flows on Android Emulator
 make e2e           # All flows on both platforms (sequential)
