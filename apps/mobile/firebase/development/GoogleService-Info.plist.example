@@ -3,21 +3,21 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>595448026395-d1vtu4cn06h2g3le497gtpp0n5vgu5l7.apps.googleusercontent.com</string>
+	<string>YOUR_CLIENT_ID.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.595448026395-d1vtu4cn06h2g3le497gtpp0n5vgu5l7</string>
+	<string>com.googleusercontent.apps.YOUR_CLIENT_ID</string>
 	<key>API_KEY</key>
-	<string>REDACTED_IOS_API_KEY</string>
+	<string>YOUR_API_KEY</string>
 	<key>GCM_SENDER_ID</key>
-	<string>595448026395</string>
+	<string>YOUR_GCM_SENDER_ID</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
 	<string>to.coyo.app</string>
 	<key>PROJECT_ID</key>
-	<string>coyo-app-dev</string>
+	<string>YOUR_PROJECT_ID</string>
 	<key>STORAGE_BUCKET</key>
-	<string>coyo-app-dev.firebasestorage.app</string>
+	<string>YOUR_PROJECT_ID.firebasestorage.app</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -29,6 +29,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:595448026395:ios:7583c068f379873aff6fbe</string>
+	<string>YOUR_GOOGLE_APP_ID</string>
 </dict>
 </plist>
