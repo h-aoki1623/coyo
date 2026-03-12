@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from coyo.db import get_session_factory
 from coyo.exceptions import AuthenticationError
-from coyo.models.user import User
+from coyo.models.user import AuthProvider, User
 from coyo.repositories.user import UserRepository
 from coyo.services.firebase import FirebaseTokenPayload, verify_firebase_token
 
@@ -24,25 +24,26 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
         yield session
 
 
-_ALLOWED_PROVIDERS = frozenset({"email", "google", "apple"})
-
-_PROVIDER_MAPPING: dict[str, str] = {
-    "password": "email",
-    "google.com": "google",
-    "apple.com": "apple",
+_PROVIDER_MAPPING: dict[str, AuthProvider] = {
+    "password": AuthProvider.EMAIL,
+    "google.com": AuthProvider.GOOGLE,
+    "apple.com": AuthProvider.APPLE,
 }
 
 
-def map_provider(sign_in_provider: str) -> str:
+def map_provider(sign_in_provider: str) -> AuthProvider:
     """Map Firebase sign_in_provider to our auth_provider value."""
-    provider = _PROVIDER_MAPPING.get(sign_in_provider, sign_in_provider)
-    if provider not in _ALLOWED_PROVIDERS:
+    mapped = _PROVIDER_MAPPING.get(sign_in_provider)
+    if mapped is not None:
+        return mapped
+    try:
+        return AuthProvider(sign_in_provider)
+    except ValueError:
         logger.warning(
             "unknown_auth_provider",
             extra={"sign_in_provider": sign_in_provider, "fallback": "email"},
         )
-        return "email"
-    return provider
+        return AuthProvider.EMAIL
 
 
 async def get_firebase_token(
