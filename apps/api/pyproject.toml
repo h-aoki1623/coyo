@@ -20,6 +20,7 @@ dependencies = [
     "python-multipart>=0.0.18",
     "sse-starlette>=2.2",
     "firebase-admin>=6.5",
+    "slowapi>=0.1.9",
 ]
 
 [project.optional-dependencies]

@@ -1,10 +1,11 @@
 """Authentication endpoints."""
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse
 
 from coyo.dependencies import get_current_user
 from coyo.models.user import User
+from coyo.rate_limit import AUTH_RATE_LIMIT, limiter
 from coyo.schemas.auth import SessionResponse
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
@@ -29,7 +30,8 @@ _APP_REDIRECT_HTML = f"""\
 
 
 @router.get("/app-redirect", response_class=HTMLResponse, include_in_schema=False)
-async def app_redirect() -> HTMLResponse:
+@limiter.limit(AUTH_RATE_LIMIT)
+async def app_redirect(request: Request) -> HTMLResponse:
     """Redirect the browser to the Coyo app via custom URL scheme.
 
     Used as the `continueUrl` for Firebase email verification.
@@ -40,7 +42,9 @@ async def app_redirect() -> HTMLResponse:
 
 
 @router.post("/session", response_model=SessionResponse)
+@limiter.limit(AUTH_RATE_LIMIT)
 async def create_session(
+    request: Request,
     user: User = Depends(get_current_user),
 ) -> SessionResponse:
     """Create or sync a backend user record from a Firebase token.

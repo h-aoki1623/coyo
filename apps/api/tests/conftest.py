@@ -4,6 +4,12 @@ Provides an async in-memory SQLite database, a FastAPI TestClient,
 mock dependencies, and reusable data fixtures.
 """
 
+import os
+
+# Force in-memory rate-limit storage for tests.
+# Must be set before coyo.rate_limit is imported (which reads os.getenv at module level).
+os.environ["REDIS_URL"] = "memory://"
+
 from collections.abc import AsyncGenerator
 from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock, patch
