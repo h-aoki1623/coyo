@@ -27,42 +27,15 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 MOBILE_DIR="$SCRIPT_DIR"
 REPO_ROOT="$(cd "$MOBILE_DIR/../.." && pwd)"
-# Main repo root (overridden if in a worktree)
-_MAIN_REPO_ROOT="$REPO_ROOT"
-# Docker Compose project name (consistent across main repo and worktrees)
-_COMPOSE_PROJECT="$(basename "$REPO_ROOT")"
 API_DIR="$REPO_ROOT/apps/api"
 
-API_PORT=8000
-API_HEALTH_URL="http://localhost:${API_PORT}/health"
+# Load shared functions
+source "$REPO_ROOT/scripts/lib/common.sh"
+init_log "[dev]"
+init_worktree
 
 # Track PIDs for cleanup
 _PIDS_TO_KILL=()
-_API_STARTED_BY_SCRIPT=false
-
-# Colors
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[0;33m'
-CYAN='\033[0;36m'
-NC='\033[0m'
-
-log()  { echo -e "${GREEN}[dev]${NC} $*"; }
-warn() { echo -e "${YELLOW}[dev]${NC} $*"; }
-err()  { echo -e "${RED}[dev]${NC} $*" >&2; }
-info() { echo -e "${CYAN}[dev]${NC} $*"; }
-
-# ===========================================================================
-# Worktree support
-# ===========================================================================
-
-# Source the shared worktree setup script. It detects if we're in a worktree
-# and copies .env, credentials, installs node_modules and .venv independently.
-# Exports: WORKTREE_MAIN_REPO, WORKTREE_COMPOSE_PROJECT
-source "$REPO_ROOT/scripts/setup-worktree.sh"
-setup_worktree
-_MAIN_REPO_ROOT="$WORKTREE_MAIN_REPO"
-_COMPOSE_PROJECT="$WORKTREE_COMPOSE_PROJECT"
 
 # ===========================================================================
 # Cleanup
@@ -82,7 +55,7 @@ cleanup() {
   fi
 
   # Stop backend if we started it
-  if [[ "$_API_STARTED_BY_SCRIPT" == "true" ]]; then
+  if [[ -n "$_BACKEND_PID" ]]; then
     log "Stopping backend API..."
     local pids
     pids=$(lsof -ti :"$API_PORT" 2>/dev/null || true)
@@ -97,184 +70,8 @@ cleanup() {
 trap cleanup EXIT INT TERM
 
 # ===========================================================================
-# Metro
+# iOS: Build and install
 # ===========================================================================
-
-# Kill any existing Metro process on port 8081
-# (e.g. leftover from a previous session, build copy, or expo run:*)
-kill_existing_metro() {
-  local pids
-  pids=$(lsof -ti :8081 2>/dev/null || true)
-  if [[ -z "$pids" ]]; then
-    return
-  fi
-
-  warn "Killing existing Metro process on port 8081 (PIDs: $pids)"
-  # Stage 1: graceful SIGTERM
-  echo "$pids" | xargs kill 2>/dev/null || true
-  sleep 2
-
-  # Stage 2: SIGKILL anything that didn't exit
-  local remaining
-  remaining=$(lsof -ti :8081 2>/dev/null || true)
-  if [[ -n "$remaining" ]]; then
-    warn "Metro did not exit after SIGTERM; force-killing (PIDs: $remaining)"
-    echo "$remaining" | xargs kill -9 2>/dev/null || true
-    sleep 1
-  fi
-}
-
-# ===========================================================================
-# Docker
-# ===========================================================================
-
-ensure_docker() {
-  if docker info &>/dev/null; then
-    log "Docker daemon is running."
-  else
-    log "Starting Docker Desktop..."
-    open -a Docker 2>/dev/null || true
-    local retries=30
-    while ! docker info &>/dev/null; do
-      retries=$((retries - 1))
-      if [[ $retries -le 0 ]]; then
-        err "Docker did not start within 60 seconds."
-        exit 1
-      fi
-      sleep 2
-    done
-    log "Docker Desktop started."
-  fi
-
-  if docker compose -f "$REPO_ROOT/docker-compose.yml" -p "$_COMPOSE_PROJECT" ps --status running 2>/dev/null | grep -q "postgres"; then
-    log "Docker services already running."
-  else
-    log "Starting Docker services (Postgres + Redis)..."
-    docker compose -f "$REPO_ROOT/docker-compose.yml" -p "$_COMPOSE_PROJECT" up -d
-    local retries=10
-    while ! docker compose -f "$REPO_ROOT/docker-compose.yml" -p "$_COMPOSE_PROJECT" exec -T postgres pg_isready -U coyo -d coyo > /dev/null 2>&1; do
-      retries=$((retries - 1))
-      if [[ $retries -le 0 ]]; then
-        err "Postgres did not become ready."
-        exit 1
-      fi
-      sleep 2
-    done
-    log "Docker services are running."
-  fi
-}
-
-# ===========================================================================
-# Backend
-# ===========================================================================
-
-ensure_backend() {
-  if curl -sf --max-time 3 "$API_HEALTH_URL" > /dev/null 2>&1; then
-    log "Backend API already running."
-    return
-  fi
-
-  ensure_docker
-
-  # Verify venv
-  if [[ ! -x "$API_DIR/.venv/bin/python" ]]; then
-    err "Python venv not found at $API_DIR/.venv"
-    err "Create it with: cd $API_DIR && python3 -m venv .venv && .venv/bin/pip install -e '.[dev]'"
-    exit 1
-  fi
-
-  local venv_python
-  venv_python=$("$API_DIR/.venv/bin/python" -c "import sys; print(sys.executable)" 2>/dev/null || true)
-  if [[ -z "$venv_python" ]]; then
-    err "Python venv is broken. Recreate with: cd $API_DIR && python3 -m venv .venv --clear && .venv/bin/pip install -e '.[dev]'"
-    exit 1
-  fi
-
-  # Run migrations
-  # When running in a worktree, the .venv editable install points to the
-  # main repo's src/. Override PYTHONPATH so the worktree's src/ takes priority.
-  log "Running database migrations..."
-  cd "$API_DIR"
-  PYTHONPATH="$API_DIR/src:${PYTHONPATH:-}" .venv/bin/alembic upgrade head 2>&1 | tail -3
-
-  # Start uvicorn in background
-  log "Starting backend API..."
-  cd "$API_DIR"
-  PYTHONPATH="$API_DIR/src:${PYTHONPATH:-}" .venv/bin/uvicorn src.coyo.main:app --port "$API_PORT" &
-  local api_pid=$!
-  _PIDS_TO_KILL+=("$api_pid")
-  _API_STARTED_BY_SCRIPT=true
-
-  local retries=15
-  while ! curl -sf --max-time 2 "$API_HEALTH_URL" > /dev/null 2>&1; do
-    retries=$((retries - 1))
-    if [[ $retries -le 0 ]]; then
-      err "Backend API did not start within 30 seconds."
-      exit 1
-    fi
-    sleep 2
-  done
-  log "Backend API is running (PID: $api_pid)."
-}
-
-# ===========================================================================
-# iOS Simulator
-# ===========================================================================
-
-get_booted_ios_udid() {
-  xcrun simctl list devices booted -j 2>/dev/null \
-    | python3 -c "
-import json, sys
-data = json.load(sys.stdin)
-for runtime, devices in data.get('devices', {}).items():
-    for d in devices:
-        if d.get('state') == 'Booted':
-            print(d['udid'])
-            sys.exit(0)
-sys.exit(1)
-" 2>/dev/null || true
-}
-
-boot_ios_simulator() {
-  local udid
-  udid=$(get_booted_ios_udid)
-  if [[ -n "$udid" ]]; then
-    log "iOS Simulator already booted: $udid"
-    return
-  fi
-
-  # Pick the first available iPhone simulator
-  local target_udid
-  target_udid=$(xcrun simctl list devices available -j 2>/dev/null \
-    | python3 -c "
-import json, sys
-data = json.load(sys.stdin)
-for runtime, devices in sorted(data.get('devices', {}).items(), reverse=True):
-    for d in devices:
-        if d.get('isAvailable') and 'iPhone' in d.get('name', '') and 'Pro' in d.get('name', ''):
-            print(d['udid'])
-            sys.exit(0)
-# Fallback: any iPhone
-for runtime, devices in sorted(data.get('devices', {}).items(), reverse=True):
-    for d in devices:
-        if d.get('isAvailable') and 'iPhone' in d.get('name', ''):
-            print(d['udid'])
-            sys.exit(0)
-sys.exit(1)
-" 2>/dev/null) || true
-
-  if [[ -z "$target_udid" ]]; then
-    err "No iPhone simulator found. Create one in Xcode > Window > Devices and Simulators."
-    exit 1
-  fi
-
-  log "Booting iOS Simulator ($target_udid)..."
-  xcrun simctl boot "$target_udid" 2>/dev/null || true
-  # Open Simulator.app to show the window
-  open -a Simulator 2>/dev/null || true
-  sleep 3
-  log "iOS Simulator booted."
-}
 
 run_ios() {
   boot_ios_simulator
@@ -300,7 +97,6 @@ run_ios() {
 
   # Build with xcodebuild (expo run:ios fails on Xcode 17 beta due to
   # devicectl JSON format changes that misidentify simulator as physical device)
-  # --no-bundler not needed: Metro is already running (started in Step 3).
   log "Building with xcodebuild..."
   xcodebuild \
     -workspace ios/Coyo.xcworkspace \
@@ -348,70 +144,15 @@ run_ios() {
 }
 
 # ===========================================================================
-# Android Emulator
+# Android: Build and install
 # ===========================================================================
-
-get_android_emulator_id() {
-  adb devices 2>/dev/null | grep -E "emulator-[0-9]+\s+device" | awk '{print $1}' | head -1 || true
-}
-
-boot_android_emulator() {
-  local device_id
-  device_id=$(get_android_emulator_id)
-  if [[ -n "$device_id" ]]; then
-    log "Android Emulator already running: $device_id"
-    return
-  fi
-
-  if ! command -v adb &>/dev/null; then
-    err "adb not found. Install Android SDK platform-tools."
-    exit 1
-  fi
-
-  # Find the first available AVD
-  local avd_name
-  avd_name=$("$ANDROID_HOME/emulator/emulator" -list-avds 2>/dev/null | head -1)
-  if [[ -z "$avd_name" ]]; then
-    err "No Android AVD found. Create one in Android Studio > Virtual Device Manager."
-    exit 1
-  fi
-
-  log "Starting Android Emulator ($avd_name)..."
-  "$ANDROID_HOME/emulator/emulator" -avd "$avd_name" -no-snapshot-load &>/dev/null &
-  _PIDS_TO_KILL+=("$!")
-
-  # Wait for emulator to boot
-  log "Waiting for emulator to boot..."
-  local retries=60
-  while true; do
-    device_id=$(get_android_emulator_id)
-    if [[ -n "$device_id" ]]; then
-      # Check if boot completed
-      local boot_status
-      boot_status=$(adb -s "$device_id" shell getprop sys.boot_completed 2>/dev/null | tr -d '\r' || true)
-      if [[ "$boot_status" == "1" ]]; then
-        break
-      fi
-    fi
-    retries=$((retries - 1))
-    if [[ $retries -le 0 ]]; then
-      err "Android Emulator did not boot within 120 seconds."
-      exit 1
-    fi
-    sleep 2
-  done
-  log "Android Emulator booted: $device_id"
-}
-
-setup_adb_reverse() {
-  local device_id="$1"
-  adb -s "$device_id" reverse tcp:8081 tcp:8081 2>/dev/null || true
-  adb -s "$device_id" reverse tcp:${API_PORT} tcp:${API_PORT} 2>/dev/null || true
-  log "adb reverse set up (ports 8081, ${API_PORT})."
-}
 
 run_android() {
   boot_android_emulator
+  if [[ -n "$_EMULATOR_PID" ]]; then
+    _PIDS_TO_KILL+=("$_EMULATOR_PID")
+  fi
+
   local device_id
   device_id=$(get_android_emulator_id)
 
@@ -459,7 +200,10 @@ echo ""
 kill_existing_metro
 
 # Step 2: Backend infrastructure
-ensure_backend
+ensure_backend || exit 1
+if [[ -n "$_BACKEND_PID" ]]; then
+  _PIDS_TO_KILL+=("$_BACKEND_PID")
+fi
 
 # Step 3: Start Metro in background BEFORE builds
 # Apps launched by expo run:* connect to Metro immediately on start.
@@ -472,15 +216,9 @@ _PIDS_TO_KILL+=("$_METRO_PID")
 
 # Wait for Metro to be ready
 log "Waiting for Metro to be ready..."
-local_retries=30
-while ! curl -sf --max-time 2 http://localhost:8081/status > /dev/null 2>&1; do
-  local_retries=$((local_retries - 1))
-  if [[ $local_retries -le 0 ]]; then
-    err "Metro did not start within 60 seconds."
-    exit 1
-  fi
-  sleep 2
-done
+if ! wait_for_url "http://localhost:8081/status" 30 2 "Metro bundler"; then
+  exit 1
+fi
 log "Metro bundler is ready."
 
 # Step 4: Platform-specific build
