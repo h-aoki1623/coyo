@@ -53,7 +53,7 @@ interface AuthState {
   getToken: () => Promise<string | null>;
 }
 
-export const useAuthStore = create<AuthState>((set, get) => ({
+export const useAuthStore = create<AuthState>((set, _get) => ({
   user: null,
   isAuthenticated: false,
   isEmailVerified: false,

@@ -22,9 +22,7 @@ import { StepItem } from './components/StepItem';
 
 import type { AuthStackParamList } from '@/navigation/types';
 
-type Props = NativeStackScreenProps<AuthStackParamList, 'EmailVerification'> | {
-  /** When rendered directly by the auth gate (no route params), email comes from the auth store */
-};
+type Props = NativeStackScreenProps<AuthStackParamList, 'EmailVerification'> | Record<string, never>;
 
 const RESEND_COOLDOWN_SECONDS = 60;
 
