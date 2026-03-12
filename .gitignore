@@ -61,6 +61,8 @@ apps/mobile/google-play-service-account.json
 # Root-level files (legacy, no longer used)
 apps/mobile/GoogleService-Info.plist
 apps/mobile/google-services.json
+# Development configs contain API keys — download from Firebase Console
+apps/mobile/firebase/development/
 # Production configs are decoded from EAS Secrets at build time
 apps/mobile/firebase/production/
 
