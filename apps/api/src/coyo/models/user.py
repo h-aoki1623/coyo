@@ -6,6 +6,7 @@ import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING
 
+import sqlalchemy as sa
 from sqlalchemy import DateTime, Float, ForeignKey, Integer, String, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -17,16 +18,41 @@ if TYPE_CHECKING:
 
 
 class User(BaseModel):
-    """Represents a user identified by device ID."""
+    """Represents a user identified by an external authentication provider UID."""
 
     __tablename__ = "users"
+    __table_args__ = (
+        sa.CheckConstraint(
+            "auth_provider IN ('email', 'google', 'apple')",
+            name="ck_users_auth_provider_valid",
+        ),
+    )
 
-    device_id: Mapped[str] = mapped_column(
-        String(36),
+    auth_uid: Mapped[str] = mapped_column(
+        String(128),
         unique=True,
         nullable=False,
+        comment="External authentication provider UID",
+    )
+
+    email: Mapped[str | None] = mapped_column(
+        String(255),
+        nullable=True,
         index=True,
-        comment="Client-generated UUID from X-Device-Id header",
+        comment="User email from Firebase",
+    )
+
+    display_name: Mapped[str | None] = mapped_column(
+        String(255),
+        nullable=True,
+        comment="Display name from Firebase",
+    )
+
+    auth_provider: Mapped[str] = mapped_column(
+        String(20),
+        nullable=False,
+        server_default="email",
+        comment="Authentication provider: email, google, apple",
     )
 
     updated_at: Mapped[datetime] = mapped_column(

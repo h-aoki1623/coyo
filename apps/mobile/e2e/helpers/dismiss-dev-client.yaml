@@ -6,16 +6,19 @@
 # If the dialog is not visible, the conditional block is simply skipped.
 #
 # This file is NOT listed in config.yaml and is NOT a test flow.
-appId: com.coyo.app
+appId: to.coyo.app
 ---
 - launchApp:
     clearState: false
 
+# Wait for the app to finish loading.
+# With auth gate, the Welcome screen appears for unauthenticated users.
 - extendedWaitUntil:
     visible:
-      id: "home-greeting"
+      id: "welcome-get-started"
     timeout: 30000
 
+# Dismiss dev client dialog if it appears on top
 - runFlow:
     when:
       visible: "Continue"

@@ -13,6 +13,7 @@ const en = {
       hint: 'Tap to resume',
       resume: 'Resume',
     },
+    signOut: 'Sign Out',
   },
 
   // Topics
@@ -134,6 +135,77 @@ const en = {
     micPermissionTitle: 'Microphone Permission Required',
     micPermissionMessage:
       'Coyo needs access to your microphone for conversation practice. Please enable it in Settings.',
+  },
+
+  // Auth Screens
+  auth: {
+    welcome: {
+      signIn: 'Sign In',
+      headline: 'Your English improves\nas you speak.',
+      subtitle:
+        'Enjoy natural English conversation with AI while getting real-time corrections.',
+      getStarted: 'Get Started Free',
+    },
+    modal: {
+      createAccount: 'Create Account',
+      signIn: 'Sign In',
+      continueWithEmail: 'Continue with Email',
+      continueWithGoogle: 'Continue with Google',
+      continueWithApple: 'Continue with Apple',
+      termsPrefix: 'By continuing, you agree to Coyo\'s ',
+      termsOfService: 'Terms of Service',
+      termsConnector: ' and ',
+      privacyPolicy: 'Privacy Policy',
+      termsSuffix: '.',
+      hasAccountPrompt: 'Already have an account? ',
+      noAccountPrompt: "Don't have an account? ",
+      signUp: 'Sign Up',
+    },
+    signUp: {
+      title: 'Sign Up',
+      name: 'Name',
+      email: 'Email',
+      password: 'Password',
+      submit: 'Create Account',
+    },
+    signIn: {
+      title: 'Sign In',
+      email: 'Email',
+      password: 'Password',
+      submit: 'Sign In',
+      forgotPassword: 'Forgot password?',
+    },
+    verification: {
+      title: 'Check Your Email',
+      description:
+        'We sent you a verification email. Tap the link to activate your account.',
+      sentTo: 'Verification sent',
+      step1: 'Open your email app',
+      step2: 'Find the email from Coyo (check your spam folder too)',
+      step3: 'Tap "Verify your email address"',
+      notVerified: 'Not verified yet',
+      checkFailed: 'Verification check failed. Please try again.',
+      confirm: 'I\'ve Verified',
+      didNotReceive: "Didn't receive it? ",
+      resend: 'Resend',
+      resendCooldown: 'Resend ({{seconds}}s)',
+    },
+    signOut: 'Sign Out',
+  },
+
+  // Firebase Auth errors
+  firebaseErrors: {
+    emailAlreadyInUse: 'This email address is already registered.',
+    invalidEmail: 'Please enter a valid email address.',
+    weakPassword: 'Password must be at least 8 characters.',
+    invalidCredential: 'Incorrect email or password.',
+    tooManyRequests: 'Too many attempts. Please try again later.',
+    networkError: 'Network error. Please check your connection.',
+    userDisabled: 'This account has been disabled.',
+    signUpFailed: 'Sign-up failed. Please try again.',
+    signInFailed: 'Sign-in failed. Please try again.',
+    signOutFailed: 'Sign-out failed. Please try again.',
+    resendFailed: 'Failed to resend verification email.',
   },
 
   // Common

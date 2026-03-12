@@ -15,7 +15,7 @@
 # NOTE: This is an advanced flow that depends on backend availability
 # and may need longer timeouts for API responses. If the backend is not
 # running, the flow will fail at the topic tap step.
-appId: com.coyo.app
+appId: to.coyo.app
 ---
 # -- Step 1: Launch and start a conversation --
 

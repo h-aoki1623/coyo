@@ -1,6 +1,7 @@
 import { fetch } from 'expo/fetch';
 import Constants from 'expo-constants';
-import { getOrCreateDeviceId } from '@/services/device-id';
+
+import { getAuthToken } from '@/services/token-provider';
 import type { TurnEvent } from '@/types/api';
 
 const API_BASE_URL = Constants.expoConfig?.extra?.apiBaseUrl ?? 'http://localhost:8000';
@@ -79,15 +80,20 @@ export async function* streamTurnEvents(
   audioFormData: FormData,
   signal?: AbortSignal,
 ): AsyncGenerator<TurnEvent> {
-  const deviceId = await getOrCreateDeviceId();
   const url = `${API_BASE_URL}/api/conversations/${encodeURIComponent(conversationId)}/turns`;
+
+  // Build auth headers (Firebase auth token)
+  const headers: Record<string, string> = {
+    'Accept': 'text/event-stream',
+  };
+  const token = await getAuthToken();
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
 
   const response = await fetch(url, {
     method: 'POST',
-    headers: {
-      'X-Device-Id': deviceId,
-      'Accept': 'text/event-stream',
-    },
+    headers,
     body: audioFormData,
     signal,
   });

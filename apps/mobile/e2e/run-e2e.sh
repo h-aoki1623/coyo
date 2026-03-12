@@ -285,14 +285,16 @@ ensure_backend() {
   ensure_docker
 
   # Run migrations
+  # When running in a worktree, the .venv editable install points to the
+  # main repo's src/. Override PYTHONPATH so the worktree's src/ takes priority.
   log "Running database migrations..."
   cd "$API_DIR"
-  .venv/bin/alembic upgrade head 2>&1 | tail -3
+  PYTHONPATH="$API_DIR/src:${PYTHONPATH:-}" .venv/bin/alembic upgrade head 2>&1 | tail -3
 
   # Start uvicorn in the background
   log "Starting backend API..."
   cd "$API_DIR"
-  .venv/bin/uvicorn src.coyo.main:app --port "$API_PORT" &
+  PYTHONPATH="$API_DIR/src:${PYTHONPATH:-}" .venv/bin/uvicorn src.coyo.main:app --port "$API_PORT" &
   local api_pid=$!
   _API_STARTED_BY_SCRIPT=true
 
@@ -544,19 +546,58 @@ run_ios() {
     # Build and install (--no-bundler: build only, don't start Metro)
     log "Building iOS app..."
     cd "$MOBILE_DIR"
-    if ! npx expo run:ios --device "$udid" --no-bundler 2>&1 | tail -20; then
-      warn "Build command exited with non-zero status. Checking if app was installed..."
+
+    # Xcode 17 workaround: pre-generate FirebaseAuth-Swift.h
+    if [[ ! -f "ios/Pods/Headers/Public/FirebaseAuth/FirebaseAuth-Swift.h" ]]; then
+      if [[ ! -d "ios" ]]; then
+        log "Running expo prebuild..."
+        npx expo prebuild --platform ios --clean 2>&1 | tail -5
+      fi
+      if [[ -f "scripts/fix-firebase-swift-header.sh" ]]; then
+        log "Generating FirebaseAuth-Swift.h (Xcode 17 workaround)..."
+        bash scripts/fix-firebase-swift-header.sh
+      fi
     fi
 
+    # Prebuild native project if needed
+    if [[ ! -d "ios" ]]; then
+      log "Running expo prebuild..."
+      npx expo prebuild --platform ios --clean 2>&1 | tail -5
+    fi
+
+    # Build with xcodebuild (expo run:ios fails on Xcode 17 beta due to
+    # devicectl JSON format changes that misidentify simulator as physical device)
+    log "Building with xcodebuild..."
+    xcodebuild \
+      -workspace ios/Coyo.xcworkspace \
+      -scheme Coyo \
+      -destination "platform=iOS Simulator,id=$udid" \
+      -configuration Debug \
+      build \
+      -quiet 2>&1 | tail -5 || true
+
+    # Find and install the built app
+    local app_path
+    app_path=$(find ~/Library/Developer/Xcode/DerivedData -name "Coyo.app" \
+      -path "*Debug-iphonesimulator*" -newer ios/Podfile 2>/dev/null | head -1)
+
+    if [[ -z "$app_path" ]]; then
+      err "Built Coyo.app not found in DerivedData."
+      exit 1
+    fi
+
+    log "Installing app from: $app_path"
+    xcrun simctl install "$udid" "$app_path"
+
     # Verify installation
-    if ! xcrun simctl listapps "$udid" 2>/dev/null | grep -q "com.coyo.app"; then
+    if ! xcrun simctl listapps "$udid" 2>/dev/null | grep -q "to.coyo.app"; then
       err "iOS app not installed on simulator. Build may have failed."
       exit 1
     fi
     log "iOS app installed successfully."
   else
     log "Skipping iOS build (--skip-build)."
-    if ! xcrun simctl listapps "$udid" 2>/dev/null | grep -q "com.coyo.app"; then
+    if ! xcrun simctl listapps "$udid" 2>/dev/null | grep -q "to.coyo.app"; then
       err "iOS app not installed on simulator. Cannot skip build."
       exit 1
     fi
@@ -599,7 +640,7 @@ run_ios() {
 
   # Launch the app so it connects to Metro before Maestro takes over
   log "Launching app to connect to Metro..."
-  xcrun simctl launch "$udid" com.coyo.app 2>/dev/null || true
+  xcrun simctl launch "$udid" to.coyo.app 2>/dev/null || true
   sleep 3
 
   # Dismiss expo-dev-client onboarding dialog if present (first launch only)
@@ -635,7 +676,7 @@ run_ios() {
     sleep 3
 
     # Re-launch the app to reconnect to Metro
-    xcrun simctl launch "$udid" com.coyo.app 2>/dev/null || true
+    xcrun simctl launch "$udid" to.coyo.app 2>/dev/null || true
     sleep 3
 
     exit_code=0
@@ -676,14 +717,14 @@ run_android() {
     npx expo run:android --no-bundler 2>&1 | tail -5
 
     # Verify installation
-    if ! adb -s "$device_id" shell pm list packages 2>/dev/null | grep -q "com.coyo.app"; then
+    if ! adb -s "$device_id" shell pm list packages 2>/dev/null | grep -q "to.coyo.app"; then
       err "Android app not installed on emulator. Build may have failed."
       exit 1
     fi
     log "Android app installed successfully."
   else
     log "Skipping Android build (--skip-build)."
-    if ! adb -s "$device_id" shell pm list packages 2>/dev/null | grep -q "com.coyo.app"; then
+    if ! adb -s "$device_id" shell pm list packages 2>/dev/null | grep -q "to.coyo.app"; then
       err "Android app not installed on emulator. Cannot skip build."
       exit 1
     fi
@@ -737,7 +778,7 @@ run_android() {
   log "Launching app to connect to Metro..."
   adb -s "$device_id" shell am start -a android.intent.action.VIEW \
     -d "exp+coyo://expo-development-client/?url=http%3A%2F%2Flocalhost%3A8081" \
-    com.coyo.app 2>/dev/null || true
+    to.coyo.app 2>/dev/null || true
   sleep 3
 
   # Dismiss expo-dev-client onboarding dialog if present (first launch only)
