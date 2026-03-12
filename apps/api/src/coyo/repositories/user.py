@@ -35,18 +35,12 @@ class UserRepository:
 
         if user is not None:
             # Update profile fields if they changed
-            changed = False
             if user.email != email:
                 user.email = email
-                changed = True
             if user.display_name != display_name:
                 user.display_name = display_name
-                changed = True
             if user.auth_provider != auth_provider:
                 user.auth_provider = auth_provider
-                changed = True
-            if changed:
-                await self._session.commit()
             return user
 
         user = User(
@@ -57,7 +51,7 @@ class UserRepository:
         )
         self._session.add(user)
         try:
-            await self._session.commit()
+            await self._session.flush()
         except IntegrityError:
             await self._session.rollback()
             user = await self.find_by_auth_uid(auth_uid)

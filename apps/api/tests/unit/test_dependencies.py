@@ -133,6 +133,7 @@ class TestGetCurrentUser:
             display_name="Firebase User",
             auth_provider=AuthProvider.EMAIL,
         )
+        mock_db.commit.assert_awaited_once()
 
     @pytest.mark.unit
     async def test_no_firebase_token_raises_authentication_error(self):

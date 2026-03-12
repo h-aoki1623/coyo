@@ -76,9 +76,11 @@ async def get_current_user(
         raise AuthenticationError()
 
     repo = UserRepository(db)
-    return await repo.find_or_create_by_auth_uid(
+    user = await repo.find_or_create_by_auth_uid(
         auth_uid=firebase_token.uid,
         email=firebase_token.email,
         display_name=firebase_token.display_name,
         auth_provider=map_provider(firebase_token.sign_in_provider),
     )
+    await db.commit()
+    return user
