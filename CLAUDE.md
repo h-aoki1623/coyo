@@ -69,7 +69,7 @@ make e2e-ios SKIP_BUILD=1 FLOW=app-launch.yaml
 
 ### What the script does automatically
 
-1. Detects git worktree and symlinks `node_modules`/`.venv` from the main repo
+1. Detects git worktree and sets up dependencies independently (copies `.env`, Firebase credentials; installs `node_modules` via `npm ci` and creates `.venv`)
 2. Sweeps rogue Maestro/Metro processes from previous runs or manual invocations
 3. Starts Docker (Postgres + Redis) if not running
 4. Runs database migrations
