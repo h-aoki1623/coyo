@@ -1,3 +1,5 @@
+import type { FirebaseAuthTypes } from '@react-native-firebase/auth';
+
 import { useAuthStore } from './auth-store';
 
 // Mock firebase-auth service
@@ -172,7 +174,7 @@ describe('useAuthStore', () => {
 
   describe('handleSignUpWithEmail', () => {
     it('calls signUpWithEmail with provided arguments', async () => {
-      mockSignUpWithEmail.mockResolvedValue({} as any);
+      mockSignUpWithEmail.mockResolvedValue({} as FirebaseAuthTypes.UserCredential);
 
       await useAuthStore.getState().handleSignUpWithEmail('a@b.com', 'pass123', 'Alice');
 
@@ -183,7 +185,7 @@ describe('useAuthStore', () => {
       let capturedLoading = false;
       mockSignUpWithEmail.mockImplementation(async () => {
         capturedLoading = useAuthStore.getState().isLoading;
-        return {} as any;
+        return {} as FirebaseAuthTypes.UserCredential;
       });
 
       await useAuthStore.getState().handleSignUpWithEmail('a@b.com', 'pass', 'Bob');
@@ -193,7 +195,7 @@ describe('useAuthStore', () => {
 
     it('clears previous error before starting', async () => {
       useAuthStore.setState({ error: 'previous error' });
-      mockSignUpWithEmail.mockResolvedValue({} as any);
+      mockSignUpWithEmail.mockResolvedValue({} as FirebaseAuthTypes.UserCredential);
 
       await useAuthStore.getState().handleSignUpWithEmail('a@b.com', 'pass', 'Bob');
 
@@ -225,7 +227,7 @@ describe('useAuthStore', () => {
 
   describe('handleSignInWithEmail', () => {
     it('calls signInWithEmail with provided arguments', async () => {
-      mockSignInWithEmail.mockResolvedValue({} as any);
+      mockSignInWithEmail.mockResolvedValue({} as FirebaseAuthTypes.UserCredential);
 
       await useAuthStore.getState().handleSignInWithEmail('a@b.com', 'pass123');
 
@@ -236,7 +238,7 @@ describe('useAuthStore', () => {
       let capturedLoading = false;
       mockSignInWithEmail.mockImplementation(async () => {
         capturedLoading = useAuthStore.getState().isLoading;
-        return {} as any;
+        return {} as FirebaseAuthTypes.UserCredential;
       });
 
       await useAuthStore.getState().handleSignInWithEmail('a@b.com', 'pass');
@@ -268,7 +270,7 @@ describe('useAuthStore', () => {
 
   describe('handleSignInWithGoogle', () => {
     it('calls signInWithGoogle', async () => {
-      mockSignInWithGoogle.mockResolvedValue({} as any);
+      mockSignInWithGoogle.mockResolvedValue({} as FirebaseAuthTypes.UserCredential);
 
       await useAuthStore.getState().handleSignInWithGoogle();
 
@@ -279,7 +281,7 @@ describe('useAuthStore', () => {
       let capturedLoading = false;
       mockSignInWithGoogle.mockImplementation(async () => {
         capturedLoading = useAuthStore.getState().isLoading;
-        return {} as any;
+        return {} as FirebaseAuthTypes.UserCredential;
       });
 
       await useAuthStore.getState().handleSignInWithGoogle();
@@ -311,7 +313,7 @@ describe('useAuthStore', () => {
 
   describe('handleSignInWithApple', () => {
     it('calls signInWithApple', async () => {
-      mockSignInWithApple.mockResolvedValue({} as any);
+      mockSignInWithApple.mockResolvedValue({} as FirebaseAuthTypes.UserCredential);
 
       await useAuthStore.getState().handleSignInWithApple();
 
@@ -322,7 +324,7 @@ describe('useAuthStore', () => {
       let capturedLoading = false;
       mockSignInWithApple.mockImplementation(async () => {
         capturedLoading = useAuthStore.getState().isLoading;
-        return {} as any;
+        return {} as FirebaseAuthTypes.UserCredential;
       });
 
       await useAuthStore.getState().handleSignInWithApple();
