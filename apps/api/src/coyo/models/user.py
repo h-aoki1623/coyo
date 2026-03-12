@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
+from enum import StrEnum
 from typing import TYPE_CHECKING
 
 import sqlalchemy as sa
@@ -17,13 +18,21 @@ if TYPE_CHECKING:
     from coyo.models.conversation import Conversation
 
 
+class AuthProvider(StrEnum):
+    """Supported authentication providers."""
+
+    EMAIL = "email"
+    GOOGLE = "google"
+    APPLE = "apple"
+
+
 class User(BaseModel):
     """Represents a user identified by an external authentication provider UID."""
 
     __tablename__ = "users"
     __table_args__ = (
         sa.CheckConstraint(
-            "auth_provider IN ('email', 'google', 'apple')",
+            f"auth_provider IN ({', '.join(repr(p.value) for p in AuthProvider)})",
             name="ck_users_auth_provider_valid",
         ),
     )
