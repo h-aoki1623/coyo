@@ -17,7 +17,7 @@ from coyo.models.base import Base
 from coyo.models.conversation import Conversation
 from coyo.models.correction import CorrectionItem, TurnCorrection
 from coyo.models.turn import Turn
-from coyo.models.user import User
+from coyo.models.user import AuthProvider, User
 
 # ---------------------------------------------------------------------------
 # Database fixtures
@@ -74,7 +74,7 @@ async def test_user(db_session: AsyncSession) -> User:
     user = User(
         auth_uid=TEST_AUTH_UID,
         email="test@example.com",
-        auth_provider="email",
+        auth_provider=AuthProvider.EMAIL,
     )
     db_session.add(user)
     await db_session.commit()
