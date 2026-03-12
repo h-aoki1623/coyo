@@ -1,6 +1,14 @@
 import 'dotenv/config';
 import type { ExpoConfig, ConfigContext } from 'expo/config';
 
+const FIREBASE_DIR_MAP: Record<string, string> = {
+  development: 'development',
+  staging: 'production',
+  production: 'production',
+};
+const appEnv = process.env.APP_ENV ?? 'development';
+const firebaseDir = `./firebase/${FIREBASE_DIR_MAP[appEnv] ?? 'development'}`;
+
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: 'Coyo',
@@ -13,7 +21,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ios: {
     bundleIdentifier: 'to.coyo.app',
     supportsTablet: false,
-    googleServicesFile: process.env.GOOGLE_SERVICES_PLIST ?? './GoogleService-Info.plist',
+    googleServicesFile: process.env.GOOGLE_SERVICES_PLIST ?? `${firebaseDir}/GoogleService-Info.plist`,
     infoPlist: {
       GIDClientID: process.env.GID_CLIENT_ID ?? '',
     },
@@ -27,7 +35,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       foregroundImage: './assets/icon.png',
       backgroundColor: '#4A90E2',
     },
-    googleServicesFile: process.env.GOOGLE_SERVICES_JSON ?? './google-services.json',
+    googleServicesFile: process.env.GOOGLE_SERVICES_JSON ?? `${firebaseDir}/google-services.json`,
   },
   plugins: [
     'expo-secure-store',
