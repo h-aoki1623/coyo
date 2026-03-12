@@ -6,10 +6,12 @@ import structlog
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.responses import Response
 
-from coyo.config import get_settings
+import coyo.config
 from coyo.exceptions import CoyoError
 
 
@@ -80,6 +82,32 @@ async def coyo_error_handler(request: Request, exc: CoyoError) -> JSONResponse:
     )
 
 
+async def rate_limit_handler(request: Request, exc: RateLimitExceeded) -> JSONResponse:
+    """Handle slowapi rate limit exceeded errors.
+
+    Returns a 429 response with the standard error envelope and
+    a Retry-After header indicating when the client may retry.
+    """
+    logger = structlog.get_logger()
+    logger.warning(
+        "rate_limit_exceeded",
+        path=str(request.url),
+        detail=str(exc.detail),
+    )
+    response = JSONResponse(
+        status_code=429,
+        content={
+            "error": {
+                "code": "RATE_LIMIT_EXCEEDED",
+                "message": "Rate limit exceeded",
+            }
+        },
+    )
+    # RFC 7231: Retry-After must be an integer (seconds) or HTTP-date
+    response.headers["Retry-After"] = "60"
+    return response
+
+
 async def unhandled_error_handler(request: Request, exc: Exception) -> JSONResponse:
     """Catch-all handler for unexpected exceptions.
 
@@ -109,11 +137,17 @@ def setup_middleware(app: FastAPI) -> None:
     """Register all middleware and exception handlers on the FastAPI app."""
     configure_structlog()
 
+    # Rate limiter
+    from coyo.rate_limit import limiter
+
+    app.state.limiter = limiter
+
     # Middleware (executed in reverse registration order)
+    app.add_middleware(SlowAPIMiddleware)
     app.add_middleware(RequestIdMiddleware)
 
     # CORS: restrict to configured origins
-    settings = get_settings()
+    settings = coyo.config.get_settings()
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_allowed_origins,
@@ -123,5 +157,6 @@ def setup_middleware(app: FastAPI) -> None:
     )
 
     # Exception handlers
+    app.add_exception_handler(RateLimitExceeded, rate_limit_handler)  # type: ignore[arg-type]
     app.add_exception_handler(CoyoError, coyo_error_handler)  # type: ignore[arg-type]
     app.add_exception_handler(Exception, unhandled_error_handler)  # type: ignore[arg-type]

@@ -2,12 +2,13 @@
 
 import uuid
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from coyo.dependencies import get_current_user, get_db
 from coyo.exceptions import NotFoundError
 from coyo.models.user import User
+from coyo.rate_limit import DEFAULT_RATE_LIMIT, limiter
 from coyo.repositories.history import HistoryRepository
 from coyo.schemas.correction import TurnCorrectionResponse
 from coyo.schemas.history import (
@@ -22,7 +23,9 @@ router = APIRouter(prefix="/api/history", tags=["history"])
 
 
 @router.get("", response_model=HistoryListResponse)
+@limiter.limit(DEFAULT_RATE_LIMIT)
 async def list_history(
+    request: Request,
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
     page: int = Query(1, ge=1, description="Page number"),
@@ -44,7 +47,9 @@ async def list_history(
 
 
 @router.get("/{conversation_id}", response_model=HistoryDetailResponse)
+@limiter.limit(DEFAULT_RATE_LIMIT)
 async def get_history_detail(
+    request: Request,
     conversation_id: uuid.UUID,
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
@@ -78,7 +83,9 @@ async def get_history_detail(
 
 
 @router.delete("/{conversation_id}", status_code=204)
+@limiter.limit(DEFAULT_RATE_LIMIT)
 async def delete_history(
+    request: Request,
     conversation_id: uuid.UUID,
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
@@ -92,7 +99,9 @@ async def delete_history(
 
 
 @router.post("/batch-delete", status_code=204)
+@limiter.limit(DEFAULT_RATE_LIMIT)
 async def batch_delete_history(
+    request: Request,
     body: BatchDeleteRequest,
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
