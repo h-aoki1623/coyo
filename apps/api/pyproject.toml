@@ -19,6 +19,7 @@ dependencies = [
     "openai>=1.60",
     "python-multipart>=0.0.18",
     "sse-starlette>=2.2",
+    "firebase-admin>=6.5",
 ]
 
 [project.optional-dependencies]

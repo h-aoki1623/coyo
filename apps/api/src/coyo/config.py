@@ -36,6 +36,10 @@ class Settings(BaseSettings):
     gcs_bucket_name: str = "coyo-audio-dev"
     gcs_audio_ttl_seconds: int = 3600
 
+    # Firebase
+    firebase_project_id: str | None = None
+    firebase_service_account_path: str | None = None
+
     # CORS
     cors_allowed_origins: list[str] = ["http://localhost:8081", "http://localhost:19006"]
 

@@ -4,7 +4,6 @@ Provides an async in-memory SQLite database, a FastAPI TestClient,
 mock dependencies, and reusable data fixtures.
 """
 
-import uuid
 from collections.abc import AsyncGenerator
 from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -66,19 +65,17 @@ async def db_session(engine) -> AsyncGenerator[AsyncSession, None]:
 # Application fixtures
 # ---------------------------------------------------------------------------
 
-DEVICE_ID = "00000000-0000-4000-a000-000000000001"
-
-
-@pytest.fixture
-def device_id() -> str:
-    """Return a fixed test device ID."""
-    return DEVICE_ID
+TEST_AUTH_UID = "test-firebase-uid-001"
 
 
 @pytest.fixture
 async def test_user(db_session: AsyncSession) -> User:
-    """Create and persist a test user."""
-    user = User(device_id=DEVICE_ID)
+    """Create and persist a test user with auth UID."""
+    user = User(
+        auth_uid=TEST_AUTH_UID,
+        email="test@example.com",
+        auth_provider="email",
+    )
     db_session.add(user)
     await db_session.commit()
     await db_session.refresh(user)
@@ -260,7 +257,7 @@ async def client(
     """Provide an async HTTP client with overridden dependencies.
 
     Overrides get_db to use the test session and get_current_user to
-    return the test user, bypassing the X-Device-Id header requirement.
+    return the test user, bypassing the authentication requirement.
     """
     from coyo.dependencies import get_current_user, get_db
     from coyo.main import app

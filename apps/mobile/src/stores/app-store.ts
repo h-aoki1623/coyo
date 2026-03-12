@@ -1,9 +1,7 @@
 import { create } from 'zustand';
-import { getOrCreateDeviceId } from '@/services/device-id';
 
 interface AppState {
   isOnline: boolean;
-  deviceId: string | null;
   pausedConversationId: string | null;
 
   // Actions
@@ -14,12 +12,10 @@ interface AppState {
 
 export const useAppStore = create<AppState>((set) => ({
   isOnline: true,
-  deviceId: null,
   pausedConversationId: null,
 
   initialize: async () => {
-    const deviceId = await getOrCreateDeviceId();
-    set({ deviceId });
+    // No-op: previously initialized device ID (removed)
   },
 
   setOnlineStatus: (isOnline) => set({ isOnline }),

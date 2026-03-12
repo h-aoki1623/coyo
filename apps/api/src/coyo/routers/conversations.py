@@ -33,7 +33,7 @@ async def create_conversation(
 ) -> ConversationResponse:
     """Start a new conversation session.
 
-    Requires X-Device-Id header for user identification.
+    Requires Firebase authentication.
     """
     service = ConversationService(db)
     conversation = await service.start_conversation(

@@ -3,7 +3,7 @@
 # to the Talk screen. Uses the "Sports" topic as the test case.
 #
 # REQUIRES: Backend API must be running (run-e2e.sh starts it automatically).
-appId: com.coyo.app
+appId: to.coyo.app
 ---
 # Launch the application (clearState: false to preserve expo-dev-client settings)
 - launchApp:
