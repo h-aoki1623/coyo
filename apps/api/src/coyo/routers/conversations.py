@@ -4,7 +4,7 @@ import json
 import logging
 import uuid
 
-from fastapi import APIRouter, Depends, UploadFile
+from fastapi import APIRouter, Depends, Request, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 from sse_starlette.sse import EventSourceResponse
 
@@ -12,6 +12,7 @@ from coyo.config import get_settings
 from coyo.dependencies import get_current_user, get_db
 from coyo.exceptions import ConversationStateError, ValidationError
 from coyo.models.user import User
+from coyo.rate_limit import DEFAULT_RATE_LIMIT, EXPENSIVE_RATE_LIMIT, limiter
 from coyo.schemas.conversation import (
     ConversationResponse,
     CreateConversationRequest,
@@ -26,7 +27,9 @@ router = APIRouter(prefix="/api/conversations", tags=["conversations"])
 
 
 @router.post("", response_model=ConversationResponse, status_code=201)
+@limiter.limit(DEFAULT_RATE_LIMIT)
 async def create_conversation(
+    request: Request,
     body: CreateConversationRequest,
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
@@ -44,7 +47,9 @@ async def create_conversation(
 
 
 @router.post("/{conversation_id}/turns")
+@limiter.limit(EXPENSIVE_RATE_LIMIT)
 async def submit_turn(
+    request: Request,
     conversation_id: uuid.UUID,
     audio: UploadFile,
     user: User = Depends(get_current_user),
@@ -101,7 +106,9 @@ async def submit_turn(
 
 
 @router.get("/{conversation_id}", response_model=ConversationResponse)
+@limiter.limit(DEFAULT_RATE_LIMIT)
 async def get_conversation(
+    request: Request,
     conversation_id: uuid.UUID,
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
@@ -116,7 +123,9 @@ async def get_conversation(
     "/{conversation_id}/feedback",
     response_model=FeedbackResponse,
 )
+@limiter.limit(DEFAULT_RATE_LIMIT)
 async def get_feedback(
+    request: Request,
     conversation_id: uuid.UUID,
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
@@ -138,7 +147,9 @@ async def get_feedback(
 
 
 @router.post("/{conversation_id}/end", response_model=ConversationResponse)
+@limiter.limit(DEFAULT_RATE_LIMIT)
 async def end_conversation(
+    request: Request,
     conversation_id: uuid.UUID,
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
@@ -150,7 +161,9 @@ async def end_conversation(
 
 
 @router.post("/{conversation_id}/resume", response_model=ConversationResponse)
+@limiter.limit(DEFAULT_RATE_LIMIT)
 async def resume_conversation(
+    request: Request,
     conversation_id: uuid.UUID,
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
