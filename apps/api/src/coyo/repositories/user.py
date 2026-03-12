@@ -4,7 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from coyo.models.user import User
+from coyo.models.user import AuthProvider, User
 
 
 class UserRepository:
@@ -24,7 +24,7 @@ class UserRepository:
         auth_uid: str,
         email: str | None,
         display_name: str | None,
-        auth_provider: str,
+        auth_provider: AuthProvider,
     ) -> User:
         """Find a user by auth_uid, or create one if not found.
 

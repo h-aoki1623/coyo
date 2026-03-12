@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from coyo.models.conversation import Conversation
 from coyo.models.turn import Turn
-from coyo.models.user import User
+from coyo.models.user import AuthProvider, User
 from coyo.repositories.conversation import ConversationRepository
 from coyo.repositories.history import HistoryRepository
 from coyo.repositories.turn import TurnRepository
@@ -219,7 +219,7 @@ class TestUserRepository:
             auth_uid="fb-new-uid",
             email="new@example.com",
             display_name="New User",
-            auth_provider="email",
+            auth_provider=AuthProvider.EMAIL,
         )
         assert user.id is not None
         assert user.auth_uid == "fb-new-uid"
@@ -247,13 +247,13 @@ class TestUserRepository:
             auth_uid="fb-idempotent-uid",
             email="idem@example.com",
             display_name="Idempotent",
-            auth_provider="email",
+            auth_provider=AuthProvider.EMAIL,
         )
         user2 = await repo.find_or_create_by_auth_uid(
             auth_uid="fb-idempotent-uid",
             email="idem@example.com",
             display_name="Idempotent",
-            auth_provider="email",
+            auth_provider=AuthProvider.EMAIL,
         )
         assert user1.id == user2.id
 
@@ -343,7 +343,7 @@ class TestHistoryRepository:
         # Create a different user
         other_user = User(
             auth_uid="fb-other-user",
-            auth_provider="email",
+            auth_provider=AuthProvider.EMAIL,
         )
         db_session.add(other_user)
         await db_session.commit()
@@ -376,7 +376,7 @@ class TestHistoryRepository:
         """Verify that a different user cannot delete the conversation."""
         other_user = User(
             auth_uid="fb-other-user-2",
-            auth_provider="email",
+            auth_provider=AuthProvider.EMAIL,
         )
         db_session.add(other_user)
         await db_session.commit()

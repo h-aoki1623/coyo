@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from coyo.dependencies import get_current_user, get_firebase_token, map_provider
 from coyo.exceptions import AuthenticationError
-from coyo.models.user import User
+from coyo.models.user import AuthProvider, User
 from coyo.services.firebase import FirebaseTokenPayload
 
 # ---------------------------------------------------------------------------
@@ -20,23 +20,23 @@ class TestMapProvider:
 
     @pytest.mark.unit
     def test_password_maps_to_email(self):
-        assert map_provider("password") == "email"
+        assert map_provider("password") is AuthProvider.EMAIL
 
     @pytest.mark.unit
     def test_google_com_maps_to_google(self):
-        assert map_provider("google.com") == "google"
+        assert map_provider("google.com") is AuthProvider.GOOGLE
 
     @pytest.mark.unit
     def test_apple_com_maps_to_apple(self):
-        assert map_provider("apple.com") == "apple"
+        assert map_provider("apple.com") is AuthProvider.APPLE
 
     @pytest.mark.unit
     def test_unknown_provider_falls_back_to_email(self):
-        assert map_provider("unknown") == "email"
+        assert map_provider("unknown") is AuthProvider.EMAIL
 
     @pytest.mark.unit
     def test_custom_provider_falls_back_to_email(self):
-        assert map_provider("github.com") == "email"
+        assert map_provider("github.com") is AuthProvider.EMAIL
 
 
 # ---------------------------------------------------------------------------
@@ -131,7 +131,7 @@ class TestGetCurrentUser:
             auth_uid="fb-uid-1",
             email="user@test.com",
             display_name="Firebase User",
-            auth_provider="email",
+            auth_provider=AuthProvider.EMAIL,
         )
 
     @pytest.mark.unit
@@ -167,7 +167,7 @@ class TestGetCurrentUser:
             )
 
         call_kwargs = mock_repo_instance.find_or_create_by_auth_uid.call_args.kwargs
-        assert call_kwargs["auth_provider"] == "google"
+        assert call_kwargs["auth_provider"] is AuthProvider.GOOGLE
 
     @pytest.mark.unit
     async def test_apple_provider_is_mapped_correctly(self):
@@ -192,4 +192,4 @@ class TestGetCurrentUser:
             )
 
         call_kwargs = mock_repo_instance.find_or_create_by_auth_uid.call_args.kwargs
-        assert call_kwargs["auth_provider"] == "apple"
+        assert call_kwargs["auth_provider"] is AuthProvider.APPLE
