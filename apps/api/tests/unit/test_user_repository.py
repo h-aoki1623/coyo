@@ -126,7 +126,7 @@ class TestFindOrCreateByAuthUid:
         assert user.auth_provider == AuthProvider.GOOGLE
 
     @pytest.mark.unit
-    async def test_no_commit_when_nothing_changed(self, db_session: AsyncSession):
+    async def test_returns_unchanged_user_when_nothing_changed(self, db_session: AsyncSession):
         existing = User(
             auth_uid="fb-uid-no-change",
             email="same@example.com",
@@ -195,41 +195,31 @@ class TestFindOrCreateRaceCondition:
     """Tests for the IntegrityError race condition retry path."""
 
     @pytest.mark.unit
-    async def test_integrity_error_retries_and_finds_user(
-        self, db_session: AsyncSession
-    ):
-        """Simulate concurrent insert: commit raises IntegrityError, retry finds user."""
-        # Pre-insert the user that the "other process" created
+    async def test_integrity_error_retries_and_finds_user(self):
+        """Simulate concurrent insert: flush raises IntegrityError, retry finds user."""
         existing = User(
             auth_uid="fb-race-uid",
             email="race@example.com",
             display_name="Race User",
             auth_provider=AuthProvider.EMAIL,
         )
-        db_session.add(existing)
-        await db_session.commit()
-        await db_session.refresh(existing)
 
-        repo = UserRepository(db_session)
+        mock_session = AsyncMock(spec=AsyncSession)
+        mock_session.flush = AsyncMock(
+            side_effect=IntegrityError(
+                statement="INSERT",
+                params={},
+                orig=Exception("UNIQUE constraint failed"),
+            ),
+        )
 
-        with (
-            patch.object(
-                repo,
-                "find_by_auth_uid",
-                new_callable=AsyncMock,
-                side_effect=[None, existing],
-            ),
-            patch.object(
-                db_session,
-                "commit",
-                side_effect=IntegrityError(
-                    statement="INSERT",
-                    params={},
-                    orig=Exception("UNIQUE constraint failed"),
-                ),
-            ),
-            patch.object(db_session, "rollback", new_callable=AsyncMock),
-            patch.object(db_session, "add"),
+        repo = UserRepository(mock_session)
+
+        with patch.object(
+            repo,
+            "find_by_auth_uid",
+            new_callable=AsyncMock,
+            side_effect=[None, existing],
         ):
             user = await repo.find_or_create_by_auth_uid(
                 auth_uid="fb-race-uid",
@@ -238,31 +228,30 @@ class TestFindOrCreateRaceCondition:
                 auth_provider=AuthProvider.EMAIL,
             )
 
-        assert user.id == existing.id
         assert user.auth_uid == "fb-race-uid"
+        mock_session.rollback.assert_awaited_once()
 
     @pytest.mark.unit
-    async def test_integrity_error_reraises_when_retry_returns_none(
-        self, db_session: AsyncSession
-    ):
+    async def test_integrity_error_reraises_when_retry_returns_none(self):
         """IntegrityError is re-raised if the retry find also returns None."""
-        repo = UserRepository(db_session)
-
-        async def mock_find(auth_uid: str) -> User | None:
-            return None  # Both first and retry calls return None
-
-        async def mock_commit() -> None:
-            raise IntegrityError(
+        mock_session = AsyncMock(spec=AsyncSession)
+        mock_session.flush = AsyncMock(
+            side_effect=IntegrityError(
                 statement="INSERT",
                 params={},
                 orig=Exception("UNIQUE constraint failed"),
-            )
+            ),
+        )
+
+        repo = UserRepository(mock_session)
 
         with (
-            patch.object(repo, "find_by_auth_uid", side_effect=mock_find),
-            patch.object(db_session, "commit", side_effect=mock_commit),
-            patch.object(db_session, "rollback", new_callable=AsyncMock),
-            patch.object(db_session, "add"),
+            patch.object(
+                repo,
+                "find_by_auth_uid",
+                new_callable=AsyncMock,
+                return_value=None,
+            ),
             pytest.raises(IntegrityError),
         ):
             await repo.find_or_create_by_auth_uid(
