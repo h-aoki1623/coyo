@@ -1,7 +1,9 @@
 # auth-sign-in.yaml
 # Verifies the email/password sign-in flow: Welcome → Auth Modal → Sign In Form → Home.
-# This flow MUST run first in the test suite because subsequent flows
-# depend on the persisted auth session (clearState: false).
+#
+# Uses clearState: true to wipe Keychain and app data before launch,
+# ensuring the app always starts from the Welcome screen regardless of
+# parallel test execution order.
 #
 # Prerequisites:
 # - E2E test user must exist in Firebase with email_verified=True
@@ -9,9 +11,9 @@
 # - Backend API must be running (run-e2e.sh starts it automatically)
 appId: to.coyo.app
 ---
-# Launch the application
+# Launch with clearState to ensure unauthenticated state (wipes Keychain)
 - launchApp:
-    clearState: false
+    clearState: true
 
 # Wait for the Welcome screen (auth gate — user is not signed in yet)
 - extendedWaitUntil:
