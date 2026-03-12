@@ -85,6 +85,19 @@ Claude MUST use the following branch prefixes and meanings:
 
 Commit messages and PR titles/descriptions MUST be written in the same language as the repository's `README.md`. Before writing any commit message or PR description, check the language used in `README.md` and match it.
 
+## Pre-Commit Checklist (MUST)
+
+Claude MUST complete ALL of the following BEFORE creating any commit:
+
+1. **Tests written** — Unit tests (and integration tests if API/DB changes) for all new/changed code
+2. **Tests passing** — All tests run and pass (`pytest` / `npx jest`)
+3. **Build passing** — Build verification succeeds (`npx tsc --noEmit` / `npx expo export` / equivalent)
+4. **Coverage verified** — Test coverage ≥ 80% for new/changed code
+
+Claude MUST NEVER create a commit or PR without completing these steps. If the user explicitly requests to skip testing, Claude should warn about risks but comply.
+
+This checklist applies to all workflow types (Feature, Bugfix, Refactor, DB Change). The only exception is the **Docs** workflow (documentation-only changes with no code modifications).
+
 ## Commit Message Format
 
 ```
