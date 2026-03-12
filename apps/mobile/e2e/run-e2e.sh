@@ -368,8 +368,26 @@ run_ios() {
     xcrun simctl boot "$udid" 2>/dev/null || true
     sleep 3
 
+    # Verify Metro is still serving bundles after Simulator reset.
+    # Without this check, the app may launch to a black screen because it
+    # cannot fetch the JS bundle from Metro.
+    log "Verifying Metro bundle availability before retry..."
+    if ! curl -sf --max-time 30 \
+        "http://localhost:8081/index.bundle?platform=ios&dev=true&minify=false" \
+        -o /dev/null 2>/dev/null; then
+      err "Metro is not serving iOS bundles after Simulator reset. Aborting retry."
+      return 1
+    fi
+    log "Metro iOS bundle is ready."
+
     # Re-launch the app to reconnect to Metro
     xcrun simctl launch "$udid" to.coyo.app 2>/dev/null || true
+    sleep 5
+
+    # Warm-up: wait for the app to fully render before Maestro takes over.
+    # The extra delay prevents the black-screen crash observed when Maestro
+    # starts interacting before the JS bundle has finished loading.
+    log "Waiting for app to stabilize after relaunch..."
     sleep 3
 
     exit_code=0
