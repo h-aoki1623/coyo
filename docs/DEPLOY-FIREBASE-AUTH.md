@@ -200,14 +200,26 @@ Production config files are stored as Base64-encoded EAS Secrets and decoded at 
 cd apps/mobile
 
 # Base64-encode and store GoogleService-Info.plist as EAS Secret
-base64 -i /path/to/production/GoogleService-Info.plist | eas secret:create \
-  --name GOOGLE_SERVICES_PLIST_BASE64 \
-  --scope project --force
+VALUE=$(base64 -i '/path/to/production/GoogleService-Info.plist')
+
+eas env:create --name GOOGLE_SERVICES_PLIST_BASE64 \
+  --value "$VALUE" \
+  --scope project \
+  --type string \
+  --visibility secret \
+  --environment production \
+  --force
 
 # Base64-encode and store google-services.json as EAS Secret
-base64 -i /path/to/production/google-services.json | eas secret:create \
-  --name GOOGLE_SERVICES_JSON_BASE64 \
-  --scope project --force
+VALUE=$(base64 -i '/path/to/production/google-services.json')
+
+eas env:create --name GOOGLE_SERVICES_JSON_BASE64 \
+  --value "$VALUE" \
+  --scope project \
+  --type string \
+  --visibility secret \
+  --environment production \
+  --force
 ```
 
 2. **Pre-install hook** (`eas-build-pre-install.sh`) runs automatically during EAS Build:
@@ -223,12 +235,22 @@ base64 -i /path/to/production/google-services.json | eas secret:create \
 cd apps/mobile
 
 # Google Web Client ID (required for Google Sign-In)
-eas secret:create --name GOOGLE_WEB_CLIENT_ID \
-  --value "<web-client-id>" --scope project
+eas env:create --name GOOGLE_WEB_CLIENT_ID \
+  --value "<web-client-id>" \
+  --scope project \
+  --type string \
+  --visibility secret \
+  --environment production \
+  --force
 
 # iOS Google Client ID (CLIENT_ID from GoogleService-Info.plist)
-eas secret:create --name GID_CLIENT_ID \
-  --value "<ios-client-id>" --scope project
+eas env:create --name GID_CLIENT_ID \
+  --value "<ios-client-id>" \
+  --scope project \
+  --type string \
+  --visibility secret \
+  --environment production \
+  --force
 ```
 
 ### C.3 Update eas.json
