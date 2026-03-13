@@ -60,6 +60,7 @@ class TestAppRedirect:
 
         assert response.status_code == 200
         assert "text/html" in response.headers["content-type"]
+        assert "coyo://email-verified" in response.text
 
     @pytest.mark.unit
     async def test_app_redirect_has_csp_header(
