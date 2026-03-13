@@ -72,6 +72,16 @@ class TestAppRedirect:
         csp = response.headers["content-security-policy"]
         assert csp == "default-src 'none'; style-src 'unsafe-inline'"
 
+    @pytest.mark.unit
+    async def test_app_redirect_has_x_content_type_options_header(
+        self,
+        auth_client: AsyncClient,
+    ):
+        response = await auth_client.get("/api/auth/app-redirect")
+
+        assert response.status_code == 200
+        assert response.headers["x-content-type-options"] == "nosniff"
+
 
 class TestSessionEndpoint:
     """Tests for POST /api/auth/session."""
