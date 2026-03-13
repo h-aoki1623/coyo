@@ -14,13 +14,15 @@ const firebaseDir = `./firebase/${FIREBASE_DIR_MAP[appEnv] ?? 'development'}`;
 // On EAS Build, production Firebase configs are decoded by eas-build-pre-install.sh
 // before prebuild runs. However, EAS CLI also evaluates this config locally
 // (via `npx expo config`) before uploading the project, at which point
-// production files do not exist. Return undefined so the local pre-check
-// does not fail with ENOENT. The config plugin mods that actually require the
-// file only run during prebuild on the remote builder, where the file exists.
-function resolveFirebaseConfig(filename: string): string | undefined {
+// production files do not exist. Fall back to development configs for the
+// local pre-check only — the actual build on the remote builder will use the
+// correct production files decoded by the pre-install hook.
+const FALLBACK_DIR = './firebase/development';
+
+function resolveFirebaseConfig(filename: string): string {
   const primary = `${firebaseDir}/${filename}`;
   if (fs.existsSync(primary)) return primary;
-  return undefined;
+  return `${FALLBACK_DIR}/${filename}`;
 }
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
