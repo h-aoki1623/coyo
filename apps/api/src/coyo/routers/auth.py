@@ -42,6 +42,7 @@ async def app_redirect(request: Request) -> HTMLResponse:
         content=_APP_REDIRECT_HTML,
         headers={
             "Content-Security-Policy": "default-src 'none'; style-src 'unsafe-inline'",
+            "X-Content-Type-Options": "nosniff",
         },
     )
 
