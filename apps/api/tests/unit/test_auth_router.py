@@ -1,4 +1,4 @@
-"""Unit tests for the auth router (POST /api/auth/session)."""
+"""Unit tests for the auth router."""
 
 from collections.abc import AsyncGenerator
 from unittest.mock import patch
