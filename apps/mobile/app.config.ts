@@ -1,4 +1,5 @@
 import fs from 'fs';
+import path from 'path';
 
 import 'dotenv/config';
 import type { ExpoConfig, ConfigContext } from 'expo/config';
@@ -10,14 +11,32 @@ const FIREBASE_DIR_MAP: Record<string, string> = {
 };
 const appEnv = process.env.APP_ENV ?? 'development';
 const firebaseDir = `./firebase/${FIREBASE_DIR_MAP[appEnv] ?? 'development'}`;
-
-// On EAS Build, production Firebase configs are decoded by eas-build-pre-install.sh
-// before prebuild runs. However, EAS CLI also evaluates this config locally
-// (via `npx expo config`) before uploading the project, at which point
-// production files do not exist. Fall back to development configs for the
-// local pre-check only — the actual build on the remote builder will use the
-// correct production files decoded by the pre-install hook.
 const FALLBACK_DIR = './firebase/development';
+
+// On EAS Build, Firebase config files are not in the git repo (gitignored).
+// They are provided as Base64-encoded EAS Secrets. This function decodes them
+// to disk at config evaluation time — before resolveFirebaseConfig() runs —
+// so that googleServicesFile paths resolve correctly during both the local
+// pre-check (`npx expo config`) and the remote prebuild step.
+function decodeFirebaseSecretsIfNeeded(): void {
+  const secrets: Array<{ envVar: string; filename: string }> = [
+    { envVar: 'GOOGLE_SERVICES_JSON_BASE64', filename: 'google-services.json' },
+    { envVar: 'GOOGLE_SERVICES_PLIST_BASE64', filename: 'GoogleService-Info.plist' },
+  ];
+
+  for (const { envVar, filename } of secrets) {
+    const base64Value = process.env[envVar];
+    if (!base64Value) continue;
+
+    const targetPath = path.join(firebaseDir, filename);
+    if (fs.existsSync(targetPath)) continue;
+
+    fs.mkdirSync(firebaseDir, { recursive: true });
+    fs.writeFileSync(targetPath, Buffer.from(base64Value, 'base64'), { mode: 0o600 });
+  }
+}
+
+decodeFirebaseSecretsIfNeeded();
 
 function resolveFirebaseConfig(filename: string): string {
   const primary = `${firebaseDir}/${filename}`;
