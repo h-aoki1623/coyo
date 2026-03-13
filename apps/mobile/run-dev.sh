@@ -196,16 +196,59 @@ info "  Coyo Development Environment"
 info "====================================="
 echo ""
 
-# Step 1: Kill leftover Metro to avoid port conflicts during build
+# Step 1: Validate Firebase config files before prebuild
+FIREBASE_DIR="$MOBILE_DIR/firebase/development"
+IOS_PLIST="$FIREBASE_DIR/GoogleService-Info.plist"
+ANDROID_JSON="$FIREBASE_DIR/google-services.json"
+
+if [[ ! -f "$IOS_PLIST" ]] || [[ ! -f "$ANDROID_JSON" ]]; then
+  # Auto-copy fallback: if config files exist at the mobile root (legacy location),
+  # copy them into firebase/development/ so app.config.ts can find them.
+  LEGACY_PLIST="$MOBILE_DIR/GoogleService-Info.plist"
+  LEGACY_JSON="$MOBILE_DIR/google-services.json"
+
+  if [[ -f "$LEGACY_PLIST" ]] || [[ -f "$LEGACY_JSON" ]]; then
+    warn "Firebase config not found in firebase/development/."
+    warn "Copying from legacy location (apps/mobile/ root)..."
+    mkdir -p "$FIREBASE_DIR"
+    [[ -f "$LEGACY_PLIST" ]] && cp "$LEGACY_PLIST" "$IOS_PLIST"
+    [[ -f "$LEGACY_JSON" ]]  && cp "$LEGACY_JSON"  "$ANDROID_JSON"
+    log "Firebase config copied to firebase/development/."
+
+    # Verify both files are now present after the copy
+    if [[ ! -f "$IOS_PLIST" ]] || [[ ! -f "$ANDROID_JSON" ]]; then
+      err "Firebase config is still incomplete after legacy copy."
+      [[ ! -f "$IOS_PLIST" ]]   && err "  Missing: GoogleService-Info.plist (iOS)"
+      [[ ! -f "$ANDROID_JSON" ]] && err "  Missing: google-services.json (Android)"
+      err ""
+      err "Download the missing file(s) from the Firebase Console"
+      err "and place them in: apps/mobile/firebase/development/"
+      exit 1
+    fi
+  else
+    err "Firebase config files not found."
+    err "Expected: $IOS_PLIST"
+    err "Expected: $ANDROID_JSON"
+    err ""
+    err "Download them from the Firebase Console:"
+    err "  1. Go to Firebase Console > Project Settings > General"
+    err "  2. Download GoogleService-Info.plist (iOS) and google-services.json (Android)"
+    err "  3. Place them in: apps/mobile/firebase/development/"
+    exit 1
+  fi
+fi
+log "Firebase config validated."
+
+# Step 2: Kill leftover Metro to avoid port conflicts during build
 kill_existing_metro
 
-# Step 2: Backend infrastructure
+# Step 3: Backend infrastructure
 ensure_backend || exit 1
 if [[ -n "$_BACKEND_PID" ]]; then
   _PIDS_TO_KILL+=("$_BACKEND_PID")
 fi
 
-# Step 3: Start Metro in background BEFORE builds
+# Step 4: Start Metro in background BEFORE builds
 # Apps launched by expo run:* connect to Metro immediately on start.
 # Metro must be running first, otherwise the dev client shows an error screen.
 log "Starting Metro bundler..."
@@ -221,7 +264,7 @@ if ! wait_for_url "http://localhost:8081/status" 30 2 "Metro bundler"; then
 fi
 log "Metro bundler is ready."
 
-# Step 4: Platform-specific build
+# Step 5: Platform-specific build
 case "$TARGET" in
   ios)
     run_ios
@@ -247,7 +290,7 @@ log "  Metro bundler running (PID: $_METRO_PID)"
 log "  Press Ctrl+C to stop all services."
 log ""
 
-# Step 5: Wait on Metro (foreground)
+# Step 6: Wait on Metro (foreground)
 # NOTE: Do NOT use `exec` here — it replaces the shell process and prevents
 # the trap handler from firing, leaving backend API and emulator processes
 # running after Ctrl+C. Instead, wait on Metro so that when it exits
