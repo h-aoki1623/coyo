@@ -55,11 +55,11 @@ In Firebase Console > Project settings > General:
 
 1. **Add iOS app**
    - Bundle ID: `to.coyo.app`
-   - Download `GoogleService-Info.plist` → place at `apps/mobile/GoogleService-Info.plist`
+   - Download `GoogleService-Info.plist` → place at `apps/mobile/firebase/development/GoogleService-Info.plist`
 2. **Add Android app**
    - Package name: `to.coyo.app`
    - Register SHA-1 fingerprints for both debug and production (see below)
-   - Download `google-services.json` → place at `apps/mobile/google-services.json`
+   - Download `google-services.json` → place at `apps/mobile/firebase/development/google-services.json`
 
 ### A.5 Register Android SHA-1 Fingerprints
 
@@ -158,42 +158,64 @@ env_vars: |
 
 ## Phase C: Mobile App Configuration
 
-### C.1 Place Firebase Config Files
+### C.1 Firebase Config Files (Per-Environment)
 
-Firebase config files (`google-services.json`, `GoogleService-Info.plist`) must be available at build time. Use separate Firebase projects for development and production environments.
+Firebase config files (`google-services.json`, `GoogleService-Info.plist`) must be available at build time. Separate Firebase projects are used for development and production to ensure isolation of user data and auth state.
 
-> **TODO**: Per-environment config file management via EAS Build is tracked in [TODO-FIREBASE-AUTH.md #11](./TODO-FIREBASE-AUTH.md). The steps below describe the interim approach using local file placement.
+`app.config.ts` selects the correct config directory based on `APP_ENV`:
 
-**Current approach (development):**
+```typescript
+const FIREBASE_DIR_MAP: Record<string, string> = {
+  development: 'development',
+  staging: 'production',
+  production: 'production',
+};
+const appEnv = process.env.APP_ENV ?? 'development';
+const firebaseDir = `./firebase/${FIREBASE_DIR_MAP[appEnv] ?? 'development'}`;
+```
 
-Place the config files directly in `apps/mobile/` (they are gitignored):
+#### Directory Structure
 
 ```
-apps/mobile/google-services.json       # Android
-apps/mobile/GoogleService-Info.plist    # iOS
+apps/mobile/firebase/
+  development/
+    google-services.json       # Android (committed to repo)
+    GoogleService-Info.plist    # iOS (committed to repo)
+  production/
+    google-services.json       # Android (decoded from EAS Secret at build time)
+    GoogleService-Info.plist    # iOS (decoded from EAS Secret at build time)
 ```
 
-**Production approach (EAS Build):**
+#### Development Config
 
-Store production config files as Base64-encoded EAS Secrets and decode at build time:
+Development config files are committed to the repository under `apps/mobile/firebase/development/`. No additional setup is needed for local development.
+
+#### Production Config (EAS Build)
+
+Production config files are stored as Base64-encoded EAS Secrets and decoded at build time by `eas-build-pre-install.sh`.
+
+1. **Store production config files as EAS Secrets:**
 
 ```bash
 cd apps/mobile
 
 # Base64-encode and store GoogleService-Info.plist as EAS Secret
-base64 -i GoogleService-Info.plist | eas secret:create \
+base64 -i /path/to/production/GoogleService-Info.plist | eas secret:create \
   --name GOOGLE_SERVICES_PLIST_BASE64 \
   --scope project --force
 
 # Base64-encode and store google-services.json as EAS Secret
-base64 -i google-services.json | eas secret:create \
+base64 -i /path/to/production/google-services.json | eas secret:create \
   --name GOOGLE_SERVICES_JSON_BASE64 \
   --scope project --force
 ```
 
-Decode and place files using a custom EAS Build pre-install hook (e.g., `eas-build-pre-install.sh`).
+2. **Pre-install hook** (`eas-build-pre-install.sh`) runs automatically during EAS Build:
+   - Decodes the Base64 secrets into `firebase/production/`
+   - Validates the decoded files (JSON lint for Android, plist lint for iOS)
+   - Sets restrictive file permissions (`chmod 600`)
 
-> **Note**: While these files contain only public information (no secrets), using separate Firebase projects per environment ensures proper isolation of user data and auth state.
+> **Note**: Development config files contain only public information (no secrets). Production config files are never committed — they exist only during EAS Build via the pre-install hook.
 
 ### C.2 Add EAS Secrets
 
