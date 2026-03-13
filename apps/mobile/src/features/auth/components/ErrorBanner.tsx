@@ -8,8 +8,10 @@ interface Props {
 }
 
 export function ErrorBanner({ message }: Props) {
+  if (!message) return null;
+
   return (
-    <View style={styles.container}>
+    <View style={styles.container} accessibilityRole="alert">
       <Text style={styles.text}>{message}</Text>
     </View>
   );

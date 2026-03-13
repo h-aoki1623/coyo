@@ -9,11 +9,18 @@ describe('ErrorBanner', () => {
     expect(screen.getByText('Something went wrong')).toBeTruthy();
   });
 
-  it('renders with an empty message', () => {
+  it('returns null for an empty message', () => {
     render(<ErrorBanner message="" />);
 
-    // Component still renders, just with empty text
-    expect(screen.toJSON()).toBeTruthy();
+    expect(screen.toJSON()).toBeNull();
+  });
+
+  it('has accessibilityRole alert', () => {
+    const { toJSON } = render(<ErrorBanner message="Error occurred" />);
+    const tree = toJSON();
+
+    expect(tree).not.toBeNull();
+    expect((tree as { props: Record<string, unknown> }).props.accessibilityRole).toBe('alert');
   });
 
   it('renders special characters and unicode', () => {
