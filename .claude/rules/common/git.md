@@ -95,6 +95,29 @@ Claude MUST complete ALL of the following BEFORE creating any commit:
 2. **Tests passing** — All tests run and pass (`pytest` / `npx jest`)
 3. **Build passing** — Build verification succeeds (`npx tsc --noEmit` / `npx expo export` / equivalent)
 4. **Coverage verified** — Test coverage ≥ 80% for new/changed code
+5. **E2E tests run** — If the change affects app behavior (see criteria below), E2E tests MUST be run and pass BEFORE committing. Do NOT skip this step or defer it to "after the PR".
+
+### E2E Test Required Criteria
+
+E2E tests are REQUIRED when the change meets ANY of the following:
+
+- Modifies UI components, screens, or navigation flows
+- Changes API endpoints, request/response schemas, or error handling
+- Alters authentication, authorization, or session logic
+- Modifies form validation, input handling, or user interactions
+- Changes business logic that affects user-visible behavior
+- Updates state management that impacts what users see or do
+- Modifies database schemas or queries that back user-facing features
+
+E2E tests are NOT required for:
+
+- Documentation-only changes
+- Code style / linting / formatting changes
+- Internal refactoring with no user-visible behavior change (unit tests are sufficient)
+- Build configuration or CI pipeline changes
+- Adding or updating dev dependencies
+
+When in doubt, run E2E tests. Skipping E2E tests for behavioral changes has caused regressions in the past.
 
 Claude MUST NEVER create a commit or PR without completing these steps. If the user explicitly requests to skip testing, Claude should warn about risks but comply.
 

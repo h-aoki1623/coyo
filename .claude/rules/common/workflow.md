@@ -98,13 +98,14 @@ Design elements are executed sequentially. Skip elements not relevant to the fea
     - **database-reviewer**: schema, indexes, queries, RLS (DB changes)
     - **python-reviewer**: PEP 8, type hints, Pythonic idioms (Python projects)
 
-13. **E2E Tests** (critical user flows)
+13. **E2E Tests** (MUST for behavioral changes — see [git.md](git.md) "E2E Test Required Criteria")
     - Web: use **web-e2e-tester** (Playwright)
     - Mobile: use **mobile-e2e-tester** (Maestro)
+    - Claude MUST NOT proceed to Commit & Push until E2E tests pass
 
 ### Phase 5: Finalize
 
-14. **Commit & Push**
+14. **Commit & Push** (BLOCKED until steps 11–13 are complete)
 15. **Documentation** (significant changes only)
     - Use **doc-updater** to update codemaps and docs
 
@@ -122,12 +123,12 @@ Reproduce-First: confirm the bug before fixing.
 6. **Test Coverage** - Verify reproduction test is sufficient; add tests if needed
    - Unit tests for the fixed behavior
    - Integration tests if the bug spans multiple components
-   - E2E tests if the bug affects a user flow - use **web-e2e-tester** (web) or **mobile-e2e-tester** (mobile)
+   - E2E tests if the fix affects a user flow (see [git.md](git.md) "E2E Test Required Criteria") - use **web-e2e-tester** (web) or **mobile-e2e-tester** (mobile)
 7. **Review** (run in parallel where possible)
    - **code-reviewer**: quality, patterns, maintainability
    - **security-reviewer**: vulnerabilities, input validation, secrets (auth/payment/API code)
    - **python-reviewer**: PEP 8, type hints, Pythonic idioms (Python projects)
-8. **Commit & Push**
+8. **Commit & Push** (BLOCKED until steps 5–7 are complete, including E2E if required)
 
 ---
 
@@ -143,13 +144,13 @@ Safety-Net-First: ensure existing behavior is protected.
 6. **Test Coverage** - Verify safety tests still pass; add tests if coverage gaps remain
    - Unit tests to verify refactored code behaves identically
    - Integration tests for changed interfaces or boundaries
-   - E2E tests if user-facing behavior could be affected - use **web-e2e-tester** (web) or **mobile-e2e-tester** (mobile)
+   - E2E tests if user-facing behavior could be affected (see [git.md](git.md) "E2E Test Required Criteria") - use **web-e2e-tester** (web) or **mobile-e2e-tester** (mobile)
 7. **Review** (run in parallel where possible)
    - **code-reviewer**: quality, patterns, maintainability
    - **security-reviewer**: vulnerabilities, input validation, secrets (auth/payment/API code)
    - **python-reviewer**: PEP 8, type hints, Pythonic idioms (Python projects)
    - **build-error-resolver** if build breaks
-8. **Commit & Push**
+8. **Commit & Push** (BLOCKED until steps 4–7 are complete, including E2E if required)
 
 ---
 
@@ -167,12 +168,12 @@ Schema-First: design the schema before writing application code.
 5. **Test Coverage** - Verify existing tests pass; add tests for new or changed behavior
    - Unit tests for data access logic
    - Integration tests for migrations and DB operations
-   - E2E tests if schema changes affect user flows - use **web-e2e-tester** (web) or **mobile-e2e-tester** (mobile)
+   - E2E tests if schema changes affect user flows (see [git.md](git.md) "E2E Test Required Criteria") - use **web-e2e-tester** (web) or **mobile-e2e-tester** (mobile)
 6. **Review** (run in parallel where possible)
    - **code-reviewer**: quality, patterns, maintainability
    - **security-reviewer**: RLS, access control, input validation
    - **python-reviewer**: PEP 8, type hints, Pythonic idioms (Python projects)
-7. **Commit & Push**
+7. **Commit & Push** (BLOCKED until steps 5–6 are complete, including E2E if required)
 
 ---
 
