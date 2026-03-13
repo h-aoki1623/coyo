@@ -48,6 +48,31 @@ async def auth_client(
     app.dependency_overrides.clear()
 
 
+class TestAppRedirect:
+    """Tests for GET /api/auth/app-redirect."""
+
+    @pytest.mark.unit
+    async def test_app_redirect_returns_html(
+        self,
+        auth_client: AsyncClient,
+    ):
+        response = await auth_client.get("/api/auth/app-redirect")
+
+        assert response.status_code == 200
+        assert "text/html" in response.headers["content-type"]
+
+    @pytest.mark.unit
+    async def test_app_redirect_has_csp_header(
+        self,
+        auth_client: AsyncClient,
+    ):
+        response = await auth_client.get("/api/auth/app-redirect")
+
+        assert response.status_code == 200
+        csp = response.headers["content-security-policy"]
+        assert csp == "default-src 'none'; style-src 'unsafe-inline'"
+
+
 class TestSessionEndpoint:
     """Tests for POST /api/auth/session."""
 
