@@ -117,7 +117,11 @@ Reproduce-First: confirm the bug before fixing.
 
 1. **Investigate** - Use **explorer** agent to trace the bug's root cause
 2. **Create Branch**
-3. **Reproduce** - Write a failing test or confirm reproduction steps
+3. **Reproduce** - Confirm the bug exists before fixing
+   - Execute the failing scenario and capture the error output
+   - If a formal test can be written, write a failing test
+   - If not (shell scripts, config), document the reproduction steps and observed error
+   - Do NOT proceed to Fix without confirmed reproduction
 4. **Fix** - Implement minimal fix
 5. **Verify** - Confirm the reproduction test passes
 6. **Test Coverage** - Verify reproduction test is sufficient; add tests if needed

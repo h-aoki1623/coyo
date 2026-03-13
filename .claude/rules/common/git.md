@@ -93,6 +93,7 @@ Claude MUST complete ALL of the following BEFORE creating any commit:
 
 1. **Tests written** — Unit tests (and integration tests if API/DB changes) for all new/changed code
 2. **Tests passing** — All tests run and pass (`pytest` / `npx jest`)
+   > NOTE: "Tests passing" includes manual functional verification for code that lacks formal test frameworks (shell scripts, CI configs, etc.). `bash -n` or `shellcheck` alone is NOT sufficient — the script must be actually executed in realistic scenarios.
 3. **Build passing** — Build verification succeeds (`npx tsc --noEmit` / `npx expo export` / equivalent)
 4. **Coverage verified** — Test coverage ≥ 80% for new/changed code
 5. **E2E tests run** — If the change affects app behavior (see criteria below), E2E tests MUST be run and pass BEFORE committing. Do NOT skip this step or defer it to "after the PR".

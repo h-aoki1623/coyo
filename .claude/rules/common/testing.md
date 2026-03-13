@@ -18,6 +18,16 @@ Testing timing and approach vary by workflow type (see [workflow.md](workflow.md
 | **Refactor** | Before refactor (safety net) + after refactor (coverage check) | Safety tests first, then verify behavior preserved |
 | **DB Change** | After implementation | Focus on integration tests for migrations and queries |
 
+## Testing for Shell Scripts / Tooling
+
+When no formal test framework exists (shell scripts, Makefiles, CI configs),
+functional verification by execution IS the test:
+
+1. **Success path** — Run with valid inputs, verify expected output
+2. **Fallback path** — Trigger fallback conditions, verify recovery
+3. **Error path** — Remove prerequisites, verify early failure with clear message
+4. **Document results** — Record what was tested and the outcome before committing
+
 ## Edge Cases (MUST Test)
 
 1. **Null/Undefined** - What if input is null or undefined?
