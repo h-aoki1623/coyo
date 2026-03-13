@@ -411,6 +411,11 @@ run_android() {
   device_id=$(get_android_emulator_id)
   log "Using Android Emulator: $device_id"
 
+  # Disable Android autofill to prevent Google Password Manager dialogs
+  # from blocking input fields during E2E tests
+  log "Disabling Android autofill service..."
+  adb -s "$device_id" shell settings put secure autofill_service null 2>/dev/null || true
+
   # Ensure adb reverse is set up
   setup_adb_reverse "$device_id"
 
