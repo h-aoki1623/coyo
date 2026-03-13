@@ -5,16 +5,17 @@ import { AuthFormLayout } from './AuthFormLayout';
 
 jest.mock('@/components/NavBar', () => ({
   NavBar: ({ onBack }: { onBack?: () => void }) => {
-    const { Pressable, Text } = require('react-native');
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const RN = require('react-native');
     return (
-      <Pressable
+      <RN.Pressable
         onPress={onBack}
         accessibilityRole="button"
         accessibilityLabel="Go back"
         testID="nav-back"
       >
-        <Text>Back</Text>
-      </Pressable>
+        <RN.Text>Back</RN.Text>
+      </RN.Pressable>
     );
   },
 }));
