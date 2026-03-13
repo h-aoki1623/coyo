@@ -18,7 +18,10 @@
     "preview": {
       "distribution": "internal",
       "env": {
-        "APP_ENV": "staging"
+        "APP_ENV": "production",
+        "API_BASE_URL": "https://coyo-api-1008709417218.asia-northeast1.run.app",
+        "GOOGLE_WEB_CLIENT_ID": "595448026395-0npbpvm0ni23dileapq0nbqq7m75np2p.apps.googleusercontent.com",
+        "GID_CLIENT_ID": "595448026395-d1vtu4cn06h2g3le497gtpp0n5vgu5l7.apps.googleusercontent.com"
       },
       "ios": {
         "enterpriseProvisioning": "adhoc"
@@ -27,7 +30,10 @@
     "production": {
       "autoIncrement": true,
       "env": {
-        "APP_ENV": "production"
+        "APP_ENV": "production",
+        "API_BASE_URL": "https://coyo-api-1008709417218.asia-northeast1.run.app",
+        "GOOGLE_WEB_CLIENT_ID": "595448026395-0npbpvm0ni23dileapq0nbqq7m75np2p.apps.googleusercontent.com",
+        "GID_CLIENT_ID": "595448026395-d1vtu4cn06h2g3le497gtpp0n5vgu5l7.apps.googleusercontent.com"
       }
     }
   },
