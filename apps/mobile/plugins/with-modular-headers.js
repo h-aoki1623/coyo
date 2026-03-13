@@ -6,19 +6,11 @@
  * 2. Adds :modular_headers => true on specific Firebase dependency pods
  *    instead of the global use_modular_headers! (which conflicts with
  *    ReactCommon on Xcode 17).
- *
- * NOTE (Xcode 17 workaround):
- * After running `npx expo prebuild`, you must pre-build the FirebaseAuth
- * target to generate FirebaseAuth-Swift.h before the main build:
- *
- *   xcodebuild -project ios/Pods/Pods.xcodeproj -target FirebaseAuth \
- *     -configuration Debug build -quiet
- *   cp ios/build/Debug-iphoneos/FirebaseAuth/Swift\ Compatibility\ Header/FirebaseAuth-Swift.h \
- *     ios/Pods/Headers/Public/FirebaseAuth/
- *   cp ios/build/Debug-iphoneos/FirebaseAuth/Swift\ Compatibility\ Header/FirebaseAuth-Swift.h \
- *     ios/Pods/Headers/Private/FirebaseAuth/
- *
- * The run-e2e.sh script handles this automatically.
+ * 3. Adds an explicit target dependency from RNFBAuth → FirebaseAuth in
+ *    post_install, so Xcode compiles FirebaseAuth first and generates
+ *    FirebaseAuth-Swift.h before RNFBAuth needs it. This fixes the
+ *    "'FirebaseAuth/FirebaseAuth-Swift.h' file not found" error on
+ *    Xcode 16+/17 where ScanDependencies runs before Swift compilation.
  */
 const { withDangerousMod } = require('expo/config-plugins');
 const fs = require('fs');
@@ -36,6 +28,24 @@ const FIREBASE_MODULAR_HEADER_PODS = [
   'GTMSessionFetcher',
   'RecaptchaInterop',
 ];
+
+// Ruby code injected into the Podfile's post_install block.
+// Adds an explicit Xcode target dependency: RNFBAuth → FirebaseAuth.
+// This forces Xcode to compile FirebaseAuth (generating FirebaseAuth-Swift.h)
+// before RNFBAuth attempts to import it.
+const SWIFT_HEADER_DEPENDENCY_SNIPPET = `
+  # [Firebase] Xcode 16+/17 workaround: explicit target dependency for Swift header
+  # RNFBAuth imports <FirebaseAuth/FirebaseAuth-Swift.h>, which is generated when
+  # FirebaseAuth's Swift code compiles. Without this dependency, Xcode's
+  # ScanDependencies phase may run RNFBAuth before FirebaseAuth finishes.
+  rnfb_auth_target = installer.pods_project.targets.find { |t| t.name == 'RNFBAuth' }
+  firebase_auth_target = installer.pods_project.targets.find { |t| t.name == 'FirebaseAuth' }
+  if rnfb_auth_target && firebase_auth_target
+    unless rnfb_auth_target.dependencies.any? { |d| d.target == firebase_auth_target }
+      rnfb_auth_target.add_dependency(firebase_auth_target)
+    end
+  end
+`;
 
 module.exports = function withModularHeaders(config) {
   return withDangerousMod(config, [
@@ -65,6 +75,12 @@ module.exports = function withModularHeaders(config) {
       podfile = podfile.replace(
         /(use_react_native!\([\s\S]*?\))/,
         `$1\n\n  # [Firebase] modular headers for specific pods only\n${podDeclarations}`,
+      );
+
+      // Inject Swift header dependency into post_install block
+      podfile = podfile.replace(
+        /(post_install\s+do\s+\|installer\|)/,
+        `$1\n${SWIFT_HEADER_DEPENDENCY_SNIPPET}`,
       );
 
       fs.writeFileSync(podfilePath, podfile, 'utf-8');
