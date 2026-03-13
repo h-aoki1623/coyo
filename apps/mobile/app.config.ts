@@ -1,3 +1,5 @@
+import fs from 'fs';
+
 import 'dotenv/config';
 import type { ExpoConfig, ConfigContext } from 'expo/config';
 
@@ -8,6 +10,18 @@ const FIREBASE_DIR_MAP: Record<string, string> = {
 };
 const appEnv = process.env.APP_ENV ?? 'development';
 const firebaseDir = `./firebase/${FIREBASE_DIR_MAP[appEnv] ?? 'development'}`;
+
+// On EAS Build, production Firebase configs are decoded by eas-build-pre-install.sh
+// before prebuild runs. However, EAS CLI also evaluates this config locally
+// (via `npx expo config`) before uploading the project, at which point
+// production files do not exist. Return undefined so the local pre-check
+// does not fail with ENOENT. The config plugin mods that actually require the
+// file only run during prebuild on the remote builder, where the file exists.
+function resolveFirebaseConfig(filename: string): string | undefined {
+  const primary = `${firebaseDir}/${filename}`;
+  if (fs.existsSync(primary)) return primary;
+  return undefined;
+}
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
@@ -21,8 +35,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ios: {
     bundleIdentifier: 'to.coyo.app',
     supportsTablet: false,
-    googleServicesFile: process.env.GOOGLE_SERVICES_PLIST ?? `${firebaseDir}/GoogleService-Info.plist`,
+    googleServicesFile: process.env.GOOGLE_SERVICES_PLIST ?? resolveFirebaseConfig('GoogleService-Info.plist'),
     infoPlist: {
+      ITSAppUsesNonExemptEncryption: false,
       GIDClientID: process.env.GID_CLIENT_ID ?? '',
     },
     entitlements: {
@@ -35,7 +50,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       foregroundImage: './assets/icon.png',
       backgroundColor: '#4A90E2',
     },
-    googleServicesFile: process.env.GOOGLE_SERVICES_JSON ?? `${firebaseDir}/google-services.json`,
+    googleServicesFile: process.env.GOOGLE_SERVICES_JSON ?? resolveFirebaseConfig('google-services.json'),
   },
   plugins: [
     'expo-secure-store',
