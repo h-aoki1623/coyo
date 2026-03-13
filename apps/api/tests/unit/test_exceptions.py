@@ -3,6 +3,7 @@
 import pytest
 
 from coyo.exceptions import (
+    AuthenticationError,
     ConversationStateError,
     CoyoError,
     ExternalServiceError,
@@ -38,6 +39,19 @@ class TestCoyoError:
         error = CoyoError("test", "TEST")
         assert isinstance(error, Exception)
 
+    @pytest.mark.unit
+    def test_coyo_error_client_message_defaults_to_message(self):
+        error = CoyoError("internal detail", "TEST")
+        assert error.client_message == "internal detail"
+
+    @pytest.mark.unit
+    def test_coyo_error_custom_client_message(self):
+        error = CoyoError(
+            "internal detail", "TEST", 500, client_message="safe message"
+        )
+        assert error.message == "internal detail"
+        assert error.client_message == "safe message"
+
 
 class TestNotFoundError:
     """Tests for the NotFoundError exception."""
@@ -48,6 +62,13 @@ class TestNotFoundError:
         assert error.message == "Conversation not found: abc-123"
         assert error.code == "NOT_FOUND"
         assert error.status_code == 404
+
+    @pytest.mark.unit
+    def test_not_found_error_client_message_is_generic(self):
+        error = NotFoundError("Conversation", "abc-123")
+        assert error.client_message == "The requested resource was not found"
+        assert "abc-123" not in error.client_message
+        assert "Conversation" not in error.client_message
 
     @pytest.mark.unit
     def test_not_found_error_inheritance(self):
@@ -69,6 +90,7 @@ class TestNotFoundError:
         id_str = str(uuid.uuid4())
         error = NotFoundError("Conversation", id_str)
         assert id_str in error.message
+        assert id_str not in error.client_message
 
 
 class TestValidationError:
@@ -92,6 +114,11 @@ class TestValidationError:
         assert error.message == ""
         assert error.code == "VALIDATION_ERROR"
 
+    @pytest.mark.unit
+    def test_validation_error_client_message_matches_message(self):
+        error = ValidationError("Invalid email format")
+        assert error.client_message == error.message
+
 
 class TestConversationStateError:
     """Tests for the ConversationStateError exception."""
@@ -108,6 +135,32 @@ class TestConversationStateError:
         error = ConversationStateError("test")
         assert isinstance(error, CoyoError)
 
+    @pytest.mark.unit
+    def test_conversation_state_error_client_message_is_generic(self):
+        error = ConversationStateError(
+            "Cannot end conversation in 'completed' status"
+        )
+        assert "completed" not in error.client_message
+        assert error.client_message == (
+            "This operation is not allowed for the current conversation state"
+        )
+
+
+class TestAuthenticationError:
+    """Tests for the AuthenticationError exception."""
+
+    @pytest.mark.unit
+    def test_authentication_error_default_client_message(self):
+        error = AuthenticationError()
+        assert error.client_message == "Authentication required"
+
+    @pytest.mark.unit
+    def test_authentication_error_hides_internal_detail(self):
+        error = AuthenticationError("Firebase token expired")
+        assert error.message == "Firebase token expired"
+        assert error.client_message == "Authentication required"
+        assert "Firebase" not in error.client_message
+
 
 class TestExternalServiceError:
     """Tests for the ExternalServiceError exception."""
@@ -120,6 +173,13 @@ class TestExternalServiceError:
         assert error.status_code == 502
 
     @pytest.mark.unit
+    def test_external_service_error_client_message_is_generic(self):
+        error = ExternalServiceError("STT", "Connection timeout")
+        assert error.client_message == "An external service error occurred"
+        assert "STT" not in error.client_message
+        assert "Connection timeout" not in error.client_message
+
+    @pytest.mark.unit
     def test_external_service_error_different_services(self):
         stt_error = ExternalServiceError("STT", "failed")
         tts_error = ExternalServiceError("TTS", "timeout")
@@ -127,6 +187,8 @@ class TestExternalServiceError:
         assert "STT" in stt_error.message
         assert "TTS" in tts_error.message
         assert "OpenAI" in llm_error.message
+        # All should have the same generic client message
+        assert stt_error.client_message == tts_error.client_message == llm_error.client_message
 
     @pytest.mark.unit
     def test_external_service_error_inheritance(self):

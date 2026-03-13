@@ -76,7 +76,7 @@ async def coyo_error_handler(request: Request, exc: CoyoError) -> JSONResponse:
         content={
             "error": {
                 "code": exc.code,
-                "message": exc.message,
+                "message": exc.client_message,
             }
         },
     )
