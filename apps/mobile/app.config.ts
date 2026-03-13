@@ -83,6 +83,14 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         microphonePermission: 'Allow Coyo to access your microphone for English conversation practice.',
       },
     ],
+    [
+      'expo-build-properties',
+      {
+        ios: {
+          useFrameworks: 'static',
+        },
+      },
+    ],
     '@react-native-firebase/app',
     '@react-native-firebase/auth',
     '@react-native-google-signin/google-signin',
