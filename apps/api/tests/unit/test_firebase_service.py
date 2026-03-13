@@ -5,7 +5,11 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from coyo.exceptions import AuthenticationError
-from coyo.services.firebase import FirebaseTokenPayload, verify_firebase_token
+from coyo.services.firebase import (
+    FirebaseTokenPayload,
+    initialize_firebase,
+    verify_firebase_token,
+)
 
 
 def _make_decoded_token(
@@ -25,6 +29,76 @@ def _make_decoded_token(
             "sign_in_provider": sign_in_provider,
         },
     }
+
+
+class TestInitializeFirebase:
+    """Tests for initialize_firebase()."""
+
+    @pytest.fixture(autouse=True)
+    def _reset_firebase_app(self):
+        """Reset the global _firebase_app before each test."""
+        with patch("coyo.services.firebase._firebase_app", new=None):
+            yield
+
+    @pytest.mark.unit
+    @patch("coyo.services.firebase.firebase_initialize_app")
+    @patch("coyo.services.firebase.credentials.ApplicationDefault")
+    def test_successful_initialization(
+        self, mock_adc: MagicMock, mock_init: MagicMock
+    ):
+        mock_init.return_value = MagicMock()
+
+        initialize_firebase(project_id="test-project")
+
+        mock_adc.assert_called_once()
+        mock_init.assert_called_once()
+
+    @pytest.mark.unit
+    @patch("coyo.services.firebase.logger")
+    @patch("coyo.services.firebase.credentials.ApplicationDefault")
+    def test_fail_on_error_false_logs_warning_on_failure(
+        self, mock_adc: MagicMock, mock_logger: MagicMock
+    ):
+        mock_adc.side_effect = ValueError("no credentials")
+
+        # Should NOT raise
+        initialize_firebase(project_id="test-project", fail_on_error=False)
+
+        mock_logger.warning.assert_called_once()
+
+    @pytest.mark.unit
+    @patch("coyo.services.firebase.logger")
+    @patch("coyo.services.firebase.credentials.ApplicationDefault")
+    def test_fail_on_error_true_raises_runtime_error(
+        self, mock_adc: MagicMock, mock_logger: MagicMock
+    ):
+        mock_adc.side_effect = ValueError("no credentials")
+
+        with pytest.raises(RuntimeError, match="Firebase initialization failed"):
+            initialize_firebase(project_id="test-project", fail_on_error=True)
+
+        mock_logger.error.assert_called_once()
+
+    @pytest.mark.unit
+    @patch("coyo.services.firebase.credentials.ApplicationDefault")
+    def test_fail_on_error_true_chains_original_exception(
+        self, mock_adc: MagicMock
+    ):
+        original = ValueError("no credentials")
+        mock_adc.side_effect = original
+
+        with pytest.raises(RuntimeError) as exc_info:
+            initialize_firebase(project_id="test-project", fail_on_error=True)
+
+        assert exc_info.value.__cause__ is original
+
+    @pytest.mark.unit
+    @patch("coyo.services.firebase.credentials.ApplicationDefault")
+    def test_default_fail_on_error_is_false(self, mock_adc: MagicMock):
+        mock_adc.side_effect = ValueError("no credentials")
+
+        # Default behavior: should NOT raise
+        initialize_firebase(project_id="test-project")
 
 
 class TestVerifyFirebaseToken:

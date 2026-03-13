@@ -23,7 +23,10 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         initialize_firebase(
             settings.firebase_project_id,
             service_account_path=settings.firebase_service_account_path,
+            fail_on_error=_is_prod,
         )
+    elif _is_prod:
+        raise RuntimeError("FIREBASE_PROJECT_ID must be set in production")
     yield
 
 

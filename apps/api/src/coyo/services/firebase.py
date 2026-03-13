@@ -31,12 +31,20 @@ class FirebaseTokenPayload:
 def initialize_firebase(
     project_id: str | None = None,
     service_account_path: str | None = None,
+    *,
+    fail_on_error: bool = False,
 ) -> None:
     """Initialize Firebase Admin SDK.
 
     Credential resolution order:
     1. Explicit service account key file (``service_account_path``)
     2. Application Default Credentials (ADC) — automatic on Cloud Run
+
+    Args:
+        project_id: Firebase project ID.
+        service_account_path: Path to service account JSON key file.
+        fail_on_error: If True, raise ``RuntimeError`` on initialization
+            failure instead of logging a warning and continuing.
     """
     global _firebase_app  # noqa: PLW0603
     if _firebase_app is not None:
@@ -54,6 +62,9 @@ def initialize_firebase(
         _firebase_app = firebase_initialize_app(cred, options)
         logger.info("firebase_initialized", project_id=project_id)
     except Exception as err:
+        if fail_on_error:
+            logger.error("firebase_init_failed", reason=str(err), error_type=type(err).__name__)
+            raise RuntimeError("Firebase initialization failed") from err
         logger.warning("firebase_init_skipped", reason=str(err), error_type=type(err).__name__)
 
 
