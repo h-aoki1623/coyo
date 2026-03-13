@@ -118,12 +118,29 @@ When creating PRs:
 3. Draft comprehensive PR summary (in the same language as `README.md`)
 4. Include test plan with TODOs
 5. Push with `-u` flag if new branch
-6. After the PR is created, clean up **only the worktree you created in this session**:
+6. Clean up worktree — see **Worktree Cleanup (MUST)** below
+
+## Worktree Cleanup (MUST)
+
+PR creation and worktree cleanup are an **atomic operation** — one MUST NOT happen without the other. Immediately after a PR is created, Claude MUST execute the following cleanup steps before responding to the user.
+
+1. Verify the worktree exists:
+   ```bash
+   git worktree list
+   ```
+2. Move to the repository root:
    ```bash
    cd <repo-root>
+   ```
+3. Remove the worktree:
+   ```bash
    git worktree remove .claude/worktrees/<dir-name>
+   ```
+4. Delete the local branch:
+   ```bash
    git branch -d <branch-name>
    ```
-   - NEVER run `rm -rf .claude/worktrees/` or delete the entire worktrees directory
-   - NEVER remove worktrees for branches you did not create in this session
-   - Before removing, verify with `git worktree list` that the target exists
+
+**Prohibited:**
+- NEVER run `rm -rf .claude/worktrees/` or delete the entire worktrees directory
+- NEVER remove worktrees or branches that were NOT created in the current session
