@@ -38,7 +38,12 @@ async def app_redirect(request: Request) -> HTMLResponse:
     After Firebase verifies the email in the browser, it redirects here,
     which in turn opens the app via the ``coyo://`` URL scheme.
     """
-    return HTMLResponse(content=_APP_REDIRECT_HTML)
+    return HTMLResponse(
+        content=_APP_REDIRECT_HTML,
+        headers={
+            "Content-Security-Policy": "default-src 'none'; style-src 'unsafe-inline'",
+        },
+    )
 
 
 @router.post("/session", response_model=SessionResponse)
