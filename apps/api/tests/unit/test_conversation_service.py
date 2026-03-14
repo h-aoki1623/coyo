@@ -6,11 +6,11 @@ from datetime import UTC, datetime
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from coto.exceptions import ConversationStateError, NotFoundError, ValidationError
-from coto.models.conversation import Conversation
-from coto.models.turn import Turn
-from coto.models.user import User
-from coto.services.conversation import ALLOWED_TOPICS, ConversationService, FeedbackStats
+from coyo.exceptions import ConversationStateError, NotFoundError, ValidationError
+from coyo.models.conversation import Conversation
+from coyo.models.turn import Turn
+from coyo.models.user import User
+from coyo.services.conversation import ALLOWED_TOPICS, ConversationService, FeedbackStats
 
 
 class TestConversationServiceStart:

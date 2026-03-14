@@ -6,13 +6,13 @@ from datetime import UTC, datetime
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from coto.models.conversation import Conversation
-from coto.models.turn import Turn
-from coto.models.user import User
-from coto.repositories.conversation import ConversationRepository
-from coto.repositories.history import HistoryRepository
-from coto.repositories.turn import TurnRepository
-from coto.repositories.user import UserRepository
+from coyo.models.conversation import Conversation
+from coyo.models.turn import Turn
+from coyo.models.user import AuthProvider, User
+from coyo.repositories.conversation import ConversationRepository
+from coyo.repositories.history import HistoryRepository
+from coyo.repositories.turn import TurnRepository
+from coyo.repositories.user import UserRepository
 
 
 # ---------------------------------------------------------------------------
@@ -215,16 +215,26 @@ class TestUserRepository:
         self, db_session: AsyncSession
     ):
         repo = UserRepository(db_session)
-        user = await repo.find_or_create_by_device_id("new-device-id")
+        user = await repo.find_or_create_by_auth_uid(
+            auth_uid="fb-new-uid",
+            email="new@example.com",
+            display_name="New User",
+            auth_provider=AuthProvider.EMAIL,
+        )
         assert user.id is not None
-        assert user.device_id == "new-device-id"
+        assert user.auth_uid == "fb-new-uid"
 
     @pytest.mark.unit
     async def test_find_or_create_returns_existing_user(
         self, db_session: AsyncSession, test_user: User
     ):
         repo = UserRepository(db_session)
-        user = await repo.find_or_create_by_device_id(test_user.device_id)
+        user = await repo.find_or_create_by_auth_uid(
+            auth_uid=test_user.auth_uid,
+            email=test_user.email,
+            display_name=test_user.display_name,
+            auth_provider=test_user.auth_provider,
+        )
         assert user.id == test_user.id
 
     @pytest.mark.unit
@@ -233,8 +243,18 @@ class TestUserRepository:
     ):
         """Verify that calling find_or_create twice returns the same user."""
         repo = UserRepository(db_session)
-        user1 = await repo.find_or_create_by_device_id("idempotent-device")
-        user2 = await repo.find_or_create_by_device_id("idempotent-device")
+        user1 = await repo.find_or_create_by_auth_uid(
+            auth_uid="fb-idempotent-uid",
+            email="idem@example.com",
+            display_name="Idempotent",
+            auth_provider=AuthProvider.EMAIL,
+        )
+        user2 = await repo.find_or_create_by_auth_uid(
+            auth_uid="fb-idempotent-uid",
+            email="idem@example.com",
+            display_name="Idempotent",
+            auth_provider=AuthProvider.EMAIL,
+        )
         assert user1.id == user2.id
 
 
@@ -321,7 +341,10 @@ class TestHistoryRepository:
     ):
         """Verify that a different user cannot access the conversation."""
         # Create a different user
-        other_user = User(device_id="other-device")
+        other_user = User(
+            auth_uid="fb-other-user",
+            auth_provider=AuthProvider.EMAIL,
+        )
         db_session.add(other_user)
         await db_session.commit()
         await db_session.refresh(other_user)
@@ -351,7 +374,10 @@ class TestHistoryRepository:
         self, db_session: AsyncSession, test_conversation: Conversation
     ):
         """Verify that a different user cannot delete the conversation."""
-        other_user = User(device_id="other-device-2")
+        other_user = User(
+            auth_uid="fb-other-user-2",
+            auth_provider=AuthProvider.EMAIL,
+        )
         db_session.add(other_user)
         await db_session.commit()
         await db_session.refresh(other_user)

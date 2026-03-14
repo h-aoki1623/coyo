@@ -1,0 +1,51 @@
+# auth-sign-in.yaml
+# Verifies the email/password sign-in flow: Welcome → Auth Modal → Sign In Form → Home.
+#
+# This flow handles both states:
+#   - Already signed in → signs out first to reach the Welcome screen
+#   - Not signed in → proceeds directly to Welcome screen
+#
+# Prerequisites:
+# - E2E test user must exist in Firebase with email_verified=True
+#   (created by: apps/api/scripts/create_e2e_user.py)
+# - Backend API must be running (run-e2e.sh starts it automatically)
+appId: to.coyo.app
+---
+# Launch the application (clearState: false to preserve expo-dev-client settings)
+- launchApp:
+    clearState: false
+
+# If already signed in (Home screen visible), sign out first.
+# This handles the case where parallel test execution signed in before us.
+- runFlow:
+    when:
+      visible:
+        id: "sign-out-button"
+    file: helpers/sign-out.yaml
+
+# Wait for the Welcome screen (auth gate — user is not signed in)
+- extendedWaitUntil:
+    visible:
+      id: "welcome-get-started"
+    timeout: 30000
+
+# Verify Welcome screen elements
+- assertVisible:
+    id: "welcome-get-started"
+- assertVisible:
+    id: "welcome-sign-in"
+
+- takeScreenshot: "auth-01-welcome-screen"
+
+# Run the sign-in sub-flow
+- runFlow:
+    file: helpers/sign-in.yaml
+
+# Verify the Home screen is fully rendered after sign-in
+- assertVisible:
+    id: "home-greeting"
+- assertVisible: "TOPICS"
+- assertVisible:
+    id: "topic-sports"
+
+- takeScreenshot: "auth-02-home-after-sign-in"

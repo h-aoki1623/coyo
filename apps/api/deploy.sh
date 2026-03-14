@@ -15,10 +15,10 @@
 set -euo pipefail
 
 # --- Configuration ---
-PROJECT_ID="${GCP_PROJECT_ID:-<your-project-id>}"
+PROJECT_ID="${GCP_PROJECT_ID:?Set GCP_PROJECT_ID}"
 REGION="${CLOUD_RUN_REGION:-asia-northeast1}"
 SERVICE_NAME="${CLOUD_RUN_SERVICE:-coyo-api}"
-REPO_NAME="coyo"
+REPO_NAME="${ARTIFACT_REPO:-coyo}"
 IMAGE_NAME="coyo-api"
 
 # Parse arguments
@@ -66,7 +66,7 @@ gcloud run deploy "${SERVICE_NAME}" \
   --max-instances 5 \
   --timeout 300 \
   --concurrency 80 \
-  --set-env-vars "ENVIRONMENT=production,GCS_BUCKET_NAME=<your-bucket-name>,RATE_LIMIT_PER_MINUTE=30,CORS_ALLOWED_ORIGINS=[]" \
+  --set-env-vars "ENVIRONMENT=production,GCS_BUCKET_NAME=${GCS_BUCKET_NAME:?Set GCS_BUCKET_NAME},RATE_LIMIT_PER_MINUTE=30,CORS_ALLOWED_ORIGINS=[]" \
   --set-secrets "DATABASE_URL=database-url:latest,REDIS_URL=redis-url:latest,OPENAI_API_KEY=openai-api-key:latest" \
   --allow-unauthenticated \
   --execution-environment gen2 \

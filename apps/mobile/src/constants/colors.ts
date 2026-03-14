@@ -98,6 +98,7 @@ export const Colors = {
   // -- Accent (primary-tinted surfaces) --
   accentBg: Primitive.primary[50],            // #EFF6FF  info cards, pressed states
   accentBorder: Primitive.primary[200],       // #BFDBFE  accent borders (cards, banners)
+  accentIconBg: Primitive.primary[100],       // #DBEAFE  step badges, email card icon bg
   accentMuted: Primitive.primary[400],        // #60A5FA  waveform bars, decorative
 
   // -- Misc (primitive passthrough) --

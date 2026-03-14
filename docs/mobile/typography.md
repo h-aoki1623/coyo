@@ -1,6 +1,6 @@
 # Typography
 
-Coto mobile app typography system based on the [Figma design](https://www.figma.com/design/4YmG7DmJneY2CAewswbJHT/Coto?node-id=89-1149).
+Coyo mobile app typography system based on the [Figma design](https://www.figma.com/design/4YmG7DmJneY2CAewswbJHT/Coto?node-id=89-1149).
 
 ## Font Families
 
@@ -27,6 +27,23 @@ Each role defines `.en` (English) and `.ja` (Japanese) variants. The only differ
 | `captionSmall` | 12 | SemiBold | Medium | Auto | Dates, badges, section labels |
 
 > **Note**: `bodyLarge` uses different weights for EN (SemiBold 600) and JA (Bold 700). This is intentional as Plus Jakarta Sans SemiBold is visually closer to Noto Sans JP Bold at the same size.
+
+## Figma Token → Code Mapping
+
+When implementing Figma designs, use this table to translate Figma typography tokens to code:
+
+| Figma Token | Code |
+|---|---|
+| `Display/JA` (28px Bold) | `Typography.display.ja` |
+| `Display/EN` (28px Bold) | `Typography.display.en` |
+| `Title/JA` (20px Bold) | `Typography.title.ja` |
+| `Title/EN` (20px Bold) | `Typography.title.en` |
+| `Headline/JA` (18px Bold) | `Typography.headline.ja` |
+| `Headline/EN` (18px Bold) | `Typography.headline.en` |
+| `Body/JA` (16px Regular) | `Typography.body.ja` |
+| `Body/EN` (16px Regular) | `Typography.body.en` |
+| `Caption/JA` (13px Regular) | `Typography.caption.ja` |
+| `Caption/EN` (13px Regular) | `Typography.caption.en` |
 
 ## Source File
 
@@ -88,7 +105,7 @@ const styles = StyleSheet.create({
 Pick the variant based on the **content language**, not the user's locale:
 
 ```typescript
-// English content (AI messages, "Coto", statistics)
+// English content (AI messages, "Coyo", statistics)
 headerTitle: { ...Typography.bodyLarge.en, color: Colors.textPrimary },
 statValue:   { ...Typography.display.en },
 

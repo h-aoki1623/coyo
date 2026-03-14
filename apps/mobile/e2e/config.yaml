@@ -1,4 +1,4 @@
-# Maestro E2E Test Configuration for Coto
+# Maestro E2E Test Configuration for Coyo
 # This file configures shared settings for all Maestro flows.
 #
 # Usage:
@@ -7,6 +7,7 @@
 
 # Flows to include when running the entire e2e directory
 flows:
+  - auth-sign-in.yaml
   - app-launch.yaml
   - home-topic-cards.yaml
   - navigate-to-history.yaml

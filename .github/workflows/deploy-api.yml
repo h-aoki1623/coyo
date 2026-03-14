@@ -1,51 +1,34 @@
 name: Deploy API
 
 on:
-  workflow_run:
-    workflows: ["CI"]
+  push:
     branches: [main]
-    types: [completed]
+    paths:
+      - 'apps/api/**'
+      - 'docker-compose.yml'
+      - '.github/workflows/deploy-api.yml'
   workflow_dispatch:
 
 env:
   GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
-  REGION: ${{ vars.CLOUD_RUN_REGION || 'asia-northeast1' }}
-  SERVICE_NAME: ${{ vars.CLOUD_RUN_SERVICE || 'coyo-api' }}
+  REGION: ${{ vars.CLOUD_RUN_REGION }}
+  SERVICE_NAME: ${{ vars.CLOUD_RUN_SERVICE }}
   IMAGE_NAME: coyo-api
 
 jobs:
-  changes:
-    name: Detect backend changes
-    runs-on: ubuntu-latest
-    if: >-
-      github.event_name == 'workflow_dispatch' ||
-      github.event.workflow_run.conclusion == 'success'
-    outputs:
-      backend: ${{ steps.filter.outputs.backend }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dorny/paths-filter@v3
-        id: filter
-        with:
-          filters: |
-            backend:
-              - 'apps/api/**'
-              - 'docker-compose.yml'
-              - '.github/workflows/deploy-api.yml'
-
   deploy:
     name: Build & Deploy to Cloud Run
-    needs: changes
     runs-on: ubuntu-latest
-    if: >-
-      github.event_name == 'workflow_dispatch' ||
-      needs.changes.outputs.backend == 'true'
     permissions:
       contents: read
       id-token: write  # Required for Workload Identity Federation
 
     steps:
       - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
 
       # Authenticate to GCP via Workload Identity Federation (no service account keys)
       - id: auth
@@ -62,20 +45,36 @@ jobs:
       # Build and push Docker image
       - name: Build and push
         run: |
-          IMAGE="${REGION}-docker.pkg.dev/${GCP_PROJECT_ID}/coyo/${IMAGE_NAME}:${GITHUB_SHA::8}"
+          IMAGE="${REGION}-docker.pkg.dev/${GCP_PROJECT_ID}/${{ vars.ARTIFACT_REPO }}/${IMAGE_NAME}:${GITHUB_SHA::8}"
           docker build -t "${IMAGE}" -f apps/api/Dockerfile apps/api/
           docker push "${IMAGE}"
           echo "IMAGE=${IMAGE}" >> $GITHUB_ENV
 
       # Run database migrations
-      - name: Run migrations
+      - name: Check pending migrations
+        id: migration-check
         run: |
           pip install -e "apps/api"
-          cd apps/api && alembic upgrade head
+          cd apps/api
+          if alembic check 2>&1 | grep -q "No new upgrade operations detected"; then
+            echo "has_pending=false" >> $GITHUB_OUTPUT
+            echo "No pending migrations"
+          else
+            echo "has_pending=true" >> $GITHUB_OUTPUT
+            echo "Pending migrations detected"
+          fi
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          REDIS_URL: "redis://localhost:6379"
-          OPENAI_API_KEY: "sk-dummy-for-migrations"
+          REDIS_URL: "memory://"
+          OPENAI_API_KEY: "dummy"
+
+      - name: Run migrations
+        if: steps.migration-check.outputs.has_pending == 'true'
+        run: cd apps/api && alembic upgrade head
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          REDIS_URL: "memory://"
+          OPENAI_API_KEY: "dummy"
 
       # Deploy to Cloud Run
       - name: Deploy to Cloud Run
@@ -97,9 +96,10 @@ jobs:
             --allow-unauthenticated
           env_vars: |
             ENVIRONMENT=production
-            GCS_BUCKET_NAME=${{ vars.GCS_BUCKET_NAME || '<your-bucket-name>' }}
+            GCS_BUCKET_NAME=${{ vars.GCS_BUCKET_NAME }}
             RATE_LIMIT_PER_MINUTE=30
             CORS_ALLOWED_ORIGINS=${{ vars.CORS_ALLOWED_ORIGINS || '[]' }}
+            FIREBASE_PROJECT_ID=${{ vars.FIREBASE_PROJECT_ID }}
           secrets: |
             DATABASE_URL=database-url:latest
             REDIS_URL=redis-url:latest

@@ -57,8 +57,21 @@ apps/mobile/e2e/screenshots/
 # === Google Play service account key ===
 apps/mobile/google-play-service-account.json
 
+# === Firebase configuration ===
+# Root-level files (legacy, no longer used)
+apps/mobile/GoogleService-Info.plist
+apps/mobile/google-services.json
+# Development configs contain API keys — download from Firebase Console
+apps/mobile/firebase/development/
+# Production configs are decoded from EAS Secrets at build time
+apps/mobile/firebase/production/
+
+# === Firebase Admin SDK service account key ===
+apps/api/firebase-service-account.json
+
 # === EAS local overrides (contains secrets) ===
 apps/mobile/eas.local.json
 
-# === Claude ===
-.claude/
+# === Claude Code (user-specific files only) ===
+.claude/settings.local.json
+.claude/worktrees/

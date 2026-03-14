@@ -1,10 +1,10 @@
-.PHONY: dev-mobile dev-api dev-ios dev-android dev-both lint lint-mobile lint-api test test-mobile test-api e2e e2e-ios e2e-android migrate migrate-new docker-up docker-down docker-reset generate-api-types
+.PHONY: dev-mobile dev-api dev-ios dev-android dev-both lint lint-mobile lint-api test test-mobile test-api e2e e2e-ios e2e-android migrate migrate-new docker-up docker-down docker-reset generate-api-types db-clean-users
 
 # Infrastructure
 docker-up:
 	docker compose up -d
 	@echo "Waiting for Postgres to be ready..."
-	@docker compose exec postgres pg_isready -U coto -d coto > /dev/null 2>&1 || sleep 3
+	@docker compose exec postgres pg_isready -U coyo -d coyo > /dev/null 2>&1 || sleep 3
 	@echo "Postgres and Redis are running."
 
 docker-down:
@@ -19,7 +19,7 @@ dev-mobile:
 	cd apps/mobile && npx expo start --dev-client
 
 dev-api:
-	cd apps/api && .venv/bin/uvicorn src.coto.main:app --reload
+	cd apps/api && .venv/bin/uvicorn src.coyo.main:app --reload
 
 # Full dev environment (Docker + API + Emulator + Build + Metro)
 dev-ios:
@@ -50,21 +50,21 @@ test-api:
 	cd apps/api && .venv/bin/pytest
 
 # E2E Tests (Maestro)
+# Requires: dev environment running in another terminal (make dev-ios / make dev-android)
 # Usage:
 #   make e2e                              # All flows on both platforms
 #   make e2e-ios                          # All flows on iOS
 #   make e2e-android                      # All flows on Android
 #   make e2e-ios FLOW=app-launch.yaml     # Single flow on iOS
 #   make e2e-android FLOW=app-launch.yaml # Single flow on Android
-#   make e2e-ios SKIP_BUILD=1             # Skip native build (app already installed)
 e2e:
-	cd apps/mobile && ./e2e/run-e2e.sh all $(if $(SKIP_BUILD),--skip-build) $(FLOW)
+	cd apps/mobile && ./e2e/run-e2e.sh all $(FLOW)
 
 e2e-ios:
-	cd apps/mobile && ./e2e/run-e2e.sh ios $(if $(SKIP_BUILD),--skip-build) $(FLOW)
+	cd apps/mobile && ./e2e/run-e2e.sh ios $(FLOW)
 
 e2e-android:
-	cd apps/mobile && ./e2e/run-e2e.sh android $(if $(SKIP_BUILD),--skip-build) $(FLOW)
+	cd apps/mobile && ./e2e/run-e2e.sh android $(FLOW)
 
 # Database Migrations
 migrate:
@@ -72,6 +72,12 @@ migrate:
 
 migrate-new:
 	cd apps/api && .venv/bin/alembic revision --autogenerate -m "$(MSG)"
+
+# Cleanup (development only)
+db-clean-users:
+	@echo "Deleting all users from the local database..."
+	docker compose exec postgres psql -U coyo -d coyo -c "DELETE FROM users;"
+	@echo "Done. Remember to also delete users in Firebase Console."
 
 # OpenAPI TypeScript type generation
 generate-api-types:

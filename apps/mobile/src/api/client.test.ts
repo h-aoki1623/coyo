@@ -1,10 +1,5 @@
 import { apiClient } from './client';
 
-// Mock the device-id service
-jest.mock('@/services/device-id', () => ({
-  getOrCreateDeviceId: jest.fn(() => Promise.resolve('test-device-id')),
-}));
-
 // Store original fetch
 const originalFetch = global.fetch;
 
@@ -58,7 +53,6 @@ describe('apiClient', () => {
         {
           headers: {
             'Content-Type': 'application/json',
-            'X-Device-Id': 'test-device-id',
           },
         },
       );
@@ -110,7 +104,7 @@ describe('apiClient', () => {
       });
     });
 
-    it('includes the X-Device-Id header', async () => {
+    it('does not include X-Device-Id header', async () => {
       (global.fetch as jest.Mock).mockResolvedValue(
         createMockResponse({ ok: true }),
       );
@@ -118,7 +112,7 @@ describe('apiClient', () => {
       await apiClient.get('/api/test');
 
       const callArgs = (global.fetch as jest.Mock).mock.calls[0];
-      expect(callArgs[1].headers['X-Device-Id']).toBe('test-device-id');
+      expect(callArgs[1].headers).not.toHaveProperty('X-Device-Id');
     });
   });
 
@@ -138,7 +132,6 @@ describe('apiClient', () => {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'X-Device-Id': 'test-device-id',
           },
           body: JSON.stringify(requestBody),
         },
@@ -187,25 +180,24 @@ describe('apiClient', () => {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
-            'X-Device-Id': 'test-device-id',
           },
         },
       );
     });
 
-    it('does not return data', async () => {
+    it('returns ApiResponse with data', async () => {
       (global.fetch as jest.Mock).mockResolvedValue(
         createMockResponse(null),
       );
 
       const result = await apiClient.delete('/api/test/1');
 
-      expect(result).toBeUndefined();
+      expect(result).toEqual({ data: null });
     });
   });
 
   describe('postStream', () => {
-    it('sends a POST request with FormData and device ID header', async () => {
+    it('sends a POST request with FormData and no device ID header', async () => {
       const mockFormData = new FormData();
       mockFormData.append('audio', 'blob-data');
 
@@ -221,7 +213,7 @@ describe('apiClient', () => {
         'http://localhost:8000/api/conversations/conv-1/turns',
         {
           method: 'POST',
-          headers: { 'X-Device-Id': 'test-device-id' },
+          headers: {},
           body: mockFormData,
         },
       );

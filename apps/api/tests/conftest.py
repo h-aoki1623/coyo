@@ -1,10 +1,15 @@
-"""Shared test fixtures for the Coto API test suite.
+"""Shared test fixtures for the Coyo API test suite.
 
 Provides an async in-memory SQLite database, a FastAPI TestClient,
 mock dependencies, and reusable data fixtures.
 """
 
-import uuid
+import os
+
+# Force in-memory rate-limit storage for tests.
+# Must be set before coyo.rate_limit is imported (which reads os.getenv at module level).
+os.environ["REDIS_URL"] = "memory://"
+
 from collections.abc import AsyncGenerator
 from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -14,11 +19,11 @@ from httpx import ASGITransport, AsyncClient
 from sqlalchemy import event
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-from coto.models.base import Base
-from coto.models.conversation import Conversation
-from coto.models.correction import CorrectionItem, TurnCorrection
-from coto.models.turn import Turn
-from coto.models.user import User
+from coyo.models.base import Base
+from coyo.models.conversation import Conversation
+from coyo.models.correction import CorrectionItem, TurnCorrection
+from coyo.models.turn import Turn
+from coyo.models.user import AuthProvider, User
 
 # ---------------------------------------------------------------------------
 # Database fixtures
@@ -66,19 +71,17 @@ async def db_session(engine) -> AsyncGenerator[AsyncSession, None]:
 # Application fixtures
 # ---------------------------------------------------------------------------
 
-DEVICE_ID = "00000000-0000-4000-a000-000000000001"
-
-
-@pytest.fixture
-def device_id() -> str:
-    """Return a fixed test device ID."""
-    return DEVICE_ID
+TEST_AUTH_UID = "test-firebase-uid-001"
 
 
 @pytest.fixture
 async def test_user(db_session: AsyncSession) -> User:
-    """Create and persist a test user."""
-    user = User(device_id=DEVICE_ID)
+    """Create and persist a test user with auth UID."""
+    user = User(
+        auth_uid=TEST_AUTH_UID,
+        email="test@example.com",
+        auth_provider=AuthProvider.EMAIL,
+    )
     db_session.add(user)
     await db_session.commit()
     await db_session.refresh(user)
@@ -243,7 +246,7 @@ def mock_settings():
     mock.max_audio_size_bytes = 10 * 1024 * 1024
     mock.rate_limit_per_minute = 30
 
-    with patch("coto.config.get_settings", return_value=mock):
+    with patch("coyo.config.get_settings", return_value=mock):
         yield mock
 
 
@@ -260,10 +263,10 @@ async def client(
     """Provide an async HTTP client with overridden dependencies.
 
     Overrides get_db to use the test session and get_current_user to
-    return the test user, bypassing the X-Device-Id header requirement.
+    return the test user, bypassing the authentication requirement.
     """
-    from coto.dependencies import get_current_user, get_db
-    from coto.main import app
+    from coyo.dependencies import get_current_user, get_db
+    from coyo.main import app
 
     async def override_get_db():
         yield db_session

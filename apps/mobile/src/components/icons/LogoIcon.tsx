@@ -7,7 +7,7 @@ interface Props {
 }
 
 /**
- * Coto brand logo: "C" with speech bubble tail + "O" ring.
+ * Coyo brand logo: "C" with speech bubble tail + "O" ring.
  * Default size matches the Figma header logo (60x24).
  */
 export function LogoIcon({ width = 60, height = 24, color = '#3B82F6' }: Props) {

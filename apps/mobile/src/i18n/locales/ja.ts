@@ -13,6 +13,7 @@ const ja = {
       hint: 'タップして再開',
       resume: '再開',
     },
+    signOut: 'サインアウト',
   },
 
   // Topics
@@ -33,7 +34,7 @@ const ja = {
     speakNow: '話してください...',
     processing: '処理中...',
     processingVoice: '音声を処理中...',
-    waitingForCoto: 'Coto が考え中...',
+    waitingForCoyo: 'Coyo が考え中...',
     completionText: 'トーク終了 · {{duration}}',
     viewFeedback: 'フィードバックを見る',
     lessThanMinute: '1分未満',
@@ -71,7 +72,7 @@ const ja = {
   // Empty Feedback (Perfect English)
   emptyFeedback: {
     title: '完璧な英語でした！',
-    messageFrom: 'Coto からのメッセージ',
+    messageFrom: 'Coyo からのメッセージ',
     body: 'あなたの英語はネイティブも納得のレベルです。次のトークも楽しみにしています！',
   },
 
@@ -132,7 +133,78 @@ const ja = {
     recordingError: '録音を開始できませんでした。もう一度お試しください。',
     micPermissionTitle: 'マイクの許可が必要です',
     micPermissionMessage:
-      'Coto で英会話を練習するにはマイクへのアクセスが必要です。設定から許可してください。',
+      'Coyo で英会話を練習するにはマイクへのアクセスが必要です。設定から許可してください。',
+  },
+
+  // Auth Screens
+  auth: {
+    welcome: {
+      signIn: 'サインイン',
+      headline: '話しているうちに、\n英語が上達していく。',
+      subtitle:
+        'AIと自然な英会話を楽しみながら、あなたの英語をリアルタイムで添削。',
+      getStarted: '無料ではじめる',
+    },
+    modal: {
+      createAccount: 'アカウントを作成',
+      signIn: 'サインイン',
+      continueWithEmail: 'メールで続ける',
+      continueWithGoogle: 'Googleで続ける',
+      continueWithApple: 'Appleで続ける',
+      termsPrefix: '続けることで、Coyoの',
+      termsOfService: '利用規約',
+      termsConnector: 'および',
+      privacyPolicy: 'プライバシーポリシー',
+      termsSuffix: 'に同意したことになります。',
+      hasAccountPrompt: 'すでにアカウントをお持ちの方は ',
+      noAccountPrompt: 'アカウントをお持ちでない方は ',
+      signUp: '新規登録',
+    },
+    signUp: {
+      title: '新規登録',
+      name: '名前',
+      email: 'メールアドレス',
+      password: 'パスワード',
+      submit: 'アカウントを作成',
+    },
+    signIn: {
+      title: 'サインイン',
+      email: 'メールアドレス',
+      password: 'パスワード',
+      submit: 'サインイン',
+      forgotPassword: 'パスワードを忘れた？',
+    },
+    verification: {
+      title: 'メールを確認',
+      description:
+        '確認メールを送信しました。リンクをタップしてアカウントを有効化してください。',
+      sentTo: 'に送信しました',
+      step1: 'メールアプリを開く',
+      step2: 'Coyoからのメールを確認（迷惑メールフォルダもご確認ください）',
+      step3: '「メールアドレスを確認する」をタップ',
+      notVerified: 'まだ確認されていません',
+      checkFailed: '確認に失敗しました。もう一度お試しください。',
+      confirm: '確認完了',
+      didNotReceive: '届きませんでしたか？ ',
+      resend: '再送信',
+      resendCooldown: '再送信 ({{seconds}}秒)',
+    },
+    signOut: 'サインアウト',
+  },
+
+  // Firebase Auth errors
+  firebaseErrors: {
+    emailAlreadyInUse: 'このメールアドレスは既に登録されています。',
+    invalidEmail: '有効なメールアドレスを入力してください。',
+    weakPassword: 'パスワードは8文字以上で入力してください。',
+    invalidCredential: 'メールアドレスまたはパスワードが正しくありません。',
+    tooManyRequests: '試行回数が多すぎます。しばらくしてからお試しください。',
+    networkError: 'ネットワークエラーです。接続を確認してください。',
+    userDisabled: 'このアカウントは無効化されています。',
+    signUpFailed: '新規登録に失敗しました。もう一度お試しください。',
+    signInFailed: 'サインインに失敗しました。もう一度お試しください。',
+    signOutFailed: 'サインアウトに失敗しました。もう一度お試しください。',
+    resendFailed: '確認メールの再送信に失敗しました。',
   },
 
   // Common

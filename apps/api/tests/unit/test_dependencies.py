@@ -1,82 +1,196 @@
 """Unit tests for FastAPI dependency injection providers."""
 
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import pytest
-from httpx import AsyncClient
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from coyo.dependencies import get_current_user, get_firebase_token, map_provider
+from coyo.exceptions import AuthenticationError
+from coyo.models.user import AuthProvider, User
+from coyo.services.firebase import FirebaseTokenPayload
+
+# ---------------------------------------------------------------------------
+# map_provider
+# ---------------------------------------------------------------------------
 
 
-class TestGetDeviceIdDependency:
-    """Tests for the get_device_id dependency via API integration."""
-
-    @pytest.mark.unit
-    async def test_missing_device_id_header_returns_422(self, engine, db_session):
-        """Verify that missing X-Device-Id header returns 422.
-
-        This test uses a fresh client without the get_current_user override
-        to test the real dependency chain.
-        """
-        from httpx import ASGITransport, AsyncClient as AC
-
-        from coto.dependencies import get_db
-        from coto.main import app
-
-        async def override_get_db():
-            yield db_session
-
-        app.dependency_overrides[get_db] = override_get_db
-        # Do NOT override get_current_user, so get_device_id is actually called
-
-        try:
-            transport = ASGITransport(app=app)
-            async with AC(transport=transport, base_url="http://test") as client:
-                response = await client.get("/api/history")
-                assert response.status_code == 422
-        finally:
-            app.dependency_overrides.clear()
+class TestMapProvider:
+    """Tests for the map_provider helper function."""
 
     @pytest.mark.unit
-    async def test_device_id_header_creates_user(self, engine, db_session):
-        """Verify that providing a valid UUID X-Device-Id creates a user and succeeds."""
-        from httpx import ASGITransport, AsyncClient as AC
-
-        from coto.dependencies import get_db
-        from coto.main import app
-
-        async def override_get_db():
-            yield db_session
-
-        app.dependency_overrides[get_db] = override_get_db
-
-        try:
-            transport = ASGITransport(app=app)
-            async with AC(transport=transport, base_url="http://test") as client:
-                response = await client.get(
-                    "/api/history",
-                    headers={"X-Device-Id": "11111111-1111-4111-a111-111111111111"},
-                )
-                assert response.status_code == 200
-        finally:
-            app.dependency_overrides.clear()
+    def test_password_maps_to_email(self):
+        assert map_provider("password") is AuthProvider.EMAIL
 
     @pytest.mark.unit
-    async def test_invalid_device_id_returns_422(self, engine, db_session):
-        """Verify that an invalid (non-UUID) X-Device-Id returns 422."""
-        from httpx import ASGITransport, AsyncClient as AC
+    def test_google_com_maps_to_google(self):
+        assert map_provider("google.com") is AuthProvider.GOOGLE
 
-        from coto.dependencies import get_db
-        from coto.main import app
+    @pytest.mark.unit
+    def test_apple_com_maps_to_apple(self):
+        assert map_provider("apple.com") is AuthProvider.APPLE
 
-        async def override_get_db():
-            yield db_session
+    @pytest.mark.unit
+    def test_unknown_provider_falls_back_to_email(self):
+        assert map_provider("unknown") is AuthProvider.EMAIL
 
-        app.dependency_overrides[get_db] = override_get_db
+    @pytest.mark.unit
+    def test_custom_provider_falls_back_to_email(self):
+        assert map_provider("github.com") is AuthProvider.EMAIL
 
-        try:
-            transport = ASGITransport(app=app)
-            async with AC(transport=transport, base_url="http://test") as client:
-                response = await client.get(
-                    "/api/history",
-                    headers={"X-Device-Id": "not-a-valid-uuid"},
-                )
-                assert response.status_code == 422
-        finally:
-            app.dependency_overrides.clear()
+
+# ---------------------------------------------------------------------------
+# get_firebase_token
+# ---------------------------------------------------------------------------
+
+
+class TestGetFirebaseToken:
+    """Tests for the get_firebase_token dependency."""
+
+    @pytest.mark.unit
+    async def test_no_authorization_header_returns_none(self):
+        result = await get_firebase_token(authorization=None)
+        assert result is None
+
+    @pytest.mark.unit
+    async def test_valid_bearer_token_calls_verify(self):
+        payload = FirebaseTokenPayload(
+            uid="uid-1",
+            email="a@b.com",
+            email_verified=True,
+            display_name="User",
+            sign_in_provider="password",
+        )
+        with patch("coyo.dependencies.verify_firebase_token", return_value=payload) as mock_verify:
+            result = await get_firebase_token(authorization="Bearer my-token-123")
+
+        assert result == payload
+        mock_verify.assert_called_once_with("my-token-123")
+
+    @pytest.mark.unit
+    async def test_invalid_header_format_no_space_raises_error(self):
+        with pytest.raises(AuthenticationError, match="Invalid Authorization header format"):
+            await get_firebase_token(authorization="BearerNoSpace")
+
+    @pytest.mark.unit
+    async def test_invalid_header_format_wrong_scheme_raises_error(self):
+        with pytest.raises(AuthenticationError, match="Invalid Authorization header format"):
+            await get_firebase_token(authorization="Basic some-creds")
+
+    @pytest.mark.unit
+    async def test_bearer_case_insensitive(self):
+        payload = FirebaseTokenPayload(
+            uid="uid-1",
+            email="a@b.com",
+            email_verified=True,
+            display_name="User",
+            sign_in_provider="password",
+        )
+        with patch("coyo.dependencies.verify_firebase_token", return_value=payload):
+            result = await get_firebase_token(authorization="bearer my-token")
+        assert result is not None
+
+    @pytest.mark.unit
+    async def test_empty_authorization_string_raises_error(self):
+        with pytest.raises(AuthenticationError, match="Invalid Authorization header format"):
+            await get_firebase_token(authorization="")
+
+
+# ---------------------------------------------------------------------------
+# get_current_user
+# ---------------------------------------------------------------------------
+
+
+class TestGetCurrentUser:
+    """Tests for the get_current_user dependency."""
+
+    @pytest.mark.unit
+    async def test_firebase_token_resolves_user_via_auth_uid(self):
+        firebase_token = FirebaseTokenPayload(
+            uid="fb-uid-1",
+            email="user@test.com",
+            email_verified=True,
+            display_name="Firebase User",
+            sign_in_provider="password",
+        )
+        mock_user = MagicMock(spec=User)
+        mock_db = AsyncMock(spec=AsyncSession)
+
+        with patch("coyo.dependencies.UserRepository") as MockRepo:
+            mock_repo_instance = MockRepo.return_value
+            mock_repo_instance.find_or_create_by_auth_uid = AsyncMock(
+                return_value=mock_user
+            )
+            result = await get_current_user(
+                firebase_token=firebase_token,
+                db=mock_db,
+            )
+
+        assert result == mock_user
+        mock_repo_instance.find_or_create_by_auth_uid.assert_called_once_with(
+            auth_uid="fb-uid-1",
+            email="user@test.com",
+            display_name="Firebase User",
+            auth_provider=AuthProvider.EMAIL,
+        )
+        mock_db.commit.assert_awaited_once()
+
+    @pytest.mark.unit
+    async def test_no_firebase_token_raises_authentication_error(self):
+        mock_db = AsyncMock(spec=AsyncSession)
+
+        with pytest.raises(AuthenticationError):
+            await get_current_user(
+                firebase_token=None,
+                db=mock_db,
+            )
+
+    @pytest.mark.unit
+    async def test_google_provider_is_mapped_correctly(self):
+        firebase_token = FirebaseTokenPayload(
+            uid="fb-uid-1",
+            email="user@test.com",
+            email_verified=True,
+            display_name="User",
+            sign_in_provider="google.com",
+        )
+        mock_user = MagicMock(spec=User)
+        mock_db = AsyncMock(spec=AsyncSession)
+
+        with patch("coyo.dependencies.UserRepository") as MockRepo:
+            mock_repo_instance = MockRepo.return_value
+            mock_repo_instance.find_or_create_by_auth_uid = AsyncMock(
+                return_value=mock_user
+            )
+            await get_current_user(
+                firebase_token=firebase_token,
+                db=mock_db,
+            )
+
+        call_kwargs = mock_repo_instance.find_or_create_by_auth_uid.call_args.kwargs
+        assert call_kwargs["auth_provider"] is AuthProvider.GOOGLE
+
+    @pytest.mark.unit
+    async def test_apple_provider_is_mapped_correctly(self):
+        firebase_token = FirebaseTokenPayload(
+            uid="fb-uid-1",
+            email="user@test.com",
+            email_verified=True,
+            display_name="User",
+            sign_in_provider="apple.com",
+        )
+        mock_user = MagicMock(spec=User)
+        mock_db = AsyncMock(spec=AsyncSession)
+
+        with patch("coyo.dependencies.UserRepository") as MockRepo:
+            mock_repo_instance = MockRepo.return_value
+            mock_repo_instance.find_or_create_by_auth_uid = AsyncMock(
+                return_value=mock_user
+            )
+            await get_current_user(
+                firebase_token=firebase_token,
+                db=mock_db,
+            )
+
+        call_kwargs = mock_repo_instance.find_or_create_by_auth_uid.call_args.kwargs
+        assert call_kwargs["auth_provider"] is AuthProvider.APPLE

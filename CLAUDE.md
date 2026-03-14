@@ -1,8 +1,8 @@
-# Coto — Project Instructions
+# Coyo — Project Instructions
 
 ## OpenAPI TypeScript Type Generation
 
-When backend API schemas change (Pydantic models in `apps/api/src/coto/schemas/`), you MUST regenerate the mobile TypeScript types to keep them in sync.
+When backend API schemas change (Pydantic models in `apps/api/src/coyo/schemas/`), you MUST regenerate the mobile TypeScript types to keep them in sync.
 
 ### Workflow
 
@@ -46,43 +46,39 @@ When backend API schemas change (Pydantic models in `apps/api/src/coto/schemas/`
 ### Running E2E Tests
 
 ```bash
-make e2e           # All flows on both iOS and Android (sequential)
-make e2e-ios       # All flows on iOS Simulator only
-make e2e-android   # All flows on Android Emulator only
+make e2e-ios       # All flows on iOS Simulator
+make e2e-android   # All flows on Android Emulator
+make e2e           # All flows on both platforms (sequential)
 
 # Single flow (useful for debugging or iterating on one test)
 make e2e-ios FLOW=app-launch.yaml
 make e2e-android FLOW=navigate-to-history.yaml
-
-# Skip native build (app already installed from a previous run)
-make e2e-ios SKIP_BUILD=1
-make e2e-ios SKIP_BUILD=1 FLOW=app-launch.yaml
 ```
 
 ### Prerequisites
 
+- **Dev environment running**: `make dev-ios` / `make dev-android` (handles Docker, backend, Metro, device boot, and app build)
 - **Maestro CLI**: `curl -Ls "https://get.maestro.mobile.dev" | bash`
-- **iOS**: Boot a simulator — `xcrun simctl boot "iPhone 16 Pro"`
-- **Android**: Start an emulator from Android Studio or `emulator -avd <name>`
-- **Docker**: Required for Postgres + Redis (`docker compose up -d`)
-- **Backend venv**: `apps/api/.venv` must exist with dependencies installed
 
-### What the script does automatically
+### Script responsibilities
 
-1. Detects git worktree and symlinks `node_modules`/`.venv` from the main repo
-2. Sweeps rogue Maestro/Metro processes from previous runs or manual invocations
-3. Starts Docker (Postgres + Redis) if not running
-4. Runs database migrations
-5. Starts backend API (`uvicorn`) if not running — stops it on exit
-6. Builds and installs the app on the target device (unless `SKIP_BUILD=1`)
-7. Starts Metro and waits for JS bundle compilation to complete before launching the app
-8. Runs all Maestro test flows
-9. Cleans up Metro and backend on exit (including Ctrl+C / kill)
+**`run-dev.sh`** (started via `make dev-ios` / `make dev-android`):
+1. Starts Docker (Postgres + Redis)
+2. Starts backend API (`uvicorn`)
+3. Boots iOS Simulator / Android Emulator
+4. Builds and installs the app
+5. Starts Metro bundler (foreground)
+6. Cleans up all processes on Ctrl+C
+
+**`run-e2e.sh`** (started via `make e2e-ios` / `make e2e-android`):
+1. Validates dev environment is running (API, Metro, device, app)
+2. Sweeps rogue Maestro processes to avoid port conflicts
+3. Runs Maestro test flows with retry on failure
 
 ### Rules
 
 - NEVER use `optional: true` on assertions that validate API responses — E2E tests must verify real backend interactions
-- The `run-e2e.sh` script ensures the backend is running; do NOT skip this by running `maestro test` directly
 - NEVER run Maestro CLI commands manually (`maestro test`, `maestro hierarchy`, etc.) — rogue Maestro processes cause port conflicts and test failures. Always use `make e2e` / `make e2e-ios` / `make e2e-android` to run E2E tests
+- NEVER run `maestro test` directly without `make e2e-*` — the script validates the environment and handles cleanup
 - iOS and Android tests run sequentially (Maestro uses port 7001 for both platforms)
 - Test flows are in `apps/mobile/e2e/*.yaml`

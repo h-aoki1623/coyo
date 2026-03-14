@@ -6,8 +6,8 @@ from unittest.mock import AsyncMock, patch
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from coto.models.turn import Turn
-from coto.services.correction import CorrectionAnalysis, CorrectionService
+from coyo.models.turn import Turn
+from coyo.services.correction import CorrectionAnalysis, CorrectionService
 
 
 class TestCorrectionService:

@@ -6,8 +6,8 @@
 
 | Service | Container | Port | Health check |
 |---|---|---|---|
-| PostgreSQL 16 | `coto-postgres` | 5432 | `pg_isready -U coto -d coto` |
-| Redis 7 | `coto-redis` | 6379 | `redis-cli ping` |
+| PostgreSQL 16 | `coyo-postgres` | 5432 | `pg_isready -U coyo -d coyo` |
+| Redis 7 | `coyo-redis` | 6379 | `redis-cli ping` |
 
 ### Start / Stop / Reset
 
@@ -21,7 +21,7 @@ make docker-reset   # Destroy volumes and restart (full data wipe)
 
 ```bash
 docker compose ps                                          # Container status
-docker compose exec postgres pg_isready -U coto -d coto   # Postgres health
+docker compose exec postgres pg_isready -U coyo -d coyo   # Postgres health
 docker compose exec redis redis-cli ping                   # Redis health
 ```
 
@@ -35,7 +35,7 @@ docker compose exec redis redis-cli ping                   # Redis health
 cd apps/api
 source .venv/bin/activate
 make -C ../.. migrate                                   # Apply pending migrations
-uvicorn src.coto.main:app --reload --host 0.0.0.0      # Start dev server
+uvicorn src.coyo.main:app --reload --host 0.0.0.0      # Start dev server
 ```
 
 ### Mobile
@@ -176,7 +176,7 @@ make dev-api   # Logs appear in terminal (uvicorn --reload)
 
 ```bash
 # Connect to local Postgres
-docker compose exec postgres psql -U coto -d coto
+docker compose exec postgres psql -U coyo -d coyo
 
 # Useful queries
 \dt                          -- List tables
