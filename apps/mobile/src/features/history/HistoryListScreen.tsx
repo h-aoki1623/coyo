@@ -16,12 +16,12 @@ import { apiClient } from '@/api/client';
 import { Colors } from '@/constants/colors';
 import { Typography } from '@/constants/typography';
 import { t } from '@/i18n';
-import { findTopic } from '@/constants/topics';
-import { TopicIcon, TrashIcon, SpeechBubbleIcon, HintCircleIcon } from '@/components/icons';
+import { LogoIcon, TrashIcon, SpeechBubbleIcon, HintCircleIcon } from '@/components/icons';
 import { NavBar } from '@/components/NavBar';
 import type { RootStackParamList } from '@/navigation/types';
 import type { HistoryListItem, HistoryListResponse } from '@/types/conversation';
-import { formatDuration, formatTime, groupByDate } from './utils/format';
+import { findTopic } from '@/constants/topics';
+import { formatDateTime, groupByDate } from './utils/format';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'HistoryList'>;
 
@@ -41,8 +41,6 @@ const HistoryRow = memo(function HistoryRow({ item, onPress, onDelete }: History
 
   const topic = findTopic(item.topic);
   const topicLabel = topic?.label ?? item.topic;
-  const topicIcon = topic?.icon ?? 'globe';
-  const topicIconColor = topic?.iconColor ?? Colors.topicSports;
 
   const handlePress = useCallback(() => {
     if (swiped) {
@@ -112,16 +110,16 @@ const HistoryRow = memo(function HistoryRow({ item, onPress, onDelete }: History
           onPress={handlePress}
           onLongPress={handleLongPress}
           accessibilityRole="button"
-          accessibilityLabel={`${topicLabel}, ${formatDuration(item.durationSeconds)}`}
+          accessibilityLabel={`${topicLabel}, ${formatDateTime(item.startedAt)}`}
         >
           <View style={styles.rowLeft}>
             <View style={styles.topicIcon}>
-              <TopicIcon icon={topicIcon} size={20} color={topicIconColor} />
+              <LogoIcon width={22} height={11} color={Colors.buttonPrimaryBg} />
             </View>
             <View style={styles.rowInfo}>
               <Text style={styles.rowTopic}>{topicLabel}</Text>
               <Text style={styles.rowMeta}>
-                {formatDuration(item.durationSeconds)} · {formatTime(item.startedAt)}
+                {formatDateTime(item.startedAt)}
               </Text>
             </View>
           </View>
