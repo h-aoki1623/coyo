@@ -104,6 +104,8 @@ const en = {
     today: 'Today',
     yesterday: 'Yesterday',
     dateFormat: '{{month}}/{{day}}',
+    dateTimeFormat: '{{monthName}} {{day}}, {{year}}, {{time}}',
+    months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
   },
 
   // History - Duration Formats

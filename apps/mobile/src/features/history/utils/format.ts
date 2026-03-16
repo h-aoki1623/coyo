@@ -20,6 +20,16 @@ export function formatTime(isoString: string): string {
   return `${displayHour}:${minutes} ${ampm}`;
 }
 
+export function formatDateTime(isoString: string): string {
+  const date = new Date(isoString);
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  const time = formatTime(isoString);
+  const monthName = t(`dates.months.${date.getMonth()}`);
+  return t('dates.dateTimeFormat', { year, month, day, time, monthName });
+}
+
 export function getSectionTitle(isoString: string, now?: Date): string {
   const date = new Date(isoString);
   const reference = now ?? new Date();
@@ -78,11 +88,7 @@ export function formatDetailHeader(
   else if (diffDays === 1) datePart = t('dates.yesterday');
   else datePart = t('dates.dateFormat', { month: date.getMonth() + 1, day: date.getDate() });
 
-  const hours = date.getHours();
-  const minutes = date.getMinutes().toString().padStart(2, '0');
-  const ampm = hours >= 12 ? 'PM' : 'AM';
-  const displayHour = hours % 12 || 12;
-  const timePart = `${displayHour}:${minutes} ${ampm}`;
+  const timePart = formatTime(isoString);
 
   const durationPart = formatDuration(durationSeconds);
 

@@ -104,6 +104,8 @@ const ja = {
     today: '今日',
     yesterday: '昨日',
     dateFormat: '{{month}}月{{day}}日',
+    dateTimeFormat: '{{year}}年{{month}}月{{day}}日 {{time}}',
+    months: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
   },
 
   // History - Duration Formats
