@@ -2,16 +2,16 @@
  * Expo Config Plugin: configures CocoaPods for Firebase with React Native.
  *
  * Sets $RNFirebaseAsStaticFramework = true so RNFBAuth / RNFBApp are
- * built as static frameworks (proper -Swift.h generation).
+ * built as static frameworks (required by react-native-firebase).
  *
- * NOTE: This plugin works together with expo-build-properties
+ * This plugin works together with expo-build-properties
  * (ios.useFrameworks = 'static') which adds `use_frameworks! :linkage => :static`
- * to the Podfile globally. That is the official fix for the
- * "'FirebaseAuth/FirebaseAuth-Swift.h' file not found" error on Xcode 16+/17.
+ * to the Podfile globally, as required by the react-native-firebase docs.
  *
- * Individual `pod :modular_headers => true` declarations are intentionally
- * NOT used — the react-native-firebase maintainer explicitly advises against
- * them (see https://github.com/invertase/react-native-firebase/issues/8215).
+ * NOTE: With react-native-firebase v23+ (Firebase iOS SDK 12.x), per-pod
+ * `modular_headers` and the fix-firebase-swift-header.sh workaround are no
+ * longer needed. The Swift header generation issue that required them was
+ * resolved in Firebase iOS SDK 12.x.
  */
 const { withDangerousMod } = require('expo/config-plugins');
 const fs = require('fs');
