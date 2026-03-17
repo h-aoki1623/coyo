@@ -54,6 +54,10 @@ require_environment() {
   local target="$1"
   local errors=0
 
+  # Kill stale dev processes running from deleted worktree directories
+  validate_port_process "$API_PORT" "API"
+  validate_port_process "$METRO_PORT" "Metro"
+
   # Maestro CLI
   if ! command -v maestro &>/dev/null; then
     err "Maestro CLI not found. Install with: curl -Ls \"https://get.maestro.mobile.dev\" | bash"

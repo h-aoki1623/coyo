@@ -12,11 +12,13 @@
 #
 # This file exports:
 #   Functions: init_log, log, warn, err, info,
-#              init_worktree, kill_existing_metro, ensure_docker,
-#              ensure_backend, get_booted_ios_udid, get_android_emulator_id,
-#              setup_adb_reverse, boot_ios_simulator, boot_android_emulator,
-#              wait_for_url
-#   Variables: _MAIN_REPO_ROOT, _COMPOSE_PROJECT, API_PORT, API_HEALTH_URL
+#              init_worktree, validate_port_process, kill_port_processes,
+#              kill_existing_metro, ensure_docker, ensure_backend,
+#              get_booted_ios_udid,
+#              get_android_emulator_id, setup_adb_reverse,
+#              boot_ios_simulator, boot_android_emulator, wait_for_url
+#   Variables: _MAIN_REPO_ROOT, _COMPOSE_PROJECT, API_PORT, METRO_PORT,
+#              API_HEALTH_URL
 
 # Guard: do nothing if executed directly
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
@@ -29,6 +31,7 @@ fi
 # ===========================================================================
 
 API_PORT=8000
+METRO_PORT=8081
 API_HEALTH_URL="http://localhost:${API_PORT}/health"
 
 # Initialized by init_worktree; callers may read these
@@ -89,30 +92,90 @@ wait_for_url() {
 }
 
 # ===========================================================================
-# Metro
+# Stale process detection
 # ===========================================================================
 
-# Kill any existing Metro process on port 8081
-kill_existing_metro() {
+# validate_port_process PORT LABEL
+# Check if a process listening on PORT has a valid (existing) working directory.
+# If the cwd no longer exists (e.g., a deleted git worktree), kill the process.
+# This prevents stale dev processes from serving outdated code.
+# Returns 0 always (best-effort guard).
+validate_port_process() {
+  local port="$1" label="$2"
   local pids
-  pids=$(lsof -ti :8081 2>/dev/null || true)
+  pids=$(lsof -ti :"$port" 2>/dev/null || true)
+  if [[ -z "$pids" ]]; then
+    return 0
+  fi
+
+  # Check each PID individually — only kill processes whose cwd no longer exists
+  local stale_pids=()
+  local pid cwd
+  while IFS= read -r pid; do
+    [[ -z "$pid" ]] && continue
+    cwd=$(lsof -a -p "$pid" -d cwd -Fn 2>/dev/null | grep '^n' | sed 's/^n//' || true)
+    if [[ -n "$cwd" && ! -d "$cwd" ]]; then
+      stale_pids+=("$pid")
+      warn "Stale $label process (PID: $pid) running from deleted directory: $cwd"
+    fi
+  done <<< "$pids"
+
+  if [[ ${#stale_pids[@]} -eq 0 ]]; then
+    return 0
+  fi
+
+  warn "Killing ${#stale_pids[@]} stale $label process(es)..."
+  printf '%s\n' "${stale_pids[@]}" | xargs kill 2>/dev/null || true
+  sleep 2
+  # Force-kill any that survived
+  local survivor
+  for pid in "${stale_pids[@]}"; do
+    if kill -0 "$pid" 2>/dev/null; then
+      survivor=true
+      kill -9 "$pid" 2>/dev/null || true
+    fi
+  done
+  [[ "${survivor:-}" == "true" ]] && sleep 1
+  log "Stale $label process(es) terminated."
+
+  return 0
+}
+
+# ===========================================================================
+# Process management
+# ===========================================================================
+
+# kill_port_processes PORT LABEL
+# Kill all processes listening on PORT with SIGTERM, then SIGKILL if needed.
+# Logs what it does. No-op if nothing is listening.
+kill_port_processes() {
+  local port="$1" label="$2"
+  local pids
+  pids=$(lsof -ti :"$port" 2>/dev/null || true)
   if [[ -z "$pids" ]]; then
     return
   fi
 
-  warn "Killing existing Metro process on port 8081 (PIDs: $pids)"
-  # Stage 1: graceful SIGTERM
+  warn "Killing $label on port $port (PIDs: $pids)"
   echo "$pids" | xargs kill 2>/dev/null || true
   sleep 2
 
-  # Stage 2: SIGKILL anything that didn't exit
   local remaining
-  remaining=$(lsof -ti :8081 2>/dev/null || true)
+  remaining=$(lsof -ti :"$port" 2>/dev/null || true)
   if [[ -n "$remaining" ]]; then
-    warn "Metro did not exit after SIGTERM; force-killing (PIDs: $remaining)"
+    warn "$label did not exit after SIGTERM; force-killing (PIDs: $remaining)"
     echo "$remaining" | xargs kill -9 2>/dev/null || true
     sleep 1
   fi
+}
+
+# ===========================================================================
+# Metro
+# ===========================================================================
+
+# Kill any existing Metro process on port $METRO_PORT
+kill_existing_metro() {
+  kill_port_processes "$METRO_PORT" "Metro"
 }
 
 # ===========================================================================
@@ -166,6 +229,9 @@ _BACKEND_PID=""
 
 ensure_backend() {
   _BACKEND_PID=""
+
+  # Kill stale API process running from a deleted worktree directory
+  validate_port_process "$API_PORT" "API"
 
   if curl -sf --max-time 3 "$API_HEALTH_URL" > /dev/null 2>&1; then
     log "Backend API already running."
