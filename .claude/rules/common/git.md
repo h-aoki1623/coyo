@@ -156,11 +156,15 @@ PR creation and worktree cleanup are an **atomic operation** — one MUST NOT ha
    ```bash
    cd <repo-root>
    ```
-3. Remove the worktree:
+3. Stop dev processes that may be running from the worktree:
+   ```bash
+   make dev-stop
+   ```
+4. Remove the worktree:
    ```bash
    git worktree remove .claude/worktrees/<dir-name>
    ```
-4. Delete the local branch:
+5. Delete the local branch:
    ```bash
    git branch -d <branch-name>
    ```
