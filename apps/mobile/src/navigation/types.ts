@@ -1,4 +1,4 @@
-export type TopicKey = 'sports' | 'business' | 'technology' | 'politics' | 'entertainment';
+export type TopicKey = 'sports' | 'business' | 'technology' | 'politics' | 'entertainment' | 'general';
 
 export type AuthStackParamList = {
   Welcome: undefined;

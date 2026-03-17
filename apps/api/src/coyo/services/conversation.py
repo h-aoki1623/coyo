@@ -55,7 +55,6 @@ class ConversationService:
 
         conversation = await self._repo.create(
             user_id=user_id,
-            topic=topic,
             time_limit_seconds=time_limit_seconds,
         )
         await self._session.commit()

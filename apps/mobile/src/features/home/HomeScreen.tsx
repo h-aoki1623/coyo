@@ -26,7 +26,6 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
 interface CreateConversationResponse {
   id: string;
-  topic: string;
   status: string;
 }
 
@@ -159,7 +158,7 @@ export function HomeScreen({ navigation }: Props) {
       }
 
       if (result.data) {
-        const topic = (result.data.topic ?? 'sports') as TopicKey;
+        const topic = 'general' as TopicKey;
         startConversation(topic, pausedConversationId);
         setPausedConversationId(null);
         navigation.navigate('Talk', {

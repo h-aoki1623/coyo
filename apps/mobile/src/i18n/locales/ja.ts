@@ -23,6 +23,7 @@ const ja = {
     politics: '政治',
     technology: 'テクノロジー',
     entertainment: 'エンタメ',
+    general: '自由会話',
   },
 
   // Talk Screen
@@ -87,6 +88,7 @@ const ja = {
     deleteMessage: 'トーク履歴を削除しますか？この操作は取り消せません。',
     deleteCancel: 'キャンセル',
     deleteConfirm: '削除',
+    talkLabel: 'トーク',
   },
 
   // History Detail Screen
