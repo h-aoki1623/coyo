@@ -87,14 +87,6 @@ run_ios() {
     npx expo prebuild --platform ios --clean 2>&1 | tail -5
   fi
 
-  # Xcode 17 workaround: pre-generate FirebaseAuth-Swift.h
-  if [[ ! -f "ios/Pods/Headers/Public/FirebaseAuth/FirebaseAuth-Swift.h" ]]; then
-    if [[ -f "scripts/fix-firebase-swift-header.sh" ]]; then
-      log "Generating FirebaseAuth-Swift.h (Xcode 17 workaround)..."
-      bash scripts/fix-firebase-swift-header.sh
-    fi
-  fi
-
   # Build with xcodebuild (expo run:ios fails on Xcode 17 beta due to
   # devicectl JSON format changes that misidentify simulator as physical device)
   log "Building with xcodebuild..."

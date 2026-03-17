@@ -23,6 +23,7 @@ const ja = {
     politics: '政治',
     technology: 'テクノロジー',
     entertainment: 'エンタメ',
+    general: '自由会話',
   },
 
   // Talk Screen
@@ -87,6 +88,7 @@ const ja = {
     deleteMessage: 'トーク履歴を削除しますか？この操作は取り消せません。',
     deleteCancel: 'キャンセル',
     deleteConfirm: '削除',
+    talkLabel: 'トーク',
   },
 
   // History Detail Screen
@@ -104,6 +106,8 @@ const ja = {
     today: '今日',
     yesterday: '昨日',
     dateFormat: '{{month}}月{{day}}日',
+    dateTimeFormat: '{{year}}年{{month}}月{{day}}日 {{time}}',
+    months: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
   },
 
   // History - Duration Formats

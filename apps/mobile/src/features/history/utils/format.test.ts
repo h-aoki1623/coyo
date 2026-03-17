@@ -1,6 +1,7 @@
 import {
   formatDuration,
   formatTime,
+  formatDateTime,
   getSectionTitle,
   groupByDate,
   formatDetailHeader,
@@ -75,6 +76,32 @@ describe('formatTime', () => {
     const date = new Date(2026, 0, 15, 23, 59, 0);
     const result = formatTime(date.toISOString());
     expect(result).toBe('11:59 PM');
+  });
+});
+
+describe('formatDateTime', () => {
+  it('formats date with year, month name, day, and time', () => {
+    const date = new Date(2026, 1, 12, 9, 42, 0);
+    const result = formatDateTime(date.toISOString());
+    expect(result).toBe('February 12, 2026, 9:42 AM');
+  });
+
+  it('formats PM time correctly', () => {
+    const date = new Date(2026, 1, 11, 20, 15, 0);
+    const result = formatDateTime(date.toISOString());
+    expect(result).toBe('February 11, 2026, 8:15 PM');
+  });
+
+  it('formats midnight correctly', () => {
+    const date = new Date(2026, 1, 10, 0, 30, 0);
+    const result = formatDateTime(date.toISOString());
+    expect(result).toBe('February 10, 2026, 12:30 AM');
+  });
+
+  it('formats July correctly', () => {
+    const date = new Date(2025, 6, 4, 15, 0, 0);
+    const result = formatDateTime(date.toISOString());
+    expect(result).toBe('July 4, 2025, 3:00 PM');
   });
 });
 

@@ -3,8 +3,9 @@
 import json
 import logging
 import uuid
+from typing import Literal
 
-from fastapi import APIRouter, Depends, Request, UploadFile
+from fastapi import APIRouter, Depends, Form, Request, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 from sse_starlette.sse import EventSourceResponse
 
@@ -52,6 +53,9 @@ async def submit_turn(
     request: Request,
     conversation_id: uuid.UUID,
     audio: UploadFile,
+    topic: Literal[
+        "sports", "business", "technology", "politics", "entertainment", "general"
+    ] = Form("general"),
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> EventSourceResponse:
@@ -90,6 +94,7 @@ async def submit_turn(
                 user_id=user.id,
                 audio_data=audio_data,
                 audio_filename=audio_filename,
+                topic=topic,
             ):
                 yield {"event": event["event"], "data": json.dumps(event["data"])}
         except Exception as exc:

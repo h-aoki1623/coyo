@@ -17,7 +17,7 @@ describe('buildAudioFormData', () => {
   });
 
   it('creates a FormData with an audio field', () => {
-    const formData = buildAudioFormData('file:///path/to/audio.m4a');
+    const formData = buildAudioFormData('file:///path/to/audio.m4a', 'sports');
 
     expect(formData).toBeInstanceOf(FormData);
   });
@@ -26,7 +26,7 @@ describe('buildAudioFormData', () => {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { File: MockFile } = require('expo-file-system/next');
 
-    buildAudioFormData('file:///recordings/test.m4a');
+    buildAudioFormData('file:///recordings/test.m4a', 'sports');
 
     expect(MockFile).toHaveBeenCalledWith('file:///recordings/test.m4a');
   });
@@ -34,21 +34,22 @@ describe('buildAudioFormData', () => {
   it('appends the blob with the file name', () => {
     const appendSpy = jest.spyOn(FormData.prototype, 'append');
 
-    buildAudioFormData('file:///recordings/test.m4a');
+    buildAudioFormData('file:///recordings/test.m4a', 'sports');
 
     expect(appendSpy).toHaveBeenCalledWith(
       'audio',
       mockBlob,
       'test.m4a',
     );
+    expect(appendSpy).toHaveBeenCalledWith('topic', 'sports');
 
     appendSpy.mockRestore();
   });
 
   it('handles different URI formats without error', () => {
-    expect(() => buildAudioFormData('file:///a.m4a')).not.toThrow();
+    expect(() => buildAudioFormData('file:///a.m4a', 'sports')).not.toThrow();
     expect(() =>
-      buildAudioFormData('file:///long/path/to/recording.m4a'),
+      buildAudioFormData('file:///long/path/to/recording.m4a', 'sports'),
     ).not.toThrow();
   });
 });

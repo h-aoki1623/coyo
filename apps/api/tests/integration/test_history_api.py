@@ -28,7 +28,6 @@ async def multiple_conversations(
     for i in range(5):
         conv = Conversation(
             user_id=test_user.id,
-            topic="technology",
             status="completed",
             time_limit_seconds=1800,
             started_at=datetime(2025, 1, 1 + i, 12, 0, 0, tzinfo=UTC),
@@ -52,7 +51,6 @@ async def conversation_with_turns(
     """Create a conversation with turns and corrections for detail tests."""
     conv = Conversation(
         user_id=test_user.id,
-        topic="sports",
         status="completed",
         time_limit_seconds=1800,
         started_at=datetime(2025, 1, 1, 12, 0, 0, tzinfo=UTC),
@@ -251,7 +249,6 @@ class TestGetHistoryDetail:
         assert response.status_code == 200
         data = response.json()
         assert data["id"] == str(conversation_with_turns.id)
-        assert data["topic"] == "sports"
         assert data["status"] == "completed"
 
     @pytest.mark.integration

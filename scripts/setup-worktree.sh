@@ -166,8 +166,8 @@ setup_worktree() {
 
   # --- Firebase / Google credentials ---
   _copy_file "apps/api/firebase-service-account.json"
-  _copy_file "apps/mobile/GoogleService-Info.plist"
-  _copy_file "apps/mobile/google-services.json"
+  _copy_file "apps/mobile/firebase/development/GoogleService-Info.plist"
+  _copy_file "apps/mobile/firebase/development/google-services.json"
 
   # --- Dependencies (install, not copy) ---
   _setup_node_modules

@@ -165,9 +165,10 @@ export function useAudioRecording(): UseAudioRecordingReturn {
  * Blob objects (via atob + Uint8Array) are not serializable by expo/fetch's
  * native implementation either.
  */
-export function buildAudioFormData(uri: string): FormData {
+export function buildAudioFormData(uri: string, topic: string): FormData {
   const file = new ExpoFile(uri);
   const formData = new FormData();
   formData.append('audio', file.blob(), file.name);
+  formData.append('topic', topic);
   return formData;
 }

@@ -22,7 +22,6 @@ class ConversationResponse(CamelModel):
     """Standard response for a single conversation."""
 
     id: uuid.UUID
-    topic: str
     status: str
     duration_seconds: int | None
     time_limit_seconds: int

@@ -1,4 +1,4 @@
-.PHONY: dev-mobile dev-api dev-ios dev-android dev-both lint lint-mobile lint-api test test-mobile test-api e2e e2e-ios e2e-android migrate migrate-new docker-up docker-down docker-reset generate-api-types db-clean-users
+.PHONY: dev-mobile dev-api dev-ios dev-android dev-both dev-stop lint lint-mobile lint-api test test-mobile test-api e2e e2e-ios e2e-android migrate migrate-new docker-up docker-down docker-reset generate-api-types db-clean-users
 
 # Infrastructure
 docker-up:
@@ -30,6 +30,9 @@ dev-android:
 
 dev-both:
 	cd apps/mobile && ./run-dev.sh both
+
+dev-stop:
+	./scripts/stop-dev.sh
 
 # Linting
 lint: lint-mobile lint-api

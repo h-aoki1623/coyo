@@ -23,6 +23,7 @@ const en = {
     politics: 'Politics',
     technology: 'Technology',
     entertainment: 'Entertainment',
+    general: 'Free Conversation',
   },
 
   // Talk Screen
@@ -87,6 +88,7 @@ const en = {
     deleteMessage: 'Delete this conversation? This action cannot be undone.',
     deleteCancel: 'Cancel',
     deleteConfirm: 'Delete',
+    talkLabel: 'Talk',
   },
 
   // History Detail Screen
@@ -104,6 +106,8 @@ const en = {
     today: 'Today',
     yesterday: 'Yesterday',
     dateFormat: '{{month}}/{{day}}',
+    dateTimeFormat: '{{monthName}} {{day}}, {{year}}, {{time}}',
+    months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
   },
 
   // History - Duration Formats

@@ -264,6 +264,11 @@ export interface components {
         Body_submit_turn_api_conversations__conversation_id__turns_post: {
             /** Audio */
             audio: string;
+            /**
+             * Topic
+             * @default general
+             */
+            topic: string;
         };
         /**
          * ConversationResponse
@@ -275,8 +280,6 @@ export interface components {
              * Format: uuid
              */
             id: string;
-            /** Topic */
-            topic: string;
             /** Status */
             status: string;
             /** Durationseconds */
@@ -357,8 +360,6 @@ export interface components {
              * Format: uuid
              */
             id: string;
-            /** Topic */
-            topic: string;
             /** Status */
             status: string;
             /** Durationseconds */
@@ -389,8 +390,6 @@ export interface components {
              * Format: uuid
              */
             id: string;
-            /** Topic */
-            topic: string;
             /** Status */
             status: string;
             /**

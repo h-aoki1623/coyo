@@ -15,7 +15,6 @@ class HistoryListItem(CamelModel):
     """Summary item for the conversation history list."""
 
     id: uuid.UUID
-    topic: str
     status: str
     started_at: datetime
     ended_at: datetime | None

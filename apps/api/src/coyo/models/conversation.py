@@ -28,11 +28,6 @@ class Conversation(BaseModel):
         nullable=False,
         index=True,
     )
-    topic: Mapped[str] = mapped_column(
-        String(50),
-        nullable=False,
-        comment="Conversation topic: sports, business, technology, politics, entertainment",
-    )
     status: Mapped[str] = mapped_column(
         String(20),
         nullable=False,

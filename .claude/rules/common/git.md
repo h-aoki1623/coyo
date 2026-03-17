@@ -18,6 +18,29 @@
 
 - Claude MUST NEVER modify or create files directly on `main` or `develop`. This applies to ALL changes including documentation, configuration, and rule files.
 
+### Worktree Dependency Setup (MUST)
+
+Worktrees do NOT include gitignored files (`.venv`, `node_modules`, `.env`). These MUST be created independently inside the worktree — **NEVER symlink** them from the main repo.
+
+Symlinking causes tests to import the **main repo's source code** instead of the worktree's modified code, producing false-passing tests that fail in CI.
+
+After creating a worktree, run the following setup before making any changes:
+
+```bash
+# 1. Backend: create independent .venv
+cd <worktree>/apps/api
+uv venv && uv pip install -e ".[dev]"
+cp <main-repo>/apps/api/.env .env   # Copy, not symlink
+
+# 2. Mobile: create independent node_modules
+cd <worktree>/apps/mobile
+npm ci
+```
+
+**Prohibited:**
+- NEVER symlink `.venv` or `node_modules` from the main repo — this causes tests to run against stale source code
+- NEVER symlink `.env` — copy it instead (symlinks may cause path-related issues)
+
 ### Branch Naming Conventions
 
 Claude MUST use the following branch prefixes and meanings:
@@ -142,11 +165,26 @@ When creating PRs:
 3. Draft comprehensive PR summary (in the same language as `README.md`)
 4. Include test plan with TODOs
 5. Push with `-u` flag if new branch
-6. Clean up worktree — see **Worktree Cleanup (MUST)** below
+6. Wait for CI — see **CI Gate (MUST)** below
+7. Clean up worktree — see **Worktree Cleanup (MUST)** below
+
+## CI Gate (MUST)
+
+After creating a PR, Claude MUST verify that all CI checks pass before proceeding to worktree cleanup.
+
+1. Poll CI status using `gh pr checks <pr-number> --watch` or equivalent until all checks complete
+2. If **all checks pass**: proceed to **Worktree Cleanup**
+3. If **any check fails**:
+   - Inspect the failure logs: `gh pr checks <pr-number>` and `gh run view <run-id> --log-failed`
+   - Fix the issue in the worktree, commit, and push
+   - Return to step 1 (re-poll CI)
+   - Do NOT proceed to cleanup until all checks are green
+
+> **Gate**: Worktree cleanup is BLOCKED until all CI checks pass. Do NOT clean up the worktree while CI is failing — the worktree is needed to apply fixes.
 
 ## Worktree Cleanup (MUST)
 
-PR creation and worktree cleanup are an **atomic operation** — one MUST NOT happen without the other. Immediately after a PR is created, Claude MUST execute the following cleanup steps before responding to the user.
+PR creation, CI verification, and worktree cleanup are an **atomic operation** — none may be skipped. After a PR is created **and all CI checks pass**, Claude MUST execute the following cleanup steps before responding to the user.
 
 1. Verify the worktree exists:
    ```bash
@@ -156,11 +194,15 @@ PR creation and worktree cleanup are an **atomic operation** — one MUST NOT ha
    ```bash
    cd <repo-root>
    ```
-3. Remove the worktree:
+3. Stop dev processes that may be running from the worktree:
+   ```bash
+   make dev-stop
+   ```
+4. Remove the worktree:
    ```bash
    git worktree remove .claude/worktrees/<dir-name>
    ```
-4. Delete the local branch:
+5. Delete the local branch:
    ```bash
    git branch -d <branch-name>
    ```

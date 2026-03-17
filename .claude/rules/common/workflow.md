@@ -85,6 +85,8 @@ Design elements are executed sequentially. Skip elements not relevant to the fea
     - Use **build-error-resolver** if build fails
     - **Mobile (Expo CNG)**: Verify with `npx expo export` and `eas build` (ios/android directories are generated, not committed)
 
+> **Gate: Phase 3 → Phase 4**: Build verification MUST pass before proceeding to Verify phase.
+
 ### Phase 4: Verify
 
 11. **Write Tests** - Use **tester** agent
@@ -92,21 +94,27 @@ Design elements are executed sequentially. Skip elements not relevant to the fea
     - Integration tests for API/DB operations
     - Target 80%+ coverage
 
-12. **Review** (run in parallel where possible)
-    - **code-reviewer**: quality, patterns, maintainability
-    - **security-reviewer**: vulnerabilities, input validation, secrets (auth/payment/API code)
-    - **database-reviewer**: schema, indexes, queries, RLS (DB changes)
-    - **python-reviewer**: PEP 8, type hints, Pythonic idioms (Python projects)
+12. **Review** — Launch ALL applicable reviewers in parallel. Do NOT proceed until ALL results are collected.
+    - **code-reviewer**: quality, patterns, maintainability — **REQUIRED for all workflows**
+    - **security-reviewer**: vulnerabilities, input validation, secrets — **REQUIRED for all workflows**
+    - **database-reviewer**: schema, indexes, queries, RLS (DB changes only)
+    - **python-reviewer**: PEP 8, type hints, Pythonic idioms (Python projects only)
+
+> **Gate: Step 12**: ALL reviewer results MUST be collected and issues addressed before proceeding to Step 13. Do NOT skip any required reviewer.
 
 13. **E2E Tests** (MUST for behavioral changes — see [git.md](git.md) "E2E Test Required Criteria")
     - Web: use **web-e2e-tester** (Playwright)
-    - Mobile: use **mobile-e2e-tester** (Maestro)
-    - Claude MUST NOT proceed to Commit & Push until E2E tests pass
+    - Mobile: use **mobile-e2e-tester** (Maestro) — **MUST run on BOTH iOS AND Android**. Running only one platform is not sufficient.
+    - Claude MUST check dev environment status (`curl` health endpoints) before running — never ask the user
+    - Claude MUST NOT proceed to Commit & Push until E2E tests pass on ALL target platforms
+
+> **Gate: Phase 4 → Phase 5**: Steps 11, 12, and 13 MUST ALL be complete. Commit is BLOCKED until every test passes, every reviewer approves, and E2E passes on all platforms.
 
 ### Phase 5: Finalize
 
-14. **Commit & Push** (BLOCKED until steps 11–13 are complete)
-15. **Documentation** (significant changes only)
+14. **Commit & Push** (BLOCKED until steps 11–13 are complete — see gate condition above)
+15. **CI Gate** — Wait for all CI checks to pass (see [git.md](git.md) "CI Gate"). Fix failures and re-push until green.
+16. **Documentation** (significant changes only)
     - Use **doc-updater** to update codemaps and docs
 
 ---
@@ -128,11 +136,16 @@ Reproduce-First: confirm the bug before fixing.
    - Unit tests for the fixed behavior
    - Integration tests if the bug spans multiple components
    - E2E tests if the fix affects a user flow (see [git.md](git.md) "E2E Test Required Criteria") - use **web-e2e-tester** (web) or **mobile-e2e-tester** (mobile)
-7. **Review** (run in parallel where possible)
-   - **code-reviewer**: quality, patterns, maintainability
-   - **security-reviewer**: vulnerabilities, input validation, secrets (auth/payment/API code)
-   - **python-reviewer**: PEP 8, type hints, Pythonic idioms (Python projects)
-8. **Commit & Push** (BLOCKED until steps 5–7 are complete, including E2E if required)
+   - **Mobile E2E: MUST run on BOTH iOS AND Android**
+7. **Review** — Launch ALL applicable reviewers in parallel. Do NOT proceed until ALL results are collected.
+   - **code-reviewer**: quality, patterns, maintainability — **REQUIRED**
+   - **security-reviewer**: vulnerabilities, input validation, secrets — **REQUIRED**
+   - **python-reviewer**: PEP 8, type hints, Pythonic idioms (Python projects only)
+
+> **Gate: Commit**: Steps 5, 6, and 7 MUST ALL be complete. ALL reviewer results must be collected and issues addressed. E2E must pass on all target platforms.
+
+8. **Commit & Push** (BLOCKED until gate condition above is met)
+9. **CI Gate** — Wait for all CI checks to pass (see [git.md](git.md) "CI Gate"). Fix failures and re-push until green.
 
 ---
 
@@ -149,12 +162,17 @@ Safety-Net-First: ensure existing behavior is protected.
    - Unit tests to verify refactored code behaves identically
    - Integration tests for changed interfaces or boundaries
    - E2E tests if user-facing behavior could be affected (see [git.md](git.md) "E2E Test Required Criteria") - use **web-e2e-tester** (web) or **mobile-e2e-tester** (mobile)
-7. **Review** (run in parallel where possible)
-   - **code-reviewer**: quality, patterns, maintainability
-   - **security-reviewer**: vulnerabilities, input validation, secrets (auth/payment/API code)
-   - **python-reviewer**: PEP 8, type hints, Pythonic idioms (Python projects)
+   - **Mobile E2E: MUST run on BOTH iOS AND Android**
+7. **Review** — Launch ALL applicable reviewers in parallel. Do NOT proceed until ALL results are collected.
+   - **code-reviewer**: quality, patterns, maintainability — **REQUIRED**
+   - **security-reviewer**: vulnerabilities, input validation, secrets — **REQUIRED**
+   - **python-reviewer**: PEP 8, type hints, Pythonic idioms (Python projects only)
    - **build-error-resolver** if build breaks
-8. **Commit & Push** (BLOCKED until steps 4–7 are complete, including E2E if required)
+
+> **Gate: Commit**: Steps 4, 5, 6, and 7 MUST ALL be complete. ALL reviewer results must be collected and issues addressed. E2E must pass on all target platforms.
+
+8. **Commit & Push** (BLOCKED until gate condition above is met)
+9. **CI Gate** — Wait for all CI checks to pass (see [git.md](git.md) "CI Gate"). Fix failures and re-push until green.
 
 ---
 
@@ -173,11 +191,16 @@ Schema-First: design the schema before writing application code.
    - Unit tests for data access logic
    - Integration tests for migrations and DB operations
    - E2E tests if schema changes affect user flows (see [git.md](git.md) "E2E Test Required Criteria") - use **web-e2e-tester** (web) or **mobile-e2e-tester** (mobile)
-6. **Review** (run in parallel where possible)
-   - **code-reviewer**: quality, patterns, maintainability
-   - **security-reviewer**: RLS, access control, input validation
-   - **python-reviewer**: PEP 8, type hints, Pythonic idioms (Python projects)
-7. **Commit & Push** (BLOCKED until steps 5–6 are complete, including E2E if required)
+   - **Mobile E2E: MUST run on BOTH iOS AND Android**
+6. **Review** — Launch ALL applicable reviewers in parallel. Do NOT proceed until ALL results are collected.
+   - **code-reviewer**: quality, patterns, maintainability — **REQUIRED**
+   - **security-reviewer**: RLS, access control, input validation — **REQUIRED**
+   - **python-reviewer**: PEP 8, type hints, Pythonic idioms (Python projects only)
+
+> **Gate: Commit**: Steps 5 and 6 MUST ALL be complete. ALL reviewer results must be collected and issues addressed. E2E must pass on all target platforms.
+
+7. **Commit & Push** (BLOCKED until gate condition above is met)
+8. **CI Gate** — Wait for all CI checks to pass (see [git.md](git.md) "CI Gate"). Fix failures and re-push until green.
 
 ---
 
@@ -189,4 +212,5 @@ Lightweight flow for documentation-only changes.
 2. **Update** - Use **doc-updater** to regenerate codemaps and refresh docs
 3. **Verify** - Confirm links work and examples are current
 4. **Commit & Push**
+5. **CI Gate** — Wait for all CI checks to pass (see [git.md](git.md) "CI Gate"). Fix failures and re-push until green.
 
