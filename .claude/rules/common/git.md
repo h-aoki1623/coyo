@@ -142,11 +142,26 @@ When creating PRs:
 3. Draft comprehensive PR summary (in the same language as `README.md`)
 4. Include test plan with TODOs
 5. Push with `-u` flag if new branch
-6. Clean up worktree — see **Worktree Cleanup (MUST)** below
+6. Wait for CI — see **CI Gate (MUST)** below
+7. Clean up worktree — see **Worktree Cleanup (MUST)** below
+
+## CI Gate (MUST)
+
+After creating a PR, Claude MUST verify that all CI checks pass before proceeding to worktree cleanup.
+
+1. Poll CI status using `gh pr checks <pr-number> --watch` or equivalent until all checks complete
+2. If **all checks pass**: proceed to **Worktree Cleanup**
+3. If **any check fails**:
+   - Inspect the failure logs: `gh pr checks <pr-number>` and `gh run view <run-id> --log-failed`
+   - Fix the issue in the worktree, commit, and push
+   - Return to step 1 (re-poll CI)
+   - Do NOT proceed to cleanup until all checks are green
+
+> **Gate**: Worktree cleanup is BLOCKED until all CI checks pass. Do NOT clean up the worktree while CI is failing — the worktree is needed to apply fixes.
 
 ## Worktree Cleanup (MUST)
 
-PR creation and worktree cleanup are an **atomic operation** — one MUST NOT happen without the other. Immediately after a PR is created, Claude MUST execute the following cleanup steps before responding to the user.
+PR creation, CI verification, and worktree cleanup are an **atomic operation** — none may be skipped. After a PR is created **and all CI checks pass**, Claude MUST execute the following cleanup steps before responding to the user.
 
 1. Verify the worktree exists:
    ```bash

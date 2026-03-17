@@ -113,7 +113,8 @@ Design elements are executed sequentially. Skip elements not relevant to the fea
 ### Phase 5: Finalize
 
 14. **Commit & Push** (BLOCKED until steps 11–13 are complete — see gate condition above)
-15. **Documentation** (significant changes only)
+15. **CI Gate** — Wait for all CI checks to pass (see [git.md](git.md) "CI Gate"). Fix failures and re-push until green.
+16. **Documentation** (significant changes only)
     - Use **doc-updater** to update codemaps and docs
 
 ---
@@ -144,6 +145,7 @@ Reproduce-First: confirm the bug before fixing.
 > **Gate: Commit**: Steps 5, 6, and 7 MUST ALL be complete. ALL reviewer results must be collected and issues addressed. E2E must pass on all target platforms.
 
 8. **Commit & Push** (BLOCKED until gate condition above is met)
+9. **CI Gate** — Wait for all CI checks to pass (see [git.md](git.md) "CI Gate"). Fix failures and re-push until green.
 
 ---
 
@@ -170,6 +172,7 @@ Safety-Net-First: ensure existing behavior is protected.
 > **Gate: Commit**: Steps 4, 5, 6, and 7 MUST ALL be complete. ALL reviewer results must be collected and issues addressed. E2E must pass on all target platforms.
 
 8. **Commit & Push** (BLOCKED until gate condition above is met)
+9. **CI Gate** — Wait for all CI checks to pass (see [git.md](git.md) "CI Gate"). Fix failures and re-push until green.
 
 ---
 
@@ -197,6 +200,7 @@ Schema-First: design the schema before writing application code.
 > **Gate: Commit**: Steps 5 and 6 MUST ALL be complete. ALL reviewer results must be collected and issues addressed. E2E must pass on all target platforms.
 
 7. **Commit & Push** (BLOCKED until gate condition above is met)
+8. **CI Gate** — Wait for all CI checks to pass (see [git.md](git.md) "CI Gate"). Fix failures and re-push until green.
 
 ---
 
@@ -208,4 +212,5 @@ Lightweight flow for documentation-only changes.
 2. **Update** - Use **doc-updater** to regenerate codemaps and refresh docs
 3. **Verify** - Confirm links work and examples are current
 4. **Commit & Push**
+5. **CI Gate** — Wait for all CI checks to pass (see [git.md](git.md) "CI Gate"). Fix failures and re-push until green.
 
