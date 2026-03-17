@@ -18,13 +18,11 @@ class ConversationRepository:
         self,
         *,
         user_id: uuid.UUID,
-        topic: str,
         time_limit_seconds: int,
     ) -> Conversation:
         """Create a new conversation and flush to obtain its ID."""
         conversation = Conversation(
             user_id=user_id,
-            topic=topic,
             time_limit_seconds=time_limit_seconds,
         )
         self._session.add(conversation)

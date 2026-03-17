@@ -46,7 +46,7 @@ function mapCorrectionData(
  * Hook for processing a conversation turn via SSE streaming.
  * Sends audio, processes streamed events, and updates stores.
  */
-export function useTurnStreaming(conversationId: string): UseTurnStreamingReturn {
+export function useTurnStreaming(conversationId: string, topic: string): UseTurnStreamingReturn {
   const [isStreaming, setIsStreaming] = useState(false);
   const [isUserProcessing, setIsUserProcessing] = useState(false);
   const [isAiThinking, setIsAiThinking] = useState(false);
@@ -186,7 +186,7 @@ export function useTurnStreaming(conversationId: string): UseTurnStreamingReturn
       aiTurnAddedRef.current = false;
 
       const ctx = { turnId: null as string | null, correctionReceived: false };
-      const formData = buildAudioFormData(audioUri);
+      const formData = buildAudioFormData(audioUri, topic);
 
       try {
         for await (const event of streamTurnEvents(conversationId, formData)) {
@@ -209,7 +209,7 @@ export function useTurnStreaming(conversationId: string): UseTurnStreamingReturn
         setIsAiThinking(false);
       }
     },
-    [conversationId, processEvent, setRecordingStatus, addBufferedAiTurn],
+    [conversationId, topic, processEvent, setRecordingStatus, addBufferedAiTurn],
   );
 
   return { isStreaming, isUserProcessing, isAiThinking, processTurn };

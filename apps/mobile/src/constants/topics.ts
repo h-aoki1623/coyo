@@ -5,7 +5,7 @@ import type { TopicKey } from '@/navigation/types';
 export interface Topic {
   key: TopicKey;
   label: string;
-  icon: 'globe' | 'briefcase' | 'building' | 'monitor' | 'film';
+  icon: 'globe' | 'briefcase' | 'building' | 'monitor' | 'film' | 'chat';
   iconBg: string;
   iconColor: string;
 }
@@ -33,6 +33,7 @@ const TOPIC_META: Record<TopicKey, Omit<Topic, 'label'>> = {
   politics: { key: 'politics', icon: 'building', iconBg: Colors.topicPoliticsBg, iconColor: Colors.topicPolitics },
   technology: { key: 'technology', icon: 'monitor', iconBg: Colors.topicTechnologyBg, iconColor: Colors.topicTechnology },
   entertainment: { key: 'entertainment', icon: 'film', iconBg: Colors.topicEntertainmentBg, iconColor: Colors.topicEntertainment },
+  general: { key: 'general', icon: 'chat', iconBg: Colors.borderSubtle, iconColor: Colors.textSecondary },
 };
 
 /**

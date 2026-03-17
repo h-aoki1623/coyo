@@ -114,7 +114,7 @@ export function TalkScreen({ navigation, route }: Props) {
   const { startRecording, stopRecording } = useAudioRecording();
 
   const activeConversationId = conversationId ?? '';
-  const { isStreaming, isUserProcessing, isAiThinking, processTurn } = useTurnStreaming(activeConversationId);
+  const { isStreaming, isUserProcessing, isAiThinking, processTurn } = useTurnStreaming(activeConversationId, topic);
 
   // Hide the default navigation header
   useEffect(() => {

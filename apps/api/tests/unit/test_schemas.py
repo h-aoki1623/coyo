@@ -156,7 +156,6 @@ class TestConversationResponse:
         now = datetime.now(UTC)
         resp = ConversationResponse(
             id=uuid.uuid4(),
-            topic="technology",
             status="active",
             duration_seconds=None,
             time_limit_seconds=1800,
@@ -173,7 +172,6 @@ class TestConversationResponse:
         now = datetime.now(UTC)
         resp = ConversationResponse(
             id=uuid.uuid4(),
-            topic="sports",
             status="completed",
             duration_seconds=900,
             time_limit_seconds=1800,
@@ -190,7 +188,6 @@ class TestConversationResponse:
         now = datetime.now(UTC)
         resp = ConversationResponse(
             id=uuid.uuid4(),
-            topic="technology",
             status="active",
             duration_seconds=None,
             time_limit_seconds=1800,
@@ -211,7 +208,6 @@ class TestConversationResponse:
 
         class FakeConversation:
             id = uuid.uuid4()
-            topic = "business"
             status = "active"
             duration_seconds = None
             time_limit_seconds = 1800
@@ -220,7 +216,6 @@ class TestConversationResponse:
             total_corrections = 0
 
         resp = ConversationResponse.model_validate(FakeConversation())
-        assert resp.topic == "business"
         assert resp.status == "active"
 
 
@@ -437,7 +432,6 @@ class TestHistorySchemas:
         now = datetime.now(UTC)
         item = HistoryListItem(
             id=uuid.uuid4(),
-            topic="technology",
             status="completed",
             started_at=now,
             ended_at=now,
@@ -452,7 +446,6 @@ class TestHistorySchemas:
         now = datetime.now(UTC)
         item = HistoryListItem(
             id=uuid.uuid4(),
-            topic="sports",
             status="active",
             started_at=now,
             ended_at=None,
@@ -490,7 +483,6 @@ class TestHistorySchemas:
         now = datetime.now(UTC)
         resp = HistoryDetailResponse(
             id=uuid.uuid4(),
-            topic="technology",
             status="completed",
             duration_seconds=600,
             time_limit_seconds=1800,
@@ -508,7 +500,6 @@ class TestHistorySchemas:
         now = datetime.now(UTC)
         resp = HistoryDetailResponse(
             id=uuid.uuid4(),
-            topic="technology",
             status="completed",
             duration_seconds=600,
             time_limit_seconds=1800,

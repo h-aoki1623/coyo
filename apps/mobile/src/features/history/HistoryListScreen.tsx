@@ -20,7 +20,6 @@ import { LogoIcon, TrashIcon, SpeechBubbleIcon, HintCircleIcon } from '@/compone
 import { NavBar } from '@/components/NavBar';
 import type { RootStackParamList } from '@/navigation/types';
 import type { HistoryListItem, HistoryListResponse } from '@/types/conversation';
-import { findTopic } from '@/constants/topics';
 import { formatDateTime, groupByDate } from './utils/format';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'HistoryList'>;
@@ -39,8 +38,7 @@ const HistoryRow = memo(function HistoryRow({ item, onPress, onDelete }: History
   const translateX = useRef(new Animated.Value(0)).current;
   const [swiped, setSwiped] = useState(false);
 
-  const topic = findTopic(item.topic);
-  const topicLabel = topic?.label ?? item.topic;
+  const topicLabel = t('history.talkLabel');
 
   const handlePress = useCallback(() => {
     if (swiped) {

@@ -70,7 +70,6 @@ async def get_history_detail(
 
     return HistoryDetailResponse(
         id=conversation.id,
-        topic=conversation.topic,
         status=conversation.status,
         duration_seconds=conversation.duration_seconds,
         time_limit_seconds=conversation.time_limit_seconds,

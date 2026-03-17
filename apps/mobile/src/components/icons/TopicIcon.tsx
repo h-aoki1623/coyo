@@ -23,6 +23,8 @@ export function TopicIcon({ icon, size = 20, color = '#2563EB' }: Props) {
       return <MonitorIcon size={size} color={color} />;
     case 'film':
       return <FilmIcon size={size} color={color} />;
+    case 'chat':
+      return <ChatBubbleIcon size={size} color={color} />;
   }
 }
 
@@ -114,6 +116,20 @@ function MonitorIcon({ size, color }: { size: number; color: string }) {
       />
       <Path
         d="M8 21h8M12 17v4"
+        stroke={color}
+        strokeWidth={1.8}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
+  );
+}
+
+function ChatBubbleIcon({ size, color }: { size: number; color: string }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path
+        d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10Z"
         stroke={color}
         strokeWidth={1.8}
         strokeLinecap="round"

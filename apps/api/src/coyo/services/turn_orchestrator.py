@@ -79,6 +79,7 @@ class TurnOrchestrator:
         user_id: uuid.UUID,
         audio_data: bytes,
         audio_filename: str = "audio.m4a",
+        topic: str = "general",
     ) -> AsyncIterator[dict[str, Any]]:
         """Process a user turn and yield SSE event dicts.
 
@@ -87,6 +88,7 @@ class TurnOrchestrator:
             user_id: The user who submitted the turn.
             audio_data: Raw audio bytes from the client.
             audio_filename: Original filename of the uploaded audio.
+            topic: Conversation topic for the LLM system prompt.
 
         Yields:
             Dicts with "event" and "data" keys for SSE formatting.
@@ -113,7 +115,7 @@ class TurnOrchestrator:
         log.info("turn_user_saved", turn_id=str(user_turn.id), sequence=next_sequence)
 
         # -- Step 3: Build conversation history and stream LLM reply ------
-        messages = await self._build_messages(conversation_id, user_text)
+        messages = await self._build_messages(conversation_id, user_text, topic=topic)
         full_ai_text = ""
 
         async for chunk in self._llm.chat(
@@ -194,18 +196,14 @@ class TurnOrchestrator:
         self,
         conversation_id: uuid.UUID,
         current_user_text: str,
+        *,
+        topic: str = "general",
     ) -> list[ChatMessage]:
         """Build the LLM message list from conversation history.
 
         Includes the system prompt, previous turns, and the current
         user message.
         """
-        # Fetch the conversation to get the topic
-        from coyo.models.conversation import Conversation
-
-        conversation = await self._session.get(Conversation, conversation_id)
-        topic = conversation.topic if conversation else "general"
-
         system_prompt = _CONVERSATION_SYSTEM_PROMPT.format(topic=topic)
         messages: list[ChatMessage] = [
             ChatMessage(role="system", content=system_prompt),
