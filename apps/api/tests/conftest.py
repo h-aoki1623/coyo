@@ -96,7 +96,6 @@ async def test_conversation(
     """Create and persist a test conversation with 'active' status."""
     conversation = Conversation(
         user_id=test_user.id,
-        topic="technology",
         status="active",
         time_limit_seconds=1800,
         started_at=datetime.now(UTC),
@@ -117,7 +116,6 @@ async def completed_conversation(
     ended = datetime(2025, 1, 1, 12, 15, 0, tzinfo=UTC)
     conversation = Conversation(
         user_id=test_user.id,
-        topic="sports",
         status="completed",
         time_limit_seconds=1800,
         started_at=started,
@@ -139,7 +137,6 @@ async def paused_conversation(
     """Create and persist a test conversation with 'paused' status."""
     conversation = Conversation(
         user_id=test_user.id,
-        topic="business",
         status="paused",
         time_limit_seconds=1800,
         started_at=datetime.now(UTC),
