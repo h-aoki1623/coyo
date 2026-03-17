@@ -18,6 +18,29 @@
 
 - Claude MUST NEVER modify or create files directly on `main` or `develop`. This applies to ALL changes including documentation, configuration, and rule files.
 
+### Worktree Dependency Setup (MUST)
+
+Worktrees do NOT include gitignored files (`.venv`, `node_modules`, `.env`). These MUST be created independently inside the worktree — **NEVER symlink** them from the main repo.
+
+Symlinking causes tests to import the **main repo's source code** instead of the worktree's modified code, producing false-passing tests that fail in CI.
+
+After creating a worktree, run the following setup before making any changes:
+
+```bash
+# 1. Backend: create independent .venv
+cd <worktree>/apps/api
+uv venv && uv pip install -e ".[dev]"
+cp <main-repo>/apps/api/.env .env   # Copy, not symlink
+
+# 2. Mobile: create independent node_modules
+cd <worktree>/apps/mobile
+npm ci
+```
+
+**Prohibited:**
+- NEVER symlink `.venv` or `node_modules` from the main repo — this causes tests to run against stale source code
+- NEVER symlink `.env` — copy it instead (symlinks may cause path-related issues)
+
 ### Branch Naming Conventions
 
 Claude MUST use the following branch prefixes and meanings:
