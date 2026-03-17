@@ -37,7 +37,6 @@ class TestCreateConversation:
             json={"topic": "technology"},
         )
         data = response.json()
-        assert data["topic"] == "technology"
         assert data["status"] == "active"
         assert data["durationSeconds"] is None
         assert data["endedAt"] is None
@@ -54,7 +53,6 @@ class TestCreateConversation:
                 json={"topic": topic},
             )
             assert response.status_code == 201
-            assert response.json()["topic"] == topic
 
     @pytest.mark.integration
     async def test_create_conversation_invalid_topic_returns_422(
@@ -125,7 +123,6 @@ class TestGetConversation:
         assert response.status_code == 200
         data = response.json()
         assert data["id"] == str(test_conversation.id)
-        assert data["topic"] == "technology"
         assert data["status"] == "active"
 
     @pytest.mark.integration

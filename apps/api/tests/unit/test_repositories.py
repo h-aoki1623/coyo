@@ -30,11 +30,9 @@ class TestConversationRepository:
         repo = ConversationRepository(db_session)
         conversation = await repo.create(
             user_id=test_user.id,
-            topic="technology",
             time_limit_seconds=1800,
         )
         assert conversation.id is not None
-        assert conversation.topic == "technology"
         assert conversation.user_id == test_user.id
 
     @pytest.mark.unit
@@ -283,7 +281,6 @@ class TestHistoryRepository:
         for _ in range(3):
             conv = Conversation(
                 user_id=test_user.id,
-                topic="sports",
                 status="active",
                 time_limit_seconds=1800,
                 started_at=datetime.now(UTC),
@@ -303,7 +300,6 @@ class TestHistoryRepository:
         for _ in range(5):
             conv = Conversation(
                 user_id=test_user.id,
-                topic="technology",
                 status="active",
                 time_limit_seconds=1800,
                 started_at=datetime.now(UTC),
@@ -394,7 +390,6 @@ class TestHistoryRepository:
         for _ in range(3):
             conv = Conversation(
                 user_id=test_user.id,
-                topic="sports",
                 status="active",
                 time_limit_seconds=1800,
                 started_at=datetime.now(UTC),
