@@ -109,6 +109,11 @@ export const TypingBubble = memo(function TypingBubble({ text }: TypingBubblePro
  */
 export const AiTypingBubble = memo(function AiTypingBubble() {
   const springAnim = useRef(new Animated.Value(0)).current;
+  const dotAnims = useRef([
+    new Animated.Value(0),
+    new Animated.Value(0),
+    new Animated.Value(0),
+  ]).current;
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -121,6 +126,44 @@ export const AiTypingBubble = memo(function AiTypingBubble() {
     }, 400);
     return () => clearTimeout(timer);
   }, [springAnim]);
+
+  useEffect(() => {
+    const CYCLE_MS = 1400;
+    const FADE_MS = CYCLE_MS * 0.4;   // 560ms fade in / fade out
+    const PAUSE_MS = CYCLE_MS * 0.2;  // 280ms hold at rest
+    const STAGGER_MS = 200;
+
+    const loops = dotAnims.map((anim, i) => {
+      const loop = Animated.loop(
+        Animated.sequence([
+          Animated.timing(anim, {
+            toValue: 1,
+            duration: FADE_MS,
+            useNativeDriver: true,
+          }),
+          Animated.timing(anim, {
+            toValue: 0,
+            duration: FADE_MS,
+            useNativeDriver: true,
+          }),
+          Animated.timing(anim, {
+            toValue: 0,
+            duration: PAUSE_MS,
+            useNativeDriver: true,
+          }),
+        ]),
+      );
+      const delayTimer = setTimeout(() => loop.start(), STAGGER_MS * i);
+      return { loop, delayTimer };
+    });
+
+    return () => {
+      loops.forEach(({ loop, delayTimer }) => {
+        clearTimeout(delayTimer);
+        loop.stop();
+      });
+    };
+  }, [dotAnims]);
 
   const animStyle = {
     opacity: springAnim,
@@ -139,14 +182,33 @@ export const AiTypingBubble = memo(function AiTypingBubble() {
     <View
       style={styles.aiContainer}
       accessibilityRole="text"
-      accessibilityLabel="Coyo is typing"
+      accessibilityLabel={t('talk.aiTyping')}
     >
       <CoyoAvatar size={28} variant="sub" />
       <Animated.View style={[styles.aiBubble, styles.typingIndicatorBubble, animStyle]}>
         <View style={styles.typingDots}>
-          <View style={[styles.typingDot, styles.typingDotMuted]} />
-          <View style={styles.typingDot} />
-          <View style={[styles.typingDot, styles.typingDotMuted]} />
+          {dotAnims.map((anim, i) => (
+            <Animated.View
+              key={i}
+              style={[
+                styles.typingDot,
+                {
+                  opacity: anim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0.4, 1],
+                  }),
+                  transform: [
+                    {
+                      scale: anim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [0.6, 1],
+                      }),
+                    },
+                  ],
+                },
+              ]}
+            />
+          ))}
         </View>
       </Animated.View>
     </View>
@@ -286,8 +348,5 @@ const styles = StyleSheet.create({
     height: 8,
     borderRadius: 4,
     backgroundColor: Colors.chevron,
-  },
-  typingDotMuted: {
-    opacity: 0.6,
   },
 });
