@@ -41,34 +41,25 @@ appId: to.coyo.app
 - assertVisible:
     id: "end-conversation"
 
-# Wait for AI greeting to complete before recording.
-# The greeting generates an AI opening message; once done, the record
-# button pill switches from "Coyo is preparing to talk..." back to the
-# idle hint text. We wait for the record button to become enabled.
+# Wait for AI greeting audio to finish and recording to auto-start.
+# After greeting audio playback completes, recording starts automatically.
 - extendedWaitUntil:
     visible:
-      text: "Press Record to start speaking"
+      id: "send-recording"
     timeout: 60000
 
 - takeScreenshot: "voice-01-talk-screen"
 
-# -- Step 2: Turn 1 — Record + send (clean audio, no corrections expected) --
-
-- tapOn:
-    id: "record-button"
-
-- extendedWaitUntil:
-    visible:
-      id: "send-recording"
-    timeout: 5000
+# -- Step 2: Turn 1 — Send recording (clean audio, no corrections expected) --
+# Recording auto-started after greeting audio finished.
 
 - tapOn:
     id: "send-recording"
 
-# Wait for turn to complete (idle hint text only appears when not streaming)
+# Wait for AI turn audio to finish and recording to auto-start
 - extendedWaitUntil:
     visible:
-      text: "Press Record to start speaking"
+      id: "send-recording"
     timeout: 60000
 
 - takeScreenshot: "voice-02-turn1-complete"
@@ -81,23 +72,16 @@ appId: to.coyo.app
     commands:
       - takeScreenshot: "voice-02b-no-corrections"
 
-# -- Step 3: Turn 3 — Record + send (error audio, corrections expected) --
-
-- tapOn:
-    id: "record-button"
-
-- extendedWaitUntil:
-    visible:
-      id: "send-recording"
-    timeout: 5000
+# -- Step 3: Turn 3 — Send recording (error audio, corrections expected) --
+# Recording auto-started after AI turn audio finished.
 
 - tapOn:
     id: "send-recording"
 
-# Wait for turn to complete (idle hint text only appears when not streaming)
+# Wait for AI turn audio to finish and recording to auto-start
 - extendedWaitUntil:
     visible:
-      text: "Press Record to start speaking"
+      id: "send-recording"
     timeout: 60000
 
 - takeScreenshot: "voice-03-turn3-complete"
