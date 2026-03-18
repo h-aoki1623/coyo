@@ -41,6 +41,7 @@ const ja = {
     lessThanMinute: '1分未満',
     minutesDuration: '{{mins}}分間',
     greetingLoading: 'Coyo が準備中...',
+    aiTyping: 'Coyo が入力中',
   },
 
   // Talk - Corrections
