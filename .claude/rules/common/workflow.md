@@ -104,8 +104,7 @@ Design elements are executed sequentially. Skip elements not relevant to the fea
 
 13. **E2E Tests** (MUST for behavioral changes — see [git.md](git.md) "E2E Test Required Criteria")
     - Web: use **web-e2e-tester** (Playwright)
-    - Mobile: use **mobile-e2e-tester** (Maestro) — **MUST run on BOTH iOS AND Android**. Running only one platform is not sufficient.
-    - Claude MUST check dev environment status (`curl` health endpoints) before running — never ask the user
+    - Mobile: use **mobile-e2e-tester** (Maestro) — **MUST run on BOTH iOS AND Android**. Running only one platform is not sufficient. Dev environment is started automatically by `make e2e-*`.
     - Claude MUST NOT proceed to Commit & Push until E2E tests pass on ALL target platforms
 
 > **Gate: Phase 4 → Phase 5**: Steps 11, 12, and 13 MUST ALL be complete. Commit is BLOCKED until every test passes, every reviewer approves, and E2E passes on all platforms.

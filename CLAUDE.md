@@ -67,21 +67,22 @@ make e2e-android FLOW=navigate-to-history.yaml
 
 ### Prerequisites
 
-- **Dev environment running**: `make dev-ios` / `make dev-android` (handles Docker, backend, Metro, device boot, and app build)
 - **Maestro CLI**: `curl -Ls "https://get.maestro.mobile.dev" | bash`
+- Dev environment is started automatically by `make e2e-*` (no need to run `make dev-*` separately)
 
 ### Script responsibilities
 
 **`run-dev.sh`** (started via `make dev-ios` / `make dev-android`):
-1. Starts Docker (Postgres + Redis)
-2. Starts backend API (`uvicorn`)
-3. Boots iOS Simulator / Android Emulator
-4. Builds and installs the app
-5. Starts Metro bundler (foreground)
-6. Cleans up all processes on Ctrl+C
+1. Starts Docker (Postgres + Redis) if not running
+2. Starts backend API (`uvicorn`) if not running
+3. Starts Metro bundler if not running
+4. Boots iOS Simulator / Android Emulator as needed
+5. Builds and installs the app
+6. Keeps Metro in foreground (or returns immediately with `--background`)
+7. Cleans up all processes on Ctrl+C (foreground mode only)
 
 **`run-e2e.sh`** (started via `make e2e-ios` / `make e2e-android`):
-1. Validates dev environment is running (API, Metro, device, app)
+1. Ensures dev environment is running (delegates to `run-dev.sh --background`)
 2. Sweeps rogue Maestro processes to avoid port conflicts
 3. Runs Maestro test flows with retry on failure
 
