@@ -17,6 +17,7 @@ from coyo.rate_limit import DEFAULT_RATE_LIMIT, EXPENSIVE_RATE_LIMIT, limiter
 from coyo.schemas.conversation import (
     ConversationResponse,
     CreateConversationRequest,
+    GreetingRequest,
 )
 from coyo.schemas.correction import FeedbackResponse, TurnCorrectionResponse
 from coyo.services.conversation import ConversationService
@@ -104,6 +105,69 @@ async def submit_turn(
                 "data": json.dumps({
                     "code": "TURN_PROCESSING_FAILED",
                     "message": "An error occurred while processing your turn.",
+                }),
+            }
+
+    return EventSourceResponse(event_generator())
+
+
+@router.post("/{conversation_id}/greeting")
+@limiter.limit(EXPENSIVE_RATE_LIMIT)
+async def submit_greeting(
+    request: Request,
+    conversation_id: uuid.UUID,
+    body: GreetingRequest,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> EventSourceResponse:
+    """Generate an AI greeting for a new conversation.
+
+    Only allowed when the conversation has no turns yet. Returns 409
+    if turns already exist (prevents duplicate greetings).
+    """
+    service = ConversationService(db)
+    conversation = await service.get_conversation(conversation_id, user.id)
+    if conversation.status != "active":
+        raise ConversationStateError(
+            f"Cannot generate greeting for conversation in '{conversation.status}' status. "
+            "Only 'active' conversations accept greetings."
+        )
+
+    # Guard: reject if turns already exist.
+    # Use FOR UPDATE to prevent race conditions where two concurrent
+    # greeting requests both pass the check before either writes.
+    from sqlalchemy import select
+
+    from coyo.models.turn import Turn
+
+    stmt = (
+        select(Turn.id)
+        .where(Turn.conversation_id == conversation_id)
+        .with_for_update()
+        .limit(1)
+    )
+    result = await db.execute(stmt)
+    if result.scalar_one_or_none() is not None:
+        raise ConversationStateError(
+            "Greeting already generated. Cannot generate another greeting for this conversation."
+        )
+
+    orchestrator = TurnOrchestrator(db)
+
+    async def event_generator():
+        try:
+            async for event in orchestrator.process_greeting(
+                conversation_id=conversation_id,
+                topic=body.topic,
+            ):
+                yield {"event": event["event"], "data": json.dumps(event["data"])}
+        except Exception as exc:
+            logger.error("Greeting pipeline error: %s", exc, exc_info=True)
+            yield {
+                "event": "error",
+                "data": json.dumps({
+                    "code": "GREETING_PROCESSING_FAILED",
+                    "message": "An error occurred while generating the greeting.",
                 }),
             }
 

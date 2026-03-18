@@ -40,6 +40,7 @@ const ja = {
     viewFeedback: 'フィードバックを見る',
     lessThanMinute: '1分未満',
     minutesDuration: '{{mins}}分間',
+    greetingLoading: 'Coyo が準備中...',
   },
 
   // Talk - Corrections

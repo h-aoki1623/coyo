@@ -74,6 +74,29 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/conversations/{conversation_id}/greeting": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Submit Greeting
+         * @description Generate an AI greeting for a new conversation.
+         *
+         *     Only allowed when the conversation has no turns yet. Returns 409
+         *     if turns already exist (prevents duplicate greetings).
+         */
+        post: operations["submit_greeting_api_conversations__conversation_id__greeting_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/conversations/{conversation_id}": {
         parameters: {
             query?: never;
@@ -267,8 +290,9 @@ export interface components {
             /**
              * Topic
              * @default general
+             * @enum {string}
              */
-            topic: string;
+            topic: "sports" | "business" | "technology" | "politics" | "entertainment" | "general";
         };
         /**
          * ConversationResponse
@@ -344,6 +368,18 @@ export interface components {
             totalClean: number;
             /** Corrections */
             corrections: components["schemas"]["TurnCorrectionResponse"][];
+        };
+        /**
+         * GreetingRequest
+         * @description Request body for triggering an AI greeting.
+         */
+        GreetingRequest: {
+            /**
+             * Topic
+             * @description Conversation topic for the greeting
+             * @enum {string}
+             */
+            topic: "sports" | "business" | "technology" | "politics" | "entertainment";
         };
         /** HTTPValidationError */
         HTTPValidationError: {
@@ -586,6 +622,43 @@ export interface operations {
         requestBody: {
             content: {
                 "multipart/form-data": components["schemas"]["Body_submit_turn_api_conversations__conversation_id__turns_post"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    submit_greeting_api_conversations__conversation_id__greeting_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                conversation_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GreetingRequest"];
             };
         };
         responses: {

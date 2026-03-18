@@ -1,4 +1,4 @@
-import { streamTurnEvents, parseSSEResponse, parseSSEBuffer } from './sse-client';
+import { streamTurnEvents, streamGreetingEvents, parseSSEResponse, parseSSEBuffer } from './sse-client';
 
 // Mock dependencies
 jest.mock('expo-constants', () => ({
@@ -471,5 +471,149 @@ describe('streamTurnEvents', () => {
 
     const [url] = mockFetch.mock.calls[0];
     expect(url).toBe('http://test-api/api/conversations/..%2F..%2Fadmin/turns');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// streamGreetingEvents
+// ---------------------------------------------------------------------------
+
+// Collect all events from the greeting async generator
+async function collectGreetingEvents(
+  conversationId: string,
+  topic: string,
+  signal?: AbortSignal,
+): Promise<Array<{ type: string; data: unknown }>> {
+  const events: Array<{ type: string; data: unknown }> = [];
+  for await (const event of streamGreetingEvents(conversationId, topic, signal)) {
+    events.push(event);
+  }
+  return events;
+}
+
+describe('streamGreetingEvents', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('sends request to correct endpoint with JSON body', async () => {
+    const chunks = ['event: turn_complete\ndata: {}\n\n'];
+    mockFetch.mockResolvedValue(createStreamingResponse(chunks));
+
+    await collectGreetingEvents('conv-456', 'technology');
+
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+    const [url, options] = mockFetch.mock.calls[0];
+    expect(url).toBe('http://test-api/api/conversations/conv-456/greeting');
+    expect(options.method).toBe('POST');
+    expect(options.headers['Accept']).toBe('text/event-stream');
+    expect(options.headers['Content-Type']).toBe('application/json');
+    expect(JSON.parse(options.body)).toEqual({ topic: 'technology' });
+  });
+
+  it('passes AbortSignal to fetch', async () => {
+    const chunks = ['event: turn_complete\ndata: {}\n\n'];
+    mockFetch.mockResolvedValue(createStreamingResponse(chunks));
+
+    const controller = new AbortController();
+    await collectGreetingEvents('conv-1', 'sports', controller.signal);
+
+    const [, options] = mockFetch.mock.calls[0];
+    expect(options.signal).toBe(controller.signal);
+  });
+
+  it('yields events from a successful greeting stream', async () => {
+    const chunks = [
+      'event: ai_response_chunk\ndata: {"text":"Hello"}\n\n',
+      'event: ai_response_done\ndata: {"text":"Hello there!"}\n\n',
+      'event: tts_audio_url\ndata: {"url":"http://audio.mp3"}\n\n',
+      'event: turn_complete\ndata: {}\n\n',
+    ];
+    mockFetch.mockResolvedValue(createStreamingResponse(chunks));
+
+    const events = await collectGreetingEvents('conv-1', 'sports');
+
+    expect(events).toHaveLength(4);
+    expect(events.map((e) => e.type)).toEqual([
+      'ai_response_chunk',
+      'ai_response_done',
+      'tts_audio_url',
+      'turn_complete',
+    ]);
+  });
+
+  it('returns silently on 409 (greeting already exists)', async () => {
+    mockFetch.mockResolvedValue(createErrorResponse('Conflict', { status: 409 }));
+
+    const events = await collectGreetingEvents('conv-1', 'sports');
+
+    expect(events).toHaveLength(0);
+  });
+
+  it('yields error event on non-409 error response', async () => {
+    const errorBody = JSON.stringify({ detail: 'Server error' });
+    mockFetch.mockResolvedValue(createErrorResponse(errorBody, { status: 500 }));
+
+    const events = await collectGreetingEvents('conv-1', 'sports');
+
+    expect(events).toHaveLength(1);
+    expect(events[0]).toEqual({
+      type: 'error',
+      data: { code: 'GREETING_ERROR', message: 'Server error' },
+    });
+  });
+
+  it('yields error with error.message field from response', async () => {
+    const errorBody = JSON.stringify({
+      error: { message: 'Rate limited' },
+    });
+    mockFetch.mockResolvedValue(createErrorResponse(errorBody, { status: 429 }));
+
+    const events = await collectGreetingEvents('conv-1', 'sports');
+
+    expect(events).toHaveLength(1);
+    expect(events[0]).toEqual({
+      type: 'error',
+      data: { code: 'GREETING_ERROR', message: 'Rate limited' },
+    });
+  });
+
+  it('yields default error when body is not JSON', async () => {
+    mockFetch.mockResolvedValue(createErrorResponse('Bad Gateway', { status: 502 }));
+
+    const events = await collectGreetingEvents('conv-1', 'sports');
+
+    expect(events).toHaveLength(1);
+    expect(events[0]).toEqual({
+      type: 'error',
+      data: { code: 'GREETING_ERROR', message: 'Greeting request failed (HTTP 502)' },
+    });
+  });
+
+  it('encodes conversationId in URL to prevent path traversal', async () => {
+    const chunks = ['event: turn_complete\ndata: {}\n\n'];
+    mockFetch.mockResolvedValue(createStreamingResponse(chunks));
+
+    await collectGreetingEvents('../../admin', 'sports');
+
+    const [url] = mockFetch.mock.calls[0];
+    expect(url).toBe('http://test-api/api/conversations/..%2F..%2Fadmin/greeting');
+  });
+
+  it('propagates fetch network errors to the consumer', async () => {
+    mockFetch.mockRejectedValue(new TypeError('Network request failed'));
+
+    await expect(collectGreetingEvents('conv-1', 'sports')).rejects.toThrow(
+      'Network request failed',
+    );
+  });
+
+  it('handles empty stream', async () => {
+    const chunks = [''];
+    mockFetch.mockResolvedValue(createStreamingResponse(chunks));
+
+    const events = await collectGreetingEvents('conv-1', 'sports');
+
+    expect(events).toHaveLength(0);
   });
 });

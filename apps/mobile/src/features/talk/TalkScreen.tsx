@@ -25,6 +25,7 @@ import { RecordButton } from './components/RecordButton';
 import { RecordingControls } from './components/RecordingControls';
 import { ErrorBanner } from './components/ErrorBanner';
 import { useAudioRecording } from './hooks/useAudioRecording';
+import { useGreeting } from './hooks/useGreeting';
 import { useTurnStreaming } from './hooks/useTurnStreaming';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Talk'>;
@@ -115,6 +116,7 @@ export function TalkScreen({ navigation, route }: Props) {
 
   const activeConversationId = conversationId ?? '';
   const { isStreaming, isUserProcessing, isAiThinking, processTurn } = useTurnStreaming(activeConversationId, topic);
+  const { isGreetingLoading, triggerGreeting } = useGreeting(activeConversationId, topic);
 
   // Hide the default navigation header
   useEffect(() => {
@@ -122,6 +124,16 @@ export function TalkScreen({ navigation, route }: Props) {
       headerShown: false,
     });
   }, [navigation]);
+
+  // Trigger AI greeting on mount for new conversations.
+  // Only activeConversationId is in deps — triggerGreeting uses refs internally
+  // and must not re-fire when its identity changes.
+  useEffect(() => {
+    if (!activeConversationId || turns.length > 0) return;
+    const controller = new AbortController();
+    triggerGreeting(controller.signal);
+    return () => controller.abort();
+  }, [activeConversationId]);
 
   // Auto-scroll: passively track FlatList dimensions via callbacks,
   // but ONLY trigger scrolls from specific state changes (useEffects/handlers).
@@ -151,13 +163,13 @@ export function TalkScreen({ navigation, route }: Props) {
     }
   }, [turns.length, scrollToBottom]);
 
-  // Scroll when footer bubbles appear (ProcessingBubble / AiTypingBubble)
+  // Scroll when footer bubbles appear (ProcessingBubble / AiTypingBubble / greeting)
   useEffect(() => {
-    if (isUserProcessing || isAiThinking) {
+    if (isUserProcessing || isAiThinking || isGreetingLoading) {
       const timer = setTimeout(scrollToBottom, 200);
       return () => clearTimeout(timer);
     }
-  }, [isUserProcessing, isAiThinking, scrollToBottom]);
+  }, [isUserProcessing, isAiThinking, isGreetingLoading, scrollToBottom]);
 
   const formatDuration = useCallback((): string => {
     const elapsed = Math.floor((Date.now() - conversationStartTime.current) / 1000);
@@ -227,7 +239,7 @@ export function TalkScreen({ navigation, route }: Props) {
   const isCompleted = status === 'completed';
   const isRecording = recordingStatus === 'recording';
   const isProcessing = recordingStatus === 'processing';
-  const canRecord = !isStreaming && !isEnding && !isCompleted && !isProcessing;
+  const canRecord = !isStreaming && !isEnding && !isCompleted && !isProcessing && !isGreetingLoading;
 
   const renderTurn = useCallback(
     ({ item }: { item: Turn }) => {
@@ -239,6 +251,11 @@ export function TalkScreen({ navigation, route }: Props) {
 
   const renderFooter = useCallback(() => {
     const elements: React.ReactElement[] = [];
+
+    // AI typing indicator during greeting
+    if (isGreetingLoading && turns.length === 0) {
+      elements.push(<AiTypingBubble key="greeting-typing" />);
+    }
 
     // User processing bubble (waiting for STT result)
     if (isUserProcessing) {
@@ -264,12 +281,22 @@ export function TalkScreen({ navigation, route }: Props) {
     if (elements.length === 0) return null;
 
     return <View>{elements}</View>;
-  }, [isUserProcessing, isAiThinking, isCompleted, conversationDuration]);
+  }, [isGreetingLoading, turns.length, isUserProcessing, isAiThinking, isCompleted, conversationDuration]);
 
   // Determine which bottom control to show
   const renderBottomControls = () => {
     if (isCompleted) {
       return <CompletionFooter onViewFeedback={handleViewFeedback} />;
+    }
+
+    if (isGreetingLoading) {
+      return (
+        <RecordButton
+          onPress={handleStartRecording}
+          processing
+          processingText={t('talk.greetingLoading')}
+        />
+      );
     }
 
     if (isRecording) {
@@ -302,7 +329,7 @@ export function TalkScreen({ navigation, route }: Props) {
       <TalkHeader onEnd={handleEndConversation} onBack={handleGoBack} isEnding={isEnding} />
 
       {/* Message area */}
-      {turns.length === 0 && !isStreaming ? (
+      {turns.length === 0 && !isStreaming && !isGreetingLoading ? (
         <View style={styles.emptyState}>
           <CoyoAvatar size={56} />
           <Text style={styles.emptyTitle}>{t('talk.emptyTitle')}</Text>
