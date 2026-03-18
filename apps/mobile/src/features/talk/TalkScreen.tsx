@@ -111,7 +111,9 @@ export function TalkScreen({ navigation, route }: Props) {
   const setStatus = useConversationStore((s) => s.setStatus);
   const recordingStatus = useAudioStore((s) => s.recordingStatus);
   const setRecordingStatus = useAudioStore((s) => s.setRecordingStatus);
+  const playbackStatus = useAudioStore((s) => s.playbackStatus);
 
+  const prevPlaybackStatusRef = useRef<'idle' | 'playing' | 'loading'>('idle');
   const { startRecording, stopRecording } = useAudioRecording();
 
   const activeConversationId = conversationId ?? '';
@@ -239,7 +241,20 @@ export function TalkScreen({ navigation, route }: Props) {
   const isCompleted = status === 'completed';
   const isRecording = recordingStatus === 'recording';
   const isProcessing = recordingStatus === 'processing';
-  const canRecord = !isStreaming && !isEnding && !isCompleted && !isProcessing && !isGreetingLoading;
+  const isPlayingAudio = playbackStatus !== 'idle';
+  const canRecord = !isStreaming && !isEnding && !isCompleted && !isProcessing && !isGreetingLoading && !isPlayingAudio;
+
+  // Auto-start recording when audio playback finishes
+  useEffect(() => {
+    const wasPlaying = prevPlaybackStatusRef.current === 'playing';
+    prevPlaybackStatusRef.current = playbackStatus;
+
+    if (wasPlaying && playbackStatus === 'idle' && canRecord && !isRecording) {
+      handleStartRecording().catch(() => {
+        // Recording start failed — user can retry manually via record button
+      });
+    }
+  }, [playbackStatus, canRecord, isRecording, handleStartRecording]);
 
   const renderTurn = useCallback(
     ({ item }: { item: Turn }) => {
@@ -308,7 +323,7 @@ export function TalkScreen({ navigation, route }: Props) {
       );
     }
 
-    if (isProcessing || isStreaming) {
+    if (isProcessing || isStreaming || isPlayingAudio) {
       return (
         <RecordButton
           onPress={handleStartRecording}
