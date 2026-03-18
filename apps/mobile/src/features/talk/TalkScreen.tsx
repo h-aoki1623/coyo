@@ -125,13 +125,15 @@ export function TalkScreen({ navigation, route }: Props) {
     });
   }, [navigation]);
 
-  // Trigger AI greeting on mount for new conversations
+  // Trigger AI greeting on mount for new conversations.
+  // Only activeConversationId is in deps — triggerGreeting uses refs internally
+  // and must not re-fire when its identity changes.
   useEffect(() => {
     if (!activeConversationId || turns.length > 0) return;
     const controller = new AbortController();
     triggerGreeting(controller.signal);
     return () => controller.abort();
-  }, [activeConversationId]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [activeConversationId]);
 
   // Auto-scroll: passively track FlatList dimensions via callbacks,
   // but ONLY trigger scrolls from specific state changes (useEffects/handlers).
