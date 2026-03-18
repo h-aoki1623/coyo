@@ -50,6 +50,14 @@ just respond naturally. Corrections are handled separately.\
 """
 
 
+_GREETING_SYSTEM_PROMPT = """\
+You are a friendly English conversation partner named Coyo. The current topic is {topic}.
+Generate a natural opening greeting to start the conversation. Keep it warm and inviting \
+(2-3 sentences). Include exactly one open-ended question about the topic to encourage the \
+user to respond. Speak at an intermediate English level.\
+"""
+
+
 def _make_event(event: str, data: dict[str, Any]) -> dict[str, Any]:
     """Build an SSE event dict with the given event name and data payload."""
     return {"event": event, "data": data}
@@ -184,6 +192,56 @@ class TurnOrchestrator:
         # -- Step 7: Done -------------------------------------------------
         yield _make_event("turn_complete", {})
         log.info("turn_pipeline_done")
+
+    async def process_greeting(
+        self,
+        *,
+        conversation_id: uuid.UUID,
+        topic: str,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Generate an AI greeting and yield SSE event dicts.
+
+        A simplified pipeline with no STT or correction — just LLM + TTS.
+        """
+        log = logger.bind(conversation_id=str(conversation_id))
+        log.info("greeting_pipeline_start")
+
+        # Build messages: system prompt only (no user message)
+        system_prompt = _GREETING_SYSTEM_PROMPT.format(topic=topic)
+        messages: list[ChatMessage] = [
+            ChatMessage(role="system", content=system_prompt),
+        ]
+
+        # Stream LLM response
+        full_ai_text = ""
+        async for chunk in self._llm.chat(
+            messages,
+            options=ChatOptions(temperature=0.8, max_tokens=256),
+        ):
+            full_ai_text += chunk
+            yield _make_event("ai_response_chunk", {"text": chunk})
+
+        yield _make_event("ai_response_done", {"text": full_ai_text})
+
+        # Save AI turn (sequence=1, role="ai")
+        ai_turn = await self._turn_repo.create(
+            conversation_id=conversation_id,
+            role="ai",
+            text=full_ai_text,
+            sequence=1,
+        )
+        log.info("greeting_ai_saved", turn_id=str(ai_turn.id))
+
+        # TTS
+        tts_url = await self._tts.synthesize(full_ai_text)
+        yield _make_event("tts_audio_url", {"url": tts_url})
+
+        # Commit
+        await self._session.commit()
+
+        # Done
+        yield _make_event("turn_complete", {})
+        log.info("greeting_pipeline_done")
 
     async def _get_next_sequence(self, conversation_id: uuid.UUID) -> int:
         """Determine the next sequence number for a conversation."""

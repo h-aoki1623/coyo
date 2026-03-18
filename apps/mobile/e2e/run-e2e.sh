@@ -9,18 +9,13 @@
 #   ./e2e/run-e2e.sh android navigate-to-history.yaml   # Run a single flow on Android
 #
 # Prerequisites:
-#   - Dev environment running (make dev-ios / make dev-android / make dev-both)
 #   - Maestro CLI installed (maestro --version)
 #
-# The dev environment (run-dev.sh) handles:
-#   - Docker (Postgres + Redis)
-#   - Backend API
-#   - Metro bundler
-#   - iOS Simulator / Android Emulator boot
-#   - App build and install
+# Dev environment (run-dev.sh) is started automatically if not already running.
+# run-dev.sh handles: Docker, Backend API, Metro, Simulator/Emulator, app build.
 #
-# This script only:
-#   1. Validates the dev environment is running (API, Metro, device, app)
+# This script:
+#   1. Ensures dev environment is running (delegates to run-dev.sh --background)
 #   2. Sweeps rogue Maestro processes to avoid port conflicts
 #   3. Ensures Maestro driver APKs are installed (Android)
 #   4. Runs Maestro test flows with retry on failure
@@ -47,76 +42,30 @@ MAESTRO_TIMEOUT=300  # 5 minutes (seconds) per maestro test invocation
 export E2E_MODE=true
 
 # ===========================================================================
-# Environment validation
+# Environment setup
 # ===========================================================================
 
-require_environment() {
+ensure_dev_environment() {
   local target="$1"
-  local errors=0
 
-  # Kill stale dev processes running from deleted worktree directories
-  validate_port_process "$API_PORT" "API"
-  validate_port_process "$METRO_PORT" "Metro"
-
-  # Maestro CLI
+  # Maestro CLI (E2E-specific prerequisite, not a dev environment concern)
   if ! command -v maestro &>/dev/null; then
     err "Maestro CLI not found. Install with: curl -Ls \"https://get.maestro.mobile.dev\" | bash"
-    errors=$((errors + 1))
+    exit 1
   fi
 
-  # Backend API
-  if ! curl -sf --max-time 3 "$API_HEALTH_URL" > /dev/null 2>&1; then
-    err "Backend API is not running at $API_HEALTH_URL"
-    err "Start the dev environment first: make dev-ios / make dev-android"
-    errors=$((errors + 1))
+  # Map e2e target to run-dev.sh target (e2e "all" = dev "both")
+  local dev_target="$target"
+  if [[ "$target" == "all" ]]; then
+    dev_target="both"
   fi
 
-  # Metro bundler
-  if ! curl -sf --max-time 2 "http://localhost:8081/status" > /dev/null 2>&1; then
-    err "Metro bundler is not running on port 8081"
-    err "Start the dev environment first: make dev-ios / make dev-android"
-    errors=$((errors + 1))
-  fi
-
-  # iOS-specific
-  if [[ "$target" == "ios" || "$target" == "all" ]]; then
-    local udid
-    udid=$(get_booted_ios_udid)
-    if [[ -z "$udid" ]]; then
-      err "No booted iOS Simulator found."
-      err "Start the dev environment first: make dev-ios"
-      errors=$((errors + 1))
-    else
-      # Verify app is installed
-      if ! xcrun simctl listapps "$udid" 2>/dev/null | grep -q "to.coyo.app"; then
-        err "iOS app (to.coyo.app) not installed on simulator."
-        err "Start the dev environment first: make dev-ios"
-        errors=$((errors + 1))
-      fi
-    fi
-  fi
-
-  # Android-specific
-  if [[ "$target" == "android" || "$target" == "all" ]]; then
-    if ! command -v adb &>/dev/null; then
-      err "adb not found. Install Android SDK platform-tools."
-      errors=$((errors + 1))
-    else
-      local device_id
-      device_id=$(get_android_emulator_id)
-      if [[ -z "$device_id" ]]; then
-        err "No Android Emulator found."
-        err "Start the dev environment first: make dev-android"
-        errors=$((errors + 1))
-      else
-        # Verify app is installed
-        if ! adb -s "$device_id" shell pm list packages 2>/dev/null | grep -q "to.coyo.app"; then
-          err "Android app (to.coyo.app) not installed on emulator."
-          err "Start the dev environment first: make dev-android"
-          errors=$((errors + 1))
-        fi
-      fi
-    fi
+  # Delegate dev environment setup to run-dev.sh (idempotent — skips
+  # components that are already running).
+  log "Ensuring dev environment is running (target: $dev_target)..."
+  if ! "$MOBILE_DIR/run-dev.sh" "$dev_target" --background; then
+    err "Failed to start dev environment. See errors above."
+    exit 1
   fi
 
   # Test audio fixtures (required for voice conversation E2E)
@@ -143,12 +92,6 @@ require_environment() {
       warn "Voice conversation E2E flow will fail. Generate them manually:"
       warn "  ./e2e/fixtures/generate-test-audio.sh"
     fi
-  fi
-
-  if [[ $errors -gt 0 ]]; then
-    err "$errors prerequisite check(s) failed."
-    err "Start the dev environment first: make dev-ios / make dev-android / make dev-both"
-    exit 1
   fi
 
   log "Environment ready."
@@ -490,7 +433,7 @@ usage() {
   echo "  Optional: specify a single flow file (e.g., app-launch.yaml)"
   echo "            to run only that flow instead of the full suite."
   echo ""
-  echo "  Requires: dev environment running (make dev-ios / make dev-android)"
+  echo "  Dev environment is started automatically if not already running."
   exit 1
 }
 
@@ -535,8 +478,8 @@ if [[ -z "$_FLOW_TARGET" ]]; then
   _FLOW_TARGET="$E2E_DIR/"
 fi
 
-# Validate dev environment is running
-require_environment "$_TARGET"
+# Ensure dev environment is running (starts if needed)
+ensure_dev_environment "$_TARGET"
 
 # Sweep any rogue Maestro processes started outside this script
 cleanup_maestro

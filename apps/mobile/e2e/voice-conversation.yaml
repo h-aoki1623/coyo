@@ -21,6 +21,10 @@ appId: to.coyo.app
 - launchApp:
     clearState: false
 
+# Ensure signed in (handles unauthenticated state when running flow individually)
+- runFlow:
+    file: helpers/ensure-signed-in.yaml
+
 - extendedWaitUntil:
     visible:
       id: "topic-sports"
@@ -37,25 +41,25 @@ appId: to.coyo.app
 - assertVisible:
     id: "end-conversation"
 
-- takeScreenshot: "voice-01-talk-screen"
-
-# -- Step 2: Turn 1 — Record + send (clean audio, no corrections expected) --
-
-- tapOn:
-    id: "record-button"
-
+# Wait for AI greeting audio to finish and recording to auto-start.
+# After greeting audio playback completes, recording starts automatically.
 - extendedWaitUntil:
     visible:
       id: "send-recording"
-    timeout: 5000
+    timeout: 60000
+
+- takeScreenshot: "voice-01-talk-screen"
+
+# -- Step 2: Turn 1 — Send recording (clean audio, no corrections expected) --
+# Recording auto-started after greeting audio finished.
 
 - tapOn:
     id: "send-recording"
 
-# Wait for turn to complete (record button reappears when idle)
+# Wait for AI turn audio to finish and recording to auto-start
 - extendedWaitUntil:
     visible:
-      id: "record-button"
+      id: "send-recording"
     timeout: 60000
 
 - takeScreenshot: "voice-02-turn1-complete"
@@ -68,23 +72,16 @@ appId: to.coyo.app
     commands:
       - takeScreenshot: "voice-02b-no-corrections"
 
-# -- Step 3: Turn 3 — Record + send (error audio, corrections expected) --
-
-- tapOn:
-    id: "record-button"
-
-- extendedWaitUntil:
-    visible:
-      id: "send-recording"
-    timeout: 5000
+# -- Step 3: Turn 3 — Send recording (error audio, corrections expected) --
+# Recording auto-started after AI turn audio finished.
 
 - tapOn:
     id: "send-recording"
 
-# Wait for turn to complete
+# Wait for AI turn audio to finish and recording to auto-start
 - extendedWaitUntil:
     visible:
-      id: "record-button"
+      id: "send-recording"
     timeout: 60000
 
 - takeScreenshot: "voice-03-turn3-complete"
@@ -104,9 +101,11 @@ appId: to.coyo.app
       - tapOn:
           id: "correction-toggle"
 
-      # Verify the expanded card with corrected text and explanation
-      - assertVisible:
-          id: "correction-card"
+      # Wait for the expand animation (300ms) to complete
+      - extendedWaitUntil:
+          visible:
+            id: "correction-card"
+          timeout: 10000
       - assertVisible:
           id: "correction-corrected-text"
       - assertVisible:
@@ -118,9 +117,11 @@ appId: to.coyo.app
       - tapOn:
           id: "correction-toggle"
 
-      # Verify the expanded card is no longer visible
-      - assertNotVisible:
-          id: "correction-card"
+      # Wait for the collapse animation to finish and card to unmount
+      - extendedWaitUntil:
+          notVisible:
+            id: "correction-card"
+          timeout: 5000
 
       - takeScreenshot: "voice-03d-correction-collapsed"
 

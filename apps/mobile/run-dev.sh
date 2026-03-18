@@ -12,7 +12,7 @@
 #   3. Boots iOS Simulator / starts Android Emulator as needed
 #   4. Builds and installs the app
 #   5. Sets up adb reverse port forwarding (Android)
-#   6. Keeps Metro bundler running in foreground
+#   6. Keeps Metro bundler running in foreground (unless --background)
 #   7. On Ctrl+C: cleans up background processes started by this script
 #
 # Prerequisites:
@@ -67,7 +67,7 @@ cleanup() {
   log "Done. Goodbye!"
 }
 
-trap cleanup EXIT INT TERM
+# Trap is set conditionally after argument parsing (see --background flag)
 
 # ===========================================================================
 # iOS: Build and install
@@ -168,11 +168,15 @@ run_android() {
 # ===========================================================================
 
 usage() {
-  echo "Usage: $0 {ios|android|both}"
+  echo "Usage: $0 {ios|android|both} [--background]"
   echo ""
   echo "  ios      Boot iOS Simulator, build, install, and start Metro"
   echo "  android  Start Android Emulator, build, install, and start Metro"
   echo "  both     Start both platforms"
+  echo ""
+  echo "Options:"
+  echo "  --background  Set up environment and return without waiting on Metro."
+  echo "                Used by run-e2e.sh to start dev environment automatically."
   exit 1
 }
 
@@ -181,6 +185,29 @@ if [[ $# -lt 1 ]]; then
 fi
 
 TARGET="$1"
+shift
+
+case "$TARGET" in
+  ios|android|both) ;;
+  *) usage ;;
+esac
+
+_BACKGROUND=false
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --background) _BACKGROUND=true; shift ;;
+    *) err "Unknown option: $1"; usage ;;
+  esac
+done
+
+# In foreground mode, always clean up on exit.
+# In background mode, only clean up on failure — processes must stay alive
+# for the caller (e.g., run-e2e.sh) on success.
+if [[ "$_BACKGROUND" == "false" ]]; then
+  trap cleanup EXIT INT TERM
+else
+  trap 'if [[ $? -ne 0 ]]; then cleanup; fi' EXIT
+fi
 
 echo ""
 info "====================================="
@@ -231,32 +258,37 @@ if [[ ! -f "$IOS_PLIST" ]] || [[ ! -f "$ANDROID_JSON" ]]; then
 fi
 log "Firebase config validated."
 
-# Step 2: Kill leftover Metro to avoid port conflicts during build
-kill_existing_metro
-
-# Step 3: Backend infrastructure
+# Step 2: Backend infrastructure
 ensure_backend || exit 1
 if [[ -n "$_BACKEND_PID" ]]; then
   _PIDS_TO_KILL+=("$_BACKEND_PID")
 fi
 
-# Step 4: Start Metro in background BEFORE builds
+# Step 3: Start Metro in background BEFORE builds (idempotent)
 # Apps launched by expo run:* connect to Metro immediately on start.
 # Metro must be running first, otherwise the dev client shows an error screen.
-log "Starting Metro bundler..."
-cd "$MOBILE_DIR"
-npx expo start --dev-client &
-_METRO_PID=$!
-_PIDS_TO_KILL+=("$_METRO_PID")
+# Kill stale Metro running from a deleted worktree directory before checking.
+validate_port_process "$METRO_PORT" "Metro"
+_METRO_PID=""
 
-# Wait for Metro to be ready
-log "Waiting for Metro to be ready..."
-if ! wait_for_url "http://localhost:8081/status" 30 2 "Metro bundler"; then
-  exit 1
+if curl -sf --max-time 2 "http://localhost:$METRO_PORT/status" > /dev/null 2>&1; then
+  log "Metro bundler already running."
+else
+  kill_existing_metro
+  log "Starting Metro bundler..."
+  cd "$MOBILE_DIR"
+  npx expo start --dev-client &
+  _METRO_PID=$!
+  _PIDS_TO_KILL+=("$_METRO_PID")
+
+  log "Waiting for Metro to be ready..."
+  if ! wait_for_url "http://localhost:$METRO_PORT/status" 30 2 "Metro bundler"; then
+    exit 1
+  fi
+  log "Metro bundler is ready."
 fi
-log "Metro bundler is ready."
 
-# Step 5: Platform-specific build
+# Step 4: Platform-specific build
 case "$TARGET" in
   ios)
     run_ios
@@ -277,14 +309,30 @@ echo ""
 log "============================================"
 log "  Ready! App is running on $TARGET."
 log "============================================"
+
+if [[ "$_BACKGROUND" == "true" ]]; then
+  log ""
+  log "  Background mode: dev environment is ready."
+  exit 0
+fi
+
 log ""
-log "  Metro bundler running (PID: $_METRO_PID)"
+log "  Metro bundler running (PID: ${_METRO_PID:-unknown})"
 log "  Press Ctrl+C to stop all services."
 log ""
 
-# Step 6: Wait on Metro (foreground)
+# Step 5: Wait on Metro (foreground only)
 # NOTE: Do NOT use `exec` here — it replaces the shell process and prevents
 # the trap handler from firing, leaving backend API and emulator processes
 # running after Ctrl+C. Instead, wait on Metro so that when it exits
 # (or user presses Ctrl+C), the EXIT trap fires and cleans up.
-wait "$_METRO_PID" 2>/dev/null || true
+if [[ -n "$_METRO_PID" ]]; then
+  wait "$_METRO_PID" 2>/dev/null || true
+else
+  # Metro was already running (not started by us). Block until Ctrl+C.
+  log "  Metro was already running. Press Ctrl+C to stop services started by this script."
+  tail -f /dev/null &
+  _TAIL_PID=$!
+  _PIDS_TO_KILL+=("$_TAIL_PID")
+  wait "$_TAIL_PID" 2>/dev/null || true
+fi

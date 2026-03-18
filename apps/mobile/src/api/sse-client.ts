@@ -4,6 +4,9 @@ import Constants from 'expo-constants';
 import { getAuthToken } from '@/services/token-provider';
 import type { TurnEvent } from '@/types/api';
 
+/** The response type returned by expo/fetch */
+type ExpoFetchResponse = Awaited<ReturnType<typeof fetch>>;
+
 const API_BASE_URL = Constants.expoConfig?.extra?.apiBaseUrl ?? 'http://localhost:8000';
 
 // Maximum buffer size (1 MB) to prevent memory exhaustion from malformed streams
@@ -68,54 +71,13 @@ export function parseSSEResponse(body: string): TurnEvent[] {
 }
 
 /**
- * Send audio and receive turn events from the backend SSE endpoint.
- *
- * Uses expo/fetch which supports ReadableStream on response bodies,
- * enabling incremental SSE event delivery. Events are yielded as soon
- * as they arrive from the backend (e.g. stt_result after STT completes)
- * rather than waiting for the entire response to finish.
+ * Read SSE events from a Response body using ReadableStream (incremental)
+ * or full-body fallback. Shared by streamTurnEvents and streamGreetingEvents.
  */
-export async function* streamTurnEvents(
-  conversationId: string,
-  audioFormData: FormData,
+async function* readSSEStream(
+  response: ExpoFetchResponse,
   signal?: AbortSignal,
 ): AsyncGenerator<TurnEvent> {
-  const url = `${API_BASE_URL}/api/conversations/${encodeURIComponent(conversationId)}/turns`;
-
-  // Build auth headers (Firebase auth token)
-  const headers: Record<string, string> = {
-    'Accept': 'text/event-stream',
-  };
-  const token = await getAuthToken();
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
-
-  const response = await fetch(url, {
-    method: 'POST',
-    headers,
-    body: audioFormData,
-    signal,
-  });
-
-  if (!response.ok) {
-    const bodyText = await response.text().catch(() => '');
-    let body: Record<string, unknown> | null = null;
-    try { body = JSON.parse(bodyText); } catch { /* not JSON */ }
-    const message = (body as Record<string, Record<string, string>> | null)?.error?.message
-      ?? (body as Record<string, string> | null)?.detail
-      ?? `Stream request failed (HTTP ${response.status})`;
-    if (__DEV__) {
-      const truncated = bodyText.length > 200 ? bodyText.slice(0, 200) + '...' : bodyText;
-      console.warn(`[SSE] Stream error HTTP ${response.status}: ${truncated}`);
-    }
-    yield {
-      type: 'error',
-      data: { code: 'STREAM_ERROR', message },
-    };
-    return;
-  }
-
   // Use ReadableStream for incremental reading (expo/fetch supports this)
   if (!response.body) {
     // Fallback: read full body if stream is not available
@@ -166,4 +128,111 @@ export async function* streamTurnEvents(
   } finally {
     reader.releaseLock();
   }
+}
+
+/**
+ * Send audio and receive turn events from the backend SSE endpoint.
+ *
+ * Uses expo/fetch which supports ReadableStream on response bodies,
+ * enabling incremental SSE event delivery. Events are yielded as soon
+ * as they arrive from the backend (e.g. stt_result after STT completes)
+ * rather than waiting for the entire response to finish.
+ */
+export async function* streamTurnEvents(
+  conversationId: string,
+  audioFormData: FormData,
+  signal?: AbortSignal,
+): AsyncGenerator<TurnEvent> {
+  const url = `${API_BASE_URL}/api/conversations/${encodeURIComponent(conversationId)}/turns`;
+
+  // Build auth headers (Firebase auth token)
+  const headers: Record<string, string> = {
+    'Accept': 'text/event-stream',
+  };
+  const token = await getAuthToken();
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers,
+    body: audioFormData,
+    signal,
+  });
+
+  if (!response.ok) {
+    const bodyText = await response.text().catch(() => '');
+    let body: Record<string, unknown> | null = null;
+    try { body = JSON.parse(bodyText); } catch { /* not JSON */ }
+    const message = (body as Record<string, Record<string, string>> | null)?.error?.message
+      ?? (body as Record<string, string> | null)?.detail
+      ?? `Stream request failed (HTTP ${response.status})`;
+    if (__DEV__) {
+      const truncated = bodyText.length > 200 ? bodyText.slice(0, 200) + '...' : bodyText;
+      console.warn(`[SSE] Stream error HTTP ${response.status}: ${truncated}`);
+    }
+    yield {
+      type: 'error',
+      data: { code: 'STREAM_ERROR', message },
+    };
+    return;
+  }
+
+  yield* readSSEStream(response, signal);
+}
+
+/**
+ * Request an AI greeting and receive turn events from the backend SSE endpoint.
+ *
+ * The greeting endpoint generates an initial AI message for a new conversation.
+ * Returns 409 if a greeting already exists — this is handled gracefully by
+ * returning without error.
+ */
+export async function* streamGreetingEvents(
+  conversationId: string,
+  topic: string,
+  signal?: AbortSignal,
+): AsyncGenerator<TurnEvent> {
+  const url = `${API_BASE_URL}/api/conversations/${encodeURIComponent(conversationId)}/greeting`;
+
+  const headers: Record<string, string> = {
+    'Accept': 'text/event-stream',
+    'Content-Type': 'application/json',
+  };
+  const token = await getAuthToken();
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ topic }),
+    signal,
+  });
+
+  if (!response.ok) {
+    // 409 = greeting already exists — not an error, just return
+    if (response.status === 409) {
+      return;
+    }
+    const bodyText = await response.text().catch(() => '');
+    let body: Record<string, unknown> | null = null;
+    try { body = JSON.parse(bodyText); } catch { /* not JSON */ }
+    const message = (body as Record<string, Record<string, string>> | null)?.error?.message
+      ?? (body as Record<string, string> | null)?.detail
+      ?? `Greeting request failed (HTTP ${response.status})`;
+    if (__DEV__) {
+      const truncated = bodyText.length > 200 ? bodyText.slice(0, 200) + '...' : bodyText;
+      console.warn(`[SSE] Greeting error HTTP ${response.status}: ${truncated}`);
+    }
+    yield {
+      type: 'error',
+      data: { code: 'GREETING_ERROR', message },
+    };
+    return;
+  }
+
+  yield* readSSEStream(response, signal);
 }

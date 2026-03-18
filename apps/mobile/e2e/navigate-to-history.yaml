@@ -10,6 +10,10 @@ appId: to.coyo.app
 - launchApp:
     clearState: false
 
+# Ensure signed in (handles unauthenticated state when running flow individually)
+- runFlow:
+    file: helpers/ensure-signed-in.yaml
+
 # Wait for the Home screen to fully render.
 - extendedWaitUntil:
     visible:
