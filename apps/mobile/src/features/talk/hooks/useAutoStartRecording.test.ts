@@ -42,7 +42,7 @@ describe('useAutoStartRecording', () => {
     // Set playback to playing before rendering
     useAudioStore.getState().setPlaybackStatus('playing');
 
-    const { rerender } = renderHook(
+    renderHook(
       ({ canRecord, isRecording }) =>
         useAutoStartRecording({ canRecord, isRecording, onStartRecording }),
       { initialProps: { canRecord: true, isRecording: false } },
