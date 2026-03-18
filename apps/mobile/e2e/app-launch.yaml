@@ -9,6 +9,10 @@ appId: to.coyo.app
 - launchApp:
     clearState: false
 
+# Ensure signed in (handles unauthenticated state when running flow individually)
+- runFlow:
+    file: helpers/ensure-signed-in.yaml
+
 # Wait for the Home screen to fully render.
 # On Android emulators, the Expo dev client cold start can be slow.
 - extendedWaitUntil:

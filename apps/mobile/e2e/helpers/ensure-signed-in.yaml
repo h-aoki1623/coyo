@@ -1,0 +1,31 @@
+# ensure-signed-in.yaml
+# Helper flow: ensures the app is signed in before a test flow runs.
+#
+# If the Welcome screen is visible (unauthenticated), signs in with E2E
+# test user credentials. If already on the Home screen, this is a no-op.
+#
+# Prerequisites:
+# - App must be launched before calling this helper (launchApp)
+# - E2E test user must exist in Firebase with email_verified=True
+#   (created by: apps/api/scripts/create_e2e_user.py)
+#
+# Usage (in any flow that requires authentication):
+#   - launchApp:
+#       clearState: false
+#   - runFlow:
+#       file: helpers/ensure-signed-in.yaml
+#
+# This file is NOT listed in config.yaml and is NOT a test flow.
+appId: to.coyo.app
+---
+# Wait for the app to finish its initial loading and auth state resolution.
+# After this, either the Welcome screen or Home screen will be visible.
+- waitForAnimationToEnd
+
+# If the Welcome screen is visible, the user is not signed in.
+# Run the sign-in flow to authenticate with the E2E test user.
+- runFlow:
+    when:
+      visible:
+        id: "welcome-get-started"
+    file: sign-in.yaml
