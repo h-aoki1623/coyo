@@ -61,10 +61,10 @@ appId: to.coyo.app
 - tapOn:
     id: "send-recording"
 
-# Wait for turn to complete (record button reappears when idle)
+# Wait for turn to complete (idle hint text only appears when not streaming)
 - extendedWaitUntil:
     visible:
-      id: "record-button"
+      text: "Press Record to start speaking"
     timeout: 60000
 
 - takeScreenshot: "voice-02-turn1-complete"
@@ -90,10 +90,10 @@ appId: to.coyo.app
 - tapOn:
     id: "send-recording"
 
-# Wait for turn to complete
+# Wait for turn to complete (idle hint text only appears when not streaming)
 - extendedWaitUntil:
     visible:
-      id: "record-button"
+      text: "Press Record to start speaking"
     timeout: 60000
 
 - takeScreenshot: "voice-03-turn3-complete"
@@ -113,9 +113,11 @@ appId: to.coyo.app
       - tapOn:
           id: "correction-toggle"
 
-      # Verify the expanded card with corrected text and explanation
-      - assertVisible:
-          id: "correction-card"
+      # Wait for the expand animation (300ms) to complete
+      - extendedWaitUntil:
+          visible:
+            id: "correction-card"
+          timeout: 10000
       - assertVisible:
           id: "correction-corrected-text"
       - assertVisible:
@@ -127,9 +129,11 @@ appId: to.coyo.app
       - tapOn:
           id: "correction-toggle"
 
-      # Verify the expanded card is no longer visible
-      - assertNotVisible:
-          id: "correction-card"
+      # Wait for the collapse animation to finish and card to unmount
+      - extendedWaitUntil:
+          notVisible:
+            id: "correction-card"
+          timeout: 5000
 
       - takeScreenshot: "voice-03d-correction-collapsed"
 
