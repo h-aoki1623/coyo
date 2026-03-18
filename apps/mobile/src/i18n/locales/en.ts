@@ -40,6 +40,7 @@ const en = {
     viewFeedback: 'View Feedback',
     lessThanMinute: 'Less than 1 min',
     minutesDuration: '{{mins}} min',
+    greetingLoading: 'Coyo is preparing to talk...',
   },
 
   // Talk - Corrections

@@ -18,6 +18,15 @@ class CreateConversationRequest(CamelModel):
     )
 
 
+class GreetingRequest(CamelModel):
+    """Request body for triggering an AI greeting."""
+
+    topic: Literal["sports", "business", "technology", "politics", "entertainment"] = Field(
+        ...,
+        description="Conversation topic for the greeting",
+    )
+
+
 class ConversationResponse(CamelModel):
     """Standard response for a single conversation."""
 

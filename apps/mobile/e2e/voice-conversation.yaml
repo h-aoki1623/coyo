@@ -37,6 +37,15 @@ appId: to.coyo.app
 - assertVisible:
     id: "end-conversation"
 
+# Wait for AI greeting to complete before recording.
+# The greeting generates an AI opening message; once done, the record
+# button pill switches from "Coyo is preparing to talk..." back to the
+# idle hint text. We wait for the record button to become enabled.
+- extendedWaitUntil:
+    visible:
+      text: "Press Record to start speaking"
+    timeout: 60000
+
 - takeScreenshot: "voice-01-talk-screen"
 
 # -- Step 2: Turn 1 — Record + send (clean audio, no corrections expected) --
