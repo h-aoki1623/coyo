@@ -63,12 +63,6 @@ describe('useTurnStreaming - isWebSearching state', () => {
   });
 
   it('sets isWebSearching to true on web_search_started event', async () => {
-    const events: TurnEvent[] = [
-      { type: 'stt_result', data: { text: 'Hello' } },
-      { type: 'web_search_started', data: {} },
-      { type: 'turn_complete', data: {} },
-    ];
-
     // We need to yield events one at a time to observe intermediate state.
     // Instead, we verify the final state after the stream completes.
     // The web_search_started sets isWebSearching=true, but turn_complete's
@@ -197,6 +191,7 @@ describe('useTurnStreaming - isWebSearching state', () => {
     mockStreamTurnEvents.mockReturnValue(errorStream());
 
     // Suppress Alert.alert and console.warn during this test
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const alertSpy = jest.spyOn(require('react-native').Alert, 'alert').mockImplementation(() => {});
     const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
 

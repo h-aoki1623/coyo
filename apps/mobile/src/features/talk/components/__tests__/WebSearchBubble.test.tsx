@@ -14,7 +14,8 @@ jest.mock('@/i18n', () => ({
 
 // Mock icon components to avoid SVG rendering issues in tests
 jest.mock('@/components/icons', () => ({
-  CoyoAvatar: ({ size, variant }: { size: number; variant: string }) => {
+  CoyoAvatar: (_props: { size: number; variant?: string }) => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { View } = require('react-native');
     return <View testID="coyo-avatar" />;
   },
@@ -23,6 +24,7 @@ jest.mock('@/components/icons', () => ({
 
 // Mock react-native-svg to avoid native module errors
 jest.mock('react-native-svg', () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { View } = require('react-native');
   return {
     __esModule: true,
