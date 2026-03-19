@@ -53,6 +53,7 @@ apps/api/openapi.json
 
 # === Maestro E2E test artifacts ===
 apps/mobile/e2e/screenshots/
+apps/mobile/e2e/results/
 
 # === Google Play service account key ===
 apps/mobile/google-play-service-account.json

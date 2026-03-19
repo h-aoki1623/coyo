@@ -29,6 +29,7 @@ REPO_ROOT="$(cd "$MOBILE_DIR/../.." && pwd)"
 API_DIR="$REPO_ROOT/apps/api"
 E2E_DIR="$SCRIPT_DIR"
 SCREENSHOTS_DIR="$E2E_DIR/screenshots"
+RESULTS_DIR="$E2E_DIR/results"
 
 # Load shared functions
 source "$REPO_ROOT/scripts/lib/common.sh"
@@ -40,6 +41,41 @@ MAESTRO_TIMEOUT=300  # 5 minutes (seconds) per maestro test invocation
 
 # Enable E2E mode: bypasses microphone recording with test audio file
 export E2E_MODE=true
+
+# ===========================================================================
+# Result file output (defense against lost stdout in background execution)
+# ===========================================================================
+
+# Write a machine-readable result file so that the outcome can be checked
+# even when stdout/stderr capture fails (e.g. Claude Code background tasks).
+# Result files are written to apps/mobile/e2e/results/.
+write_result() {
+  local _wr_platform="$1"   # ios | android | all
+  local _wr_status="$2"     # PASS | FAIL
+  local _wr_duration="$3"   # seconds
+  local _wr_details="${4:-}" # optional: failure details
+
+  mkdir -p "$RESULTS_DIR"
+
+  local _wr_ts
+  _wr_ts=$(date +%Y%m%d-%H%M%S)
+  local _wr_file="$RESULTS_DIR/e2e-result-${_wr_platform}-${_wr_ts}.txt"
+
+  {
+    echo "platform: $_wr_platform"
+    echo "status: $_wr_status"
+    echo "duration: ${_wr_duration}s"
+    echo "timestamp: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+    if [[ -n "$_wr_details" ]]; then
+      echo "details: $_wr_details"
+    fi
+  } > "$_wr_file"
+
+  # Update the latest symlink for quick access
+  ln -sf "$(basename "$_wr_file")" "$RESULTS_DIR/e2e-result-latest.txt"
+
+  log "Result written to: $_wr_file"
+}
 
 # ===========================================================================
 # Environment setup
@@ -261,6 +297,7 @@ verify_adb_reverse() {
 
 run_ios() {
   log "=== iOS E2E Tests ==="
+  local _start_time=$SECONDS
 
   cleanup_maestro
 
@@ -341,6 +378,13 @@ run_ios() {
     run_with_timeout "${MAESTRO_TIMEOUT}" maestro --platform ios --udid "$udid" test "$_FLOW_TARGET" || exit_code=$?
   fi
 
+  local _duration=$(( SECONDS - _start_time ))
+  if [[ $exit_code -eq 0 ]]; then
+    write_result "ios" "PASS" "$_duration"
+  else
+    write_result "ios" "FAIL" "$_duration" "exit code: $exit_code"
+  fi
+
   log "iOS E2E tests finished (exit code: $exit_code)"
   return $exit_code
 }
@@ -351,6 +395,7 @@ run_ios() {
 
 run_android() {
   log "=== Android E2E Tests ==="
+  local _start_time=$SECONDS
 
   cleanup_maestro
 
@@ -413,6 +458,13 @@ run_android() {
     verify_adb_reverse "$device_id"
     exit_code=0
     run_with_timeout "${MAESTRO_TIMEOUT}" maestro --platform android --udid "$device_id" test "$_FLOW_TARGET" || exit_code=$?
+  fi
+
+  local _duration=$(( SECONDS - _start_time ))
+  if [[ $exit_code -eq 0 ]]; then
+    write_result "android" "PASS" "$_duration"
+  else
+    write_result "android" "FAIL" "$_duration" "exit code: $exit_code"
   fi
 
   log "Android E2E tests finished (exit code: $exit_code)"
@@ -492,6 +544,7 @@ case "$_TARGET" in
     run_android
     ;;
   all)
+    _all_start=$SECONDS
     ios_result=0
     android_result=0
 
@@ -509,6 +562,17 @@ case "$_TARGET" in
       log "Android: PASSED"
     else
       err "Android: FAILED (exit code: $android_result)"
+    fi
+
+    # Write combined result file for "all" target
+    _all_duration=$(( SECONDS - _all_start ))
+    if [[ $ios_result -eq 0 && $android_result -eq 0 ]]; then
+      write_result "all" "PASS" "$_all_duration"
+    else
+      _fail_details=""
+      [[ $ios_result -ne 0 ]] && _fail_details="ios(exit:$ios_result)"
+      [[ $android_result -ne 0 ]] && _fail_details="${_fail_details:+$_fail_details, }android(exit:$android_result)"
+      write_result "all" "FAIL" "$_all_duration" "$_fail_details"
     fi
 
     [[ $ios_result -eq 0 && $android_result -eq 0 ]]

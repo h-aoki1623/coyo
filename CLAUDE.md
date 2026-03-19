@@ -93,3 +93,14 @@ make e2e-android FLOW=navigate-to-history.yaml
 - NEVER run `maestro test` directly without `make e2e-*` — the script validates the environment and handles cleanup
 - iOS and Android tests run sequentially (Maestro uses port 7001 for both platforms)
 - Test flows are in `apps/mobile/e2e/*.yaml`
+- NEVER run `make e2e-*` with `run_in_background: true` — background execution loses stdout/stderr capture (Claude Code CLI bug). Always run in foreground with `timeout: 600000` (10 minutes)
+
+### Checking E2E Results
+
+`run-e2e.sh` writes a result file after each platform run. This is useful when stdout is unavailable (terminal disconnection, SSH timeout, etc.):
+
+```bash
+cat apps/mobile/e2e/results/e2e-result-latest.txt
+```
+
+The file contains: `platform`, `status` (PASS/FAIL), `duration`, `timestamp`, and failure `details` if applicable.
