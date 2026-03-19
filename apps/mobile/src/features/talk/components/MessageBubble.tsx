@@ -1,5 +1,6 @@
 import { memo, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
+import Svg, { Circle, Line } from 'react-native-svg';
 import { Colors } from '@/constants/colors';
 import { Typography } from '@/constants/typography';
 import { t } from '@/i18n';
@@ -259,6 +260,86 @@ export const ProcessingBubble = memo(function ProcessingBubble() {
   );
 });
 
+function SearchIcon({ size, color }: { size: number; color: string }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+      <Circle cx="11" cy="11" r="8" />
+      <Line x1="21" y1="21" x2="16.65" y2="16.65" />
+    </Svg>
+  );
+}
+
+/**
+ * Web search indicator -- magnifying glass icon + "Searching..." text inside a white AI bubble.
+ * Shown when the AI is performing a web search before responding.
+ */
+export const WebSearchBubble = memo(function WebSearchBubble() {
+  const springAnim = useRef(new Animated.Value(0)).current;
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+
+  // Entry spring (same as AiTypingBubble)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      Animated.spring(springAnim, {
+        toValue: 1,
+        tension: 40,
+        friction: 5,
+        useNativeDriver: false,
+      }).start();
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [springAnim]);
+
+  // Opacity pulse loop
+  useEffect(() => {
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 0.4,
+          duration: 750,
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 750,
+          useNativeDriver: true,
+        }),
+      ]),
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [pulseAnim]);
+
+  const entryStyle = {
+    opacity: springAnim,
+    transformOrigin: 'left top' as const,
+    transform: [
+      {
+        scale: springAnim.interpolate({
+          inputRange: [0, 1],
+          outputRange: [0, 1],
+        }),
+      },
+    ],
+  };
+
+  return (
+    <View
+      style={styles.aiContainer}
+      accessibilityRole="text"
+      accessibilityLabel={t('talk.searching')}
+    >
+      <CoyoAvatar size={28} variant="sub" />
+      <Animated.View style={[styles.aiBubble, styles.webSearchBubble, entryStyle]}>
+        <Animated.View style={[styles.webSearchContent, { opacity: pulseAnim }]}>
+          <SearchIcon size={14} color={Colors.textTertiary} />
+          <Text style={styles.webSearchText}>{t('talk.searching')}</Text>
+        </Animated.View>
+      </Animated.View>
+    </View>
+  );
+});
+
 const styles = StyleSheet.create({
   // -- AI container (row layout with avatar) --
   aiContainer: {
@@ -348,5 +429,22 @@ const styles = StyleSheet.create({
     height: 8,
     borderRadius: 4,
     backgroundColor: Colors.chevron,
+  },
+  // -- Web search indicator --
+  webSearchBubble: {
+    flex: 0,
+    height: 50,
+    paddingHorizontal: 13,
+    paddingVertical: 0,
+    justifyContent: 'center',
+  },
+  webSearchContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  webSearchText: {
+    ...Typography.body.en,
+    color: Colors.textTertiary,
   },
 });

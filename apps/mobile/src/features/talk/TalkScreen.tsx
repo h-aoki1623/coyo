@@ -20,7 +20,7 @@ import { useAudioStore } from '@/stores/audio-store';
 import { CoyoAvatar, BackIcon } from '@/components/icons';
 import type { RootStackParamList } from '@/navigation/types';
 import type { Turn } from '@/types/conversation';
-import { MessageBubble, AiTypingBubble, ProcessingBubble } from './components/MessageBubble';
+import { MessageBubble, AiTypingBubble, ProcessingBubble, WebSearchBubble } from './components/MessageBubble';
 import { RecordButton } from './components/RecordButton';
 import { RecordingControls } from './components/RecordingControls';
 import { ErrorBanner } from './components/ErrorBanner';
@@ -117,7 +117,7 @@ export function TalkScreen({ navigation, route }: Props) {
   const { startRecording, stopRecording } = useAudioRecording();
 
   const activeConversationId = conversationId ?? '';
-  const { isStreaming, isUserProcessing, isAiThinking, processTurn } = useTurnStreaming(activeConversationId, topic);
+  const { isStreaming, isUserProcessing, isAiThinking, isWebSearching, processTurn } = useTurnStreaming(activeConversationId, topic);
   const { isGreetingLoading, triggerGreeting } = useGreeting(activeConversationId, topic);
 
   // Hide the default navigation header
@@ -165,13 +165,13 @@ export function TalkScreen({ navigation, route }: Props) {
     }
   }, [turns.length, scrollToBottom]);
 
-  // Scroll when footer bubbles appear (ProcessingBubble / AiTypingBubble / greeting)
+  // Scroll when footer bubbles appear (ProcessingBubble / AiTypingBubble / WebSearchBubble / greeting)
   useEffect(() => {
-    if (isUserProcessing || isAiThinking || isGreetingLoading) {
+    if (isUserProcessing || isAiThinking || isGreetingLoading || isWebSearching) {
       const timer = setTimeout(scrollToBottom, 200);
       return () => clearTimeout(timer);
     }
-  }, [isUserProcessing, isAiThinking, isGreetingLoading, scrollToBottom]);
+  }, [isUserProcessing, isAiThinking, isGreetingLoading, isWebSearching, scrollToBottom]);
 
   const formatDuration = useCallback((): string => {
     const elapsed = Math.floor((Date.now() - conversationStartTime.current) / 1000);
@@ -277,9 +277,13 @@ export function TalkScreen({ navigation, route }: Props) {
       elements.push(<ProcessingBubble key="user-processing" />);
     }
 
-    // AI typing indicator (dots) — shown from stt_result until audio playback starts
+    // AI typing indicator (dots) or web search bubble
     if (isAiThinking) {
-      elements.push(<AiTypingBubble key="ai-typing" />);
+      if (isWebSearching) {
+        elements.push(<WebSearchBubble key="web-searching" />);
+      } else {
+        elements.push(<AiTypingBubble key="ai-typing" />);
+      }
     }
 
     // Completion label (inside the scrollable thread, above the fixed footer)
@@ -296,7 +300,7 @@ export function TalkScreen({ navigation, route }: Props) {
     if (elements.length === 0) return null;
 
     return <View>{elements}</View>;
-  }, [isGreetingLoading, turns.length, isUserProcessing, isAiThinking, isCompleted, conversationDuration]);
+  }, [isGreetingLoading, turns.length, isUserProcessing, isAiThinking, isWebSearching, isCompleted, conversationDuration]);
 
   // Determine which bottom control to show
   const renderBottomControls = () => {

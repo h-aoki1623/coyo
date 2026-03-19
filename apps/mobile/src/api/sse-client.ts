@@ -9,8 +9,9 @@ type ExpoFetchResponse = Awaited<ReturnType<typeof fetch>>;
 
 const API_BASE_URL = Constants.expoConfig?.extra?.apiBaseUrl ?? 'http://localhost:8000';
 
-// Maximum buffer size (1 MB) to prevent memory exhaustion from malformed streams
-const MAX_BUFFER_SIZE = 1024 * 1024;
+// Maximum buffer size (4 MB) to prevent memory exhaustion from malformed streams.
+// TTS audio is sent as base64 data URLs which can be 1-2 MB for longer responses.
+const MAX_BUFFER_SIZE = 4 * 1024 * 1024;
 
 // Parse a single SSE line into its field type and value
 function parseSSELine(line: string): { event?: string; data?: string } {

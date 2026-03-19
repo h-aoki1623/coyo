@@ -34,10 +34,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from coyo.config import get_settings
 from coyo.repositories.turn import TurnRepository
 from coyo.services.correction import CorrectionService
-from coyo.services.llm.base import ChatMessage, ChatOptions
+from coyo.services.llm.base import ChatMessage, ChatOptions, TextChunk, WebSearchStarted
 from coyo.services.llm.openai_client import OpenAIClient
 from coyo.services.stt import STTService
 from coyo.services.tts import TTSService
+from coyo.services.web_search_filter import is_filler_turn, strip_citations
 
 logger = structlog.get_logger()
 
@@ -46,7 +47,10 @@ You are a friendly English conversation partner. The current topic is {topic}.
 Keep your responses natural, concise (2-3 sentences), and at an intermediate \
 English level.
 If the user makes a grammar mistake, don't correct them in the conversation — \
-just respond naturally. Corrections are handled separately.\
+just respond naturally. Corrections are handled separately.
+When you look up information, weave the facts into a natural conversational \
+response — react with your own opinion or a follow-up question, don't just \
+list facts. NEVER include URLs, links, citations, or source references.\
 """
 
 
@@ -126,12 +130,27 @@ class TurnOrchestrator:
         messages = await self._build_messages(conversation_id, user_text, topic=topic)
         full_ai_text = ""
 
-        async for chunk in self._llm.chat(
-            messages,
-            options=ChatOptions(temperature=0.8, max_tokens=256),
-        ):
-            full_ai_text += chunk
-            yield _make_event("ai_response_chunk", {"text": chunk})
+        if is_filler_turn(user_text):
+            async for chunk in self._llm.chat(
+                messages,
+                options=ChatOptions(temperature=0.8, max_tokens=256),
+            ):
+                full_ai_text += chunk
+                yield _make_event("ai_response_chunk", {"text": chunk})
+        else:
+            async for event in self._llm.chat_with_tools(
+                messages,
+                options=ChatOptions(temperature=0.8, max_tokens=256),
+            ):
+                if isinstance(event, WebSearchStarted):
+                    yield _make_event("web_search_started", {})
+                elif isinstance(event, TextChunk):
+                    full_ai_text += event.text
+                    yield _make_event("ai_response_chunk", {"text": event.text})
+
+        # Always strip markdown citations/URLs — the Responses API may include
+        # them even without an explicit web_search_call event being detected.
+        full_ai_text = strip_citations(full_ai_text)
 
         yield _make_event("ai_response_done", {"text": full_ai_text})
 

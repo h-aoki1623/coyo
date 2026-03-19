@@ -42,6 +42,7 @@ const ja = {
     minutesDuration: '{{mins}}分間',
     greetingLoading: 'Coyo が準備中...',
     aiTyping: 'Coyo が入力中',
+    searching: '検索中...',
   },
 
   // Talk - Corrections

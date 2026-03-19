@@ -42,6 +42,7 @@ const en = {
     minutesDuration: '{{mins}} min',
     greetingLoading: 'Coyo is preparing to talk...',
     aiTyping: 'Coyo is typing',
+    searching: 'Searching...',
   },
 
   // Talk - Corrections

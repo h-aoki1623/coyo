@@ -22,6 +22,7 @@ export type TurnEvent =
   | { type: 'ai_response_done'; data: { text: string } }
   | { type: 'tts_audio_url'; data: { url: string } }
   | { type: 'correction_result'; data: TurnCorrectionEventData }
+  | { type: 'web_search_started'; data: Record<string, never> }
   | { type: 'turn_complete'; data: Record<string, never> }
   | { type: 'error'; data: { code: string; message: string } };
 
