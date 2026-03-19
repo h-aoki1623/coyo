@@ -2,6 +2,7 @@
 
 from abc import ABC, abstractmethod
 from collections.abc import AsyncIterator
+from dataclasses import dataclass
 
 from pydantic import BaseModel
 
@@ -27,6 +28,21 @@ class ModelInfo(BaseModel):
     model: str
 
 
+@dataclass(frozen=True)
+class TextChunk:
+    """A streamed text token from the LLM."""
+
+    text: str
+
+
+@dataclass(frozen=True)
+class WebSearchStarted:
+    """Signals that the LLM has initiated a web search."""
+
+
+ChatStreamEvent = TextChunk | WebSearchStarted
+
+
 class LLMClient(ABC):
     """Abstract interface for LLM providers.
 
@@ -50,6 +66,18 @@ class LLMClient(ABC):
             Individual text tokens as they are generated.
         """
         ...
+
+    async def chat_with_tools(
+        self,
+        messages: list[ChatMessage],
+        options: ChatOptions | None = None,
+    ) -> AsyncIterator[ChatStreamEvent]:
+        """Stream chat events with tool support (e.g. web search).
+
+        Default implementation delegates to chat() yielding TextChunk only.
+        """
+        async for chunk in self.chat(messages, options):
+            yield TextChunk(text=chunk)
 
     @abstractmethod
     async def structured[T: BaseModel](

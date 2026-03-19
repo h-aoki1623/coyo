@@ -12,6 +12,7 @@ interface UseTurnStreamingReturn {
   isStreaming: boolean;
   isUserProcessing: boolean;
   isAiThinking: boolean;
+  isWebSearching: boolean;
   processTurn: (audioUri: string) => Promise<void>;
 }
 
@@ -50,6 +51,7 @@ export function useTurnStreaming(conversationId: string, topic: string): UseTurn
   const [isStreaming, setIsStreaming] = useState(false);
   const [isUserProcessing, setIsUserProcessing] = useState(false);
   const [isAiThinking, setIsAiThinking] = useState(false);
+  const [isWebSearching, setIsWebSearching] = useState(false);
   const soundRef = useRef<Audio.Sound | null>(null);
   const bufferedAiTextRef = useRef('');
   const aiTurnAddedRef = useRef(false);
@@ -128,7 +130,12 @@ export function useTurnStreaming(conversationId: string, topic: string): UseTurn
           setIsAiThinking(true);
           break;
         }
+        case 'web_search_started': {
+          setIsWebSearching(true);
+          break;
+        }
         case 'ai_response_chunk': {
+          setIsWebSearching(false);
           // Buffer text internally — UI keeps showing dots until audio plays
           bufferedAiTextRef.current += event.data.text;
           break;
@@ -174,7 +181,7 @@ export function useTurnStreaming(conversationId: string, topic: string): UseTurn
         }
       }
     },
-    [conversationId, addTurn, updateTurnCorrectionStatus, updateCorrection, setRecordingStatus, playAudio, addBufferedAiTurn],
+    [conversationId, addTurn, updateTurnCorrectionStatus, updateCorrection, setRecordingStatus, playAudio, addBufferedAiTurn, setIsWebSearching],
   );
 
   const processTurn = useCallback(
@@ -182,6 +189,7 @@ export function useTurnStreaming(conversationId: string, topic: string): UseTurn
       setIsStreaming(true);
       setIsUserProcessing(true);
       setIsAiThinking(false);
+      setIsWebSearching(false);
       bufferedAiTextRef.current = '';
       aiTurnAddedRef.current = false;
 
@@ -207,10 +215,11 @@ export function useTurnStreaming(conversationId: string, topic: string): UseTurn
       } finally {
         setIsStreaming(false);
         setIsAiThinking(false);
+        setIsWebSearching(false);
       }
     },
     [conversationId, topic, processEvent, setRecordingStatus, addBufferedAiTurn],
   );
 
-  return { isStreaming, isUserProcessing, isAiThinking, processTurn };
+  return { isStreaming, isUserProcessing, isAiThinking, isWebSearching, processTurn };
 }
