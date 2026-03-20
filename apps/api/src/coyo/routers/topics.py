@@ -1,7 +1,6 @@
 """Topic suggestion endpoints."""
 
 import hmac
-
 from datetime import date
 
 from fastapi import APIRouter, Depends, Header, Request

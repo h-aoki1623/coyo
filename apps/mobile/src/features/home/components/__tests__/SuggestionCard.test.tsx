@@ -5,12 +5,15 @@ import { SuggestionCard } from '../SuggestionCard';
 import type { TopicSuggestion } from '@/types/suggestion';
 
 // Mock the SpeechBubbleIcon to avoid SVG rendering issues in tests
-jest.mock('@/components/icons', () => ({
-  SpeechBubbleIcon: ({ size, color }: { size: number; color: string }) => {
-    const { View } = require('react-native');
-    return <View testID="speech-bubble-icon" />;
-  },
-}));
+jest.mock('@/components/icons', () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { View } = require('react-native');
+  return {
+    SpeechBubbleIcon: (_props: { size: number; color: string }) => (
+      <View testID="speech-bubble-icon" />
+    ),
+  };
+});
 
 const mockSuggestion: TopicSuggestion = {
   id: 'sug-1',

@@ -13,7 +13,6 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from coyo.models.base import BaseModel
 
 if TYPE_CHECKING:
-    from coyo.models.topic_suggestion import TopicSuggestion
     from coyo.models.turn import Turn
     from coyo.models.user import User
 
