@@ -245,6 +245,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/interests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Interests
+         * @description Get top interests for the current user, ordered by effective weight.
+         */
+        get: operations["get_interests_api_interests_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/topics/suggestions": {
         parameters: {
             query?: never;
@@ -499,6 +519,35 @@ export interface components {
             page: number;
             /** Perpage */
             perPage: number;
+        };
+        /**
+         * InterestResponse
+         * @description A single user interest with its computed weight.
+         */
+        InterestResponse: {
+            /** Keyword */
+            keyword: string;
+            /**
+             * Keywordtype
+             * @enum {string}
+             */
+            keywordType: "topic" | "entity";
+            /** Isnewsrelevant */
+            isNewsRelevant: boolean;
+            /** Totalmentions */
+            totalMentions: number;
+            /** Effectiveweight */
+            effectiveWeight: number;
+            /** Lastmentionedconvidx */
+            lastMentionedConvIdx: number;
+        };
+        /**
+         * InterestsListResponse
+         * @description List of user interests ordered by effective weight.
+         */
+        InterestsListResponse: {
+            /** Interests */
+            interests: components["schemas"]["InterestResponse"][];
         };
         /**
          * SessionResponse
@@ -1012,6 +1061,39 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_interests_api_interests_get: {
+        parameters: {
+            query?: {
+                limit?: number;
+            };
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InterestsListResponse"];
+                };
             };
             /** @description Validation Error */
             422: {

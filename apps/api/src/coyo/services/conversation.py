@@ -1,5 +1,6 @@
 """Service layer for conversation lifecycle management."""
 
+import asyncio
 import uuid
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -13,6 +14,10 @@ from coyo.models.conversation import Conversation
 from coyo.models.correction import TurnCorrection
 from coyo.models.turn import Turn
 from coyo.repositories.conversation import ConversationRepository
+
+# Strong references to background tasks to prevent GC during execution.
+# See: https://docs.python.org/3/library/asyncio-task.html#creating-tasks
+_background_tasks: set[asyncio.Task[None]] = set()
 
 ALLOWED_TOPICS: frozenset[str] = frozenset(
     {"sports", "business", "technology", "politics", "entertainment", "suggested"}
@@ -141,6 +146,16 @@ class ConversationService:
             score=None,
         )
         await self._session.commit()
+
+        # Background interest extraction (strong ref prevents GC)
+        from coyo.services.interest_extraction import InterestExtractionService
+
+        task = asyncio.create_task(
+            InterestExtractionService.extract_background(conversation_id, user_id)
+        )
+        _background_tasks.add(task)
+        task.add_done_callback(_background_tasks.discard)
+
         # update_on_end already checked for None via get_by_id above
         return conversation  # type: ignore[return-value]
 

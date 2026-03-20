@@ -27,7 +27,13 @@ appId: to.coyo.app
 # Verify the TOPICS section label is visible
 - assertVisible: "TOPICS"
 
-# Verify at least one topic card is present
+# Verify at least one topic card is present (scroll if suggestions push it below the fold)
+# Scroll down to reveal topic cards (avoid sign-out button at bottom)
+- swipe:
+    start: "50%, 60%"
+    end: "50%, 30%"
+    duration: 500
+
 - assertVisible:
     id: "topic-sports"
 
