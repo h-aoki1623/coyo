@@ -2,7 +2,7 @@ import { useCallback, useState, memo, useMemo } from 'react';
 import {
   View,
   Text,
-  FlatList,
+  ScrollView,
   Pressable,
   Alert,
   ActivityIndicator,
@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+
 import { apiClient } from '@/api/client';
 import { getTopics } from '@/constants/topics';
 import { Colors } from '@/constants/colors';
@@ -19,8 +20,12 @@ import { useConversationStore } from '@/stores/conversation-store';
 import { useAppStore } from '@/stores/app-store';
 import { useAuthStore } from '@/stores/auth-store';
 import { LogoIcon, HistoryIcon, TopicIcon, ResumeIcon } from '@/components/icons';
+import { SuggestionCard } from '@/features/home/components/SuggestionCard';
+import { SectionDivider } from '@/features/home/components/SectionDivider';
+import { useSuggestions } from '@/features/home/hooks/useSuggestions';
 import type { RootStackParamList, TopicKey } from '@/navigation/types';
 import type { Topic } from '@/constants/topics';
+import type { TopicSuggestion } from '@/types/suggestion';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
@@ -103,6 +108,7 @@ const TopicCard = memo(function TopicCard({ topic, isLoading, isDisabled, onPres
 
 export function HomeScreen({ navigation }: Props) {
   const [loadingTopic, setLoadingTopic] = useState<TopicKey | null>(null);
+  const [loadingSuggestionId, setLoadingSuggestionId] = useState<string | null>(null);
   const [isResuming, setIsResuming] = useState(false);
   const startConversation = useConversationStore((s) => s.startConversation);
   const pausedConversationId = useAppStore((s) => s.pausedConversationId);
@@ -110,10 +116,14 @@ export function HomeScreen({ navigation }: Props) {
   const handleSignOut = useAuthStore((s) => s.handleSignOut);
 
   const topics = useMemo(() => getTopics(), []);
+  const { suggestions } = useSuggestions();
+
+  const hasSuggestions = suggestions.personal.length > 0 || suggestions.trending.length > 0;
+  const isAnyLoading = loadingTopic !== null || loadingSuggestionId !== null;
 
   const handleTopicPress = useCallback(
     async (topicKey: TopicKey) => {
-      if (loadingTopic) return;
+      if (isAnyLoading) return;
 
       setLoadingTopic(topicKey);
       try {
@@ -140,7 +150,40 @@ export function HomeScreen({ navigation }: Props) {
         setLoadingTopic(null);
       }
     },
-    [loadingTopic, navigation, startConversation],
+    [isAnyLoading, navigation, startConversation],
+  );
+
+  const handleSuggestionPress = useCallback(
+    async (suggestion: TopicSuggestion) => {
+      if (isAnyLoading) return;
+
+      setLoadingSuggestionId(suggestion.id);
+      try {
+        const result = await apiClient.post<CreateConversationResponse>(
+          '/api/conversations',
+          { topicSuggestionId: suggestion.id },
+        );
+
+        if (result.error) {
+          Alert.alert(t('errors.genericError'), result.error.message);
+          return;
+        }
+
+        if (result.data) {
+          const topic: TopicKey = 'suggested';
+          startConversation(topic, result.data.id);
+          navigation.navigate('Talk', {
+            topic,
+            conversationId: result.data.id,
+          });
+        }
+      } catch {
+        Alert.alert(t('errors.connectionTitle'), t('errors.connectionMessage'));
+      } finally {
+        setLoadingSuggestionId(null);
+      }
+    },
+    [isAnyLoading, navigation, startConversation],
   );
 
   const handleResume = useCallback(async () => {
@@ -177,62 +220,94 @@ export function HomeScreen({ navigation }: Props) {
     navigation.navigate('HistoryList');
   }, [navigation]);
 
-  const renderTopicCard = useCallback(
-    ({ item }: { item: Topic }) => (
-      <TopicCard
-        topic={item}
-        isLoading={loadingTopic === item.key}
-        isDisabled={loadingTopic !== null}
-        onPress={handleTopicPress}
-      />
-    ),
-    [loadingTopic, handleTopicPress],
-  );
-
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
-      {/* Header area */}
-      <View style={styles.header}>
-        <View style={styles.headerRow}>
-          <View style={styles.headerSpacer} />
-          <LogoIcon />
-          <Pressable
-            onPress={handleHistoryPress}
-            style={styles.historyButton}
-            testID="history-button"
-            accessibilityRole="button"
-            accessibilityLabel={t('history.title')}
-          >
-            <HistoryIcon size={20} color={Colors.textPrimary} />
-          </Pressable>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        {/* Header area */}
+        <View style={styles.header}>
+          <View style={styles.headerRow}>
+            <View style={styles.headerSpacer} />
+            <LogoIcon />
+            <Pressable
+              onPress={handleHistoryPress}
+              style={styles.historyButton}
+              testID="history-button"
+              accessibilityRole="button"
+              accessibilityLabel={t('history.title')}
+            >
+              <HistoryIcon size={20} color={Colors.textPrimary} />
+            </Pressable>
+          </View>
+
+          <Text style={styles.greeting} testID="home-greeting">{t('home.greeting')}</Text>
+          <Text style={styles.subtitle}>{t('home.subtitle')}</Text>
         </View>
 
-        <Text style={styles.greeting} testID="home-greeting">{t('home.greeting')}</Text>
-        <Text style={styles.subtitle}>{t('home.subtitle')}</Text>
-      </View>
+        {/* Paused conversation banner */}
+        {pausedConversationId ? (
+          <View style={styles.pausedWrapper}>
+            <PausedConversationBanner
+              onResume={handleResume}
+              isResuming={isResuming}
+            />
+          </View>
+        ) : null}
 
-      {/* Paused conversation banner */}
-      {pausedConversationId ? (
-        <View style={styles.pausedWrapper}>
-          <PausedConversationBanner
-            onResume={handleResume}
-            isResuming={isResuming}
-          />
+        {/* Topics section */}
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionLabel}>{t('home.topics')}</Text>
         </View>
-      ) : null}
 
-      {/* Topics section */}
-      <View style={styles.sectionHeader}>
-        <Text style={styles.sectionLabel}>{t('home.topics')}</Text>
-      </View>
+        <View style={styles.list}>
+          {/* Suggestion sections */}
+          {hasSuggestions ? (
+            <>
+              {suggestions.personal.length > 0 ? (
+                <>
+                  <SectionDivider label={t('home.suggestedForYou')} />
+                  {suggestions.personal.map((s) => (
+                    <SuggestionCard
+                      key={s.id}
+                      suggestion={s}
+                      onPress={handleSuggestionPress}
+                      isLoading={loadingSuggestionId === s.id}
+                      isDisabled={isAnyLoading}
+                    />
+                  ))}
+                </>
+              ) : null}
 
-      <FlatList
-        data={topics}
-        renderItem={renderTopicCard}
-        keyExtractor={(item) => item.key}
-        contentContainerStyle={styles.list}
-        showsVerticalScrollIndicator={false}
-      />
+              {suggestions.trending.length > 0 ? (
+                <>
+                  <SectionDivider label={t('home.trendingTopics')} />
+                  {suggestions.trending.map((s) => (
+                    <SuggestionCard
+                      key={s.id}
+                      suggestion={s}
+                      onPress={handleSuggestionPress}
+                      isLoading={loadingSuggestionId === s.id}
+                      isDisabled={isAnyLoading}
+                    />
+                  ))}
+                </>
+              ) : null}
+
+              <SectionDivider label={t('home.otherTopics')} />
+            </>
+          ) : null}
+
+          {/* Fixed topic cards */}
+          {topics.map((topic) => (
+            <TopicCard
+              key={topic.key}
+              topic={topic}
+              isLoading={loadingTopic === topic.key}
+              isDisabled={isAnyLoading}
+              onPress={handleTopicPress}
+            />
+          ))}
+        </View>
+      </ScrollView>
 
       {/* Sign out */}
       <Pressable
@@ -254,6 +329,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.surfacePrimary,
+  },
+  scrollContent: {
+    paddingBottom: 20,
   },
   // Header
   header: {
@@ -351,7 +429,6 @@ const styles = StyleSheet.create({
   // Topic cards
   list: {
     paddingHorizontal: 20,
-    paddingBottom: 20,
     gap: 8,
   },
   card: {

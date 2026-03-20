@@ -367,7 +367,7 @@ class TestAllowedTopics:
 
     @pytest.mark.unit
     def test_allowed_topics_content(self):
-        expected = {"sports", "business", "technology", "politics", "entertainment"}
+        expected = {"sports", "business", "technology", "politics", "entertainment", "suggested"}
         assert ALLOWED_TOPICS == expected
 
     @pytest.mark.unit

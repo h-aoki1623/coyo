@@ -13,6 +13,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from coyo.models.base import BaseModel
 
 if TYPE_CHECKING:
+    from coyo.models.topic_suggestion import TopicSuggestion
     from coyo.models.turn import Turn
     from coyo.models.user import User
 
@@ -63,6 +64,13 @@ class Conversation(BaseModel):
         Float,
         nullable=True,
         default=None,
+    )
+    topic_suggestion_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("topic_suggestions.id", ondelete="SET NULL"),
+        nullable=True,
+        default=None,
+        index=True,
     )
 
     # Relationships

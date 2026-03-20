@@ -30,6 +30,10 @@ class Settings(BaseSettings):
     # LLM Config
     llm_conversation_model: str = "gpt-4.1-mini"
     llm_correction_model: str = "gpt-4.1-mini"
+    llm_topic_model: str = "gpt-4.1-mini"
+
+    # Cron
+    cron_secret: str | None = None
 
     # TTS Config
     tts_voice: str = "nova"

@@ -44,6 +44,7 @@ async def create_conversation(
     conversation = await service.start_conversation(
         user_id=user.id,
         topic=body.topic,
+        topic_suggestion_id=body.topic_suggestion_id,
     )
     return ConversationResponse.model_validate(conversation)
 
@@ -55,7 +56,7 @@ async def submit_turn(
     conversation_id: uuid.UUID,
     audio: UploadFile,
     topic: Literal[
-        "sports", "business", "technology", "politics", "entertainment", "general"
+        "sports", "business", "technology", "politics", "entertainment", "general", "suggested"
     ] = Form("general"),
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
@@ -152,6 +153,16 @@ async def submit_greeting(
             "Greeting already generated. Cannot generate another greeting for this conversation."
         )
 
+    # Load article context for suggested-topic conversations
+    article_context: str | None = None
+    if conversation.topic_suggestion_id is not None:
+        from coyo.repositories.topic_suggestion import TopicSuggestionRepository
+
+        suggestion_repo = TopicSuggestionRepository(db)
+        suggestion = await suggestion_repo.get_by_id(conversation.topic_suggestion_id)
+        if suggestion is not None:
+            article_context = f"Title: {suggestion.title}\n\n{suggestion.article_content}"
+
     orchestrator = TurnOrchestrator(db)
 
     async def event_generator():
@@ -159,6 +170,7 @@ async def submit_greeting(
             async for event in orchestrator.process_greeting(
                 conversation_id=conversation_id,
                 topic=body.topic,
+                article_context=article_context,
             ):
                 yield {"event": event["event"], "data": json.dumps(event["data"])}
         except Exception as exc:

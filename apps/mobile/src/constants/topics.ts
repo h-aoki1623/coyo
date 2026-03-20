@@ -34,6 +34,7 @@ const TOPIC_META: Record<TopicKey, Omit<Topic, 'label'>> = {
   technology: { key: 'technology', icon: 'monitor', iconBg: Colors.topicTechnologyBg, iconColor: Colors.topicTechnology },
   entertainment: { key: 'entertainment', icon: 'film', iconBg: Colors.topicEntertainmentBg, iconColor: Colors.topicEntertainment },
   general: { key: 'general', icon: 'chat', iconBg: Colors.borderSubtle, iconColor: Colors.textSecondary },
+  suggested: { key: 'suggested', icon: 'chat', iconBg: Colors.borderSubtle, iconColor: Colors.textSecondary },
 };
 
 /**
