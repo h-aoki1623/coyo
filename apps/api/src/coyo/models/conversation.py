@@ -64,6 +64,13 @@ class Conversation(BaseModel):
         nullable=True,
         default=None,
     )
+    topic_suggestion_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("topic_suggestions.id", ondelete="SET NULL"),
+        nullable=True,
+        default=None,
+        index=True,
+    )
 
     # Relationships
     user: Mapped[User] = relationship(back_populates="conversations")
