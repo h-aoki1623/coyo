@@ -7,7 +7,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from coyo.middleware import setup_middleware
-from coyo.routers import auth, conversations, history, topics
+from coyo.routers import auth, conversations, history, interests, topics
 
 _is_prod = os.getenv("ENVIRONMENT") == "production"
 
@@ -45,6 +45,7 @@ setup_middleware(app)
 app.include_router(auth.router)
 app.include_router(conversations.router)
 app.include_router(history.router)
+app.include_router(interests.router)
 app.include_router(topics.router)
 
 

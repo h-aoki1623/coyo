@@ -31,6 +31,7 @@ class Settings(BaseSettings):
     llm_conversation_model: str = "gpt-4.1-mini"
     llm_correction_model: str = "gpt-4.1-mini"
     llm_topic_model: str = "gpt-4.1-mini"
+    llm_interest_model: str = "gpt-5.4-nano"
 
     # Cron
     cron_secret: str | None = None

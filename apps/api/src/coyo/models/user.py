@@ -64,6 +64,14 @@ class User(BaseModel):
         comment="Authentication provider: email, google, apple",
     )
 
+    conversation_count: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        server_default="0",
+        default=0,
+        comment="Total completed conversations, used for interest decay gap calculation",
+    )
+
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),

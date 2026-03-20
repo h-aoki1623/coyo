@@ -9,6 +9,7 @@ from coyo.models.correction import CorrectionItem, TurnCorrection
 from coyo.models.topic_suggestion import TopicSuggestion, UserTopicSuggestion
 from coyo.models.turn import Turn
 from coyo.models.user import User, UserSettings
+from coyo.models.user_interest import UserInterest
 
 __all__ = [
     "Base",
@@ -18,6 +19,7 @@ __all__ = [
     "Turn",
     "TurnCorrection",
     "User",
+    "UserInterest",
     "UserSettings",
     "UserTopicSuggestion",
 ]
