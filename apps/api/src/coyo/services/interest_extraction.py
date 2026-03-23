@@ -101,6 +101,19 @@ class InterestExtractionService:
             )
 
     @staticmethod
+    async def extract(
+        conversation_id: uuid.UUID,
+        user_id: uuid.UUID,
+    ) -> None:
+        """Run interest extraction. Raises on failure for Cloud Tasks retry."""
+        session_factory = get_session_factory()
+        async with session_factory() as session:
+            await InterestExtractionService._extract(
+                session, conversation_id, user_id
+            )
+            await session.commit()
+
+    @staticmethod
     async def _extract(
         session: AsyncSession,
         conversation_id: uuid.UUID,
@@ -113,6 +126,14 @@ class InterestExtractionService:
             logger.warning(
                 "interest_extraction_conversation_not_found",
                 conversation_id=str(conversation_id),
+            )
+            return
+        if conversation.user_id != user_id:
+            logger.error(
+                "interest_extraction_user_mismatch",
+                conversation_id=str(conversation_id),
+                user_id=str(user_id),
+                actual_user_id=str(conversation.user_id),
             )
             return
         if conversation.interests_extracted:

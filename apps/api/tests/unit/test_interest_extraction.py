@@ -352,3 +352,89 @@ class TestExtract:
         await InterestExtractionService._extract(
             db_session, conversation.id, uuid.uuid4()
         )
+
+    @pytest.mark.unit
+    async def test_extract_user_mismatch_returns_without_processing(
+        self, db_session: AsyncSession, test_user: User
+    ):
+        """Should abort if conversation.user_id != provided user_id."""
+        conversation = Conversation(
+            user_id=test_user.id,
+            status="completed",
+            time_limit_seconds=1800,
+            started_at=datetime.now(UTC),
+        )
+        db_session.add(conversation)
+        await db_session.flush()
+
+        other_user_id = uuid.uuid4()
+        await InterestExtractionService._extract(
+            db_session, conversation.id, other_user_id
+        )
+
+        # conversation_count should NOT be incremented
+        await db_session.refresh(test_user)
+        assert test_user.conversation_count == 0
+        # interests_extracted should NOT be set
+        await db_session.refresh(conversation)
+        assert conversation.interests_extracted is False
+
+
+class TestExtractPublicMethod:
+    """Tests for the public extract() method used by Cloud Tasks."""
+
+    @pytest.mark.unit
+    async def test_extract_raises_on_failure(self, mock_settings):
+        """Unlike extract_background, extract() should propagate exceptions."""
+        conv_id = uuid.uuid4()
+        user_id = uuid.uuid4()
+
+        mock_session = AsyncMock(spec=AsyncSession)
+
+        with (
+            patch(
+                "coyo.services.interest_extraction.get_session_factory"
+            ) as mock_factory,
+            patch.object(
+                InterestExtractionService,
+                "_extract",
+                new_callable=AsyncMock,
+                side_effect=RuntimeError("DB connection lost"),
+            ),
+        ):
+            mock_factory.return_value = MagicMock(
+                __call__=MagicMock(return_value=mock_session)
+            )
+            mock_session.__aenter__ = AsyncMock(return_value=mock_session)
+            mock_session.__aexit__ = AsyncMock(return_value=False)
+
+            with pytest.raises(RuntimeError, match="DB connection lost"):
+                await InterestExtractionService.extract(conv_id, user_id)
+
+    @pytest.mark.unit
+    async def test_extract_background_swallows_exceptions(self, mock_settings):
+        """extract_background should NOT propagate exceptions (logs only)."""
+        conv_id = uuid.uuid4()
+        user_id = uuid.uuid4()
+
+        mock_session = AsyncMock(spec=AsyncSession)
+
+        with (
+            patch(
+                "coyo.services.interest_extraction.get_session_factory"
+            ) as mock_factory,
+            patch.object(
+                InterestExtractionService,
+                "_extract",
+                new_callable=AsyncMock,
+                side_effect=RuntimeError("DB connection lost"),
+            ),
+        ):
+            mock_factory.return_value = MagicMock(
+                __call__=MagicMock(return_value=mock_session)
+            )
+            mock_session.__aenter__ = AsyncMock(return_value=mock_session)
+            mock_session.__aexit__ = AsyncMock(return_value=False)
+
+            # Should NOT raise
+            await InterestExtractionService.extract_background(conv_id, user_id)
