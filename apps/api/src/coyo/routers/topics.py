@@ -3,6 +3,7 @@
 import hmac
 from datetime import date
 
+import structlog
 from fastapi import APIRouter, Depends, Header, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -14,6 +15,8 @@ from coyo.rate_limit import DEFAULT_RATE_LIMIT, EXPENSIVE_RATE_LIMIT, limiter
 from coyo.repositories.topic_suggestion import TopicSuggestionRepository
 from coyo.schemas.topic import TopicSuggestionResponse, TopicSuggestionsListResponse
 from coyo.services.topic_generation import TopicGenerationService
+
+logger = structlog.get_logger()
 
 router = APIRouter(prefix="/api/topics", tags=["topics"])
 
@@ -82,4 +85,14 @@ async def generate_topics(
     topic_count = await service.generate_common_topics()
     user_count = await service.assign_to_users()
 
-    return {"topics_generated": topic_count, "users_assigned": user_count}
+    personal_count = 0
+    try:
+        personal_count = await service.generate_personal_topics()
+    except Exception:
+        logger.exception("personal_topic_generation_failed")
+
+    return {
+        "topics_generated": topic_count,
+        "users_assigned": user_count,
+        "personal_topics_generated": personal_count,
+    }
