@@ -127,6 +127,15 @@ echo "Service URL: ${SERVICE_URL}"
 
 Update the service with Cloud Tasks and cron settings:
 
+Get the default Compute Engine service account email:
+
+```bash
+SA_EMAIL="${PROJECT_NUMBER}-compute@developer.gserviceaccount.com"
+echo "Service Account: ${SA_EMAIL}"
+```
+
+Update the service with Cloud Tasks and cron settings:
+
 ```bash
 gcloud run services update ${SERVICE_NAME} \
   --region ${REGION} \
@@ -134,7 +143,8 @@ gcloud run services update ${SERVICE_NAME} \
 CLOUD_TASKS_PROJECT=$(gcloud config get project),\
 CLOUD_TASKS_LOCATION=${REGION},\
 CLOUD_TASKS_QUEUE=interest-extraction,\
-CLOUD_RUN_SERVICE_URL=${SERVICE_URL}" \
+CLOUD_RUN_SERVICE_URL=${SERVICE_URL},\
+CLOUD_TASKS_SERVICE_ACCOUNT=${SA_EMAIL}" \
   --update-secrets "CRON_SECRET=cron-secret:latest"
 ```
 
@@ -146,9 +156,10 @@ CLOUD_RUN_SERVICE_URL=${SERVICE_URL}" \
 | `CLOUD_TASKS_LOCATION` | e.g. `asia-northeast1` | Cloud Tasks queue region |
 | `CLOUD_TASKS_QUEUE` | `interest-extraction` | Queue name |
 | `CLOUD_RUN_SERVICE_URL` | Cloud Run service URL | Task callback URL + OIDC audience |
+| `CLOUD_TASKS_SERVICE_ACCOUNT` | SA email | Service account for OIDC token in Cloud Tasks |
 | `CRON_SECRET` | Secret Manager | HMAC secret for `/api/topics/generate` |
 
-> **Note:** All 4 `CLOUD_TASKS_*` variables must be set together. The app validates this at startup and will fail if only some are configured.
+> **Note:** All 5 `CLOUD_TASKS_*` variables must be set together. The app validates this at startup and will fail if only some are configured.
 
 ## Step 6: Create Cloud Scheduler Job (Pipeline B)
 
@@ -167,7 +178,7 @@ gcloud scheduler jobs create http coyo-topic-generation \
   --http-method=POST \
   --headers="X-Cron-Secret=${CRON_SECRET}" \
   --attempt-deadline=300s \
-  --max-retry-count=2 \
+  --max-retry-attempts=2 \
   --min-backoff=30s
 ```
 

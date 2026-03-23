@@ -41,6 +41,7 @@ class Settings(BaseSettings):
     cloud_tasks_location: str | None = None
     cloud_tasks_queue: str | None = None
     cloud_run_service_url: str | None = None
+    cloud_tasks_service_account: str | None = None
 
     # TTS Config
     tts_voice: str = "nova"
@@ -73,12 +74,13 @@ class Settings(BaseSettings):
             self.cloud_tasks_location,
             self.cloud_tasks_queue,
             self.cloud_run_service_url,
+            self.cloud_tasks_service_account,
         ]
         non_none = [f for f in fields if f is not None]
-        if non_none and len(non_none) != 4:
+        if non_none and len(non_none) != len(fields):
             raise ValueError(
                 "Cloud Tasks settings must be all set or all None. "
-                f"Got {len(non_none)}/4 configured."
+                f"Got {len(non_none)}/{len(fields)} configured."
             )
         return self
 

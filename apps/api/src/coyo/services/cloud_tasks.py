@@ -142,7 +142,7 @@ class CloudTasksService:
                     headers={"Content-Type": "application/json"},
                     body=payload.encode(),
                     oidc_token=tasks_v2.OidcToken(
-                        service_account_email="",  # Uses default SA
+                        service_account_email=settings.cloud_tasks_service_account,
                         audience=settings.cloud_run_service_url,
                     ),
                 ),
