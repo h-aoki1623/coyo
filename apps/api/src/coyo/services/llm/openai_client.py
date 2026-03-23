@@ -47,7 +47,7 @@ class OpenAIClient(LLMClient):
                 model=self._model,
                 messages=[{"role": m.role, "content": m.content} for m in messages],
                 temperature=opts.temperature,
-                max_tokens=opts.max_tokens,
+                max_completion_tokens=opts.max_tokens,
                 stream=True,
             )
             async for chunk in stream:
@@ -129,7 +129,7 @@ class OpenAIClient(LLMClient):
                 model=self._model,
                 messages=[{"role": m.role, "content": m.content} for m in messages],
                 temperature=opts.temperature,
-                max_tokens=opts.max_tokens,
+                max_completion_tokens=opts.max_tokens,
                 response_format={"type": "json_object"},
             )
             content = response.choices[0].message.content

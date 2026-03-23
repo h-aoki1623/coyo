@@ -23,6 +23,18 @@ appId: to.coyo.app
 - assertVisible:
     id: "home-greeting"
 
+# Scroll to the Sports topic card (may be below the fold when suggestions are shown)
+# Scroll down to reveal topic cards (avoid sign-out button at bottom)
+- swipe:
+    start: "50%, 60%"
+    end: "50%, 30%"
+    duration: 500
+
+- extendedWaitUntil:
+    visible:
+      id: "topic-sports"
+    timeout: 5000
+
 # Tap the Sports topic card using its testID
 - tapOn:
     id: "topic-sports"

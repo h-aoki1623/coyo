@@ -61,6 +61,18 @@ Generate a natural opening greeting to start the conversation. Keep it warm and 
 user to respond. Speak at an intermediate English level.\
 """
 
+_SUGGESTED_GREETING_SYSTEM_PROMPT = """\
+You are a friendly English conversation partner named Coyo.
+The user wants to discuss a trending topic they selected.
+
+Background information (use naturally in conversation, don't quote directly):
+{article_context}
+
+Since the user selected this topic, YOU start the conversation.
+Open with a natural, engaging question or comment about this topic.
+Keep it warm and inviting (2-3 sentences). Speak at an intermediate English level.\
+"""
+
 
 def _make_event(event: str, data: dict[str, Any]) -> dict[str, Any]:
     """Build an SSE event dict with the given event name and data payload."""
@@ -217,16 +229,24 @@ class TurnOrchestrator:
         *,
         conversation_id: uuid.UUID,
         topic: str,
+        article_context: str | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
         """Generate an AI greeting and yield SSE event dicts.
 
         A simplified pipeline with no STT or correction — just LLM + TTS.
+        When article_context is provided (suggested topics), uses a specialised
+        system prompt that incorporates the article background.
         """
         log = logger.bind(conversation_id=str(conversation_id))
         log.info("greeting_pipeline_start")
 
         # Build messages: system prompt only (no user message)
-        system_prompt = _GREETING_SYSTEM_PROMPT.format(topic=topic)
+        if article_context:
+            system_prompt = _SUGGESTED_GREETING_SYSTEM_PROMPT.format(
+                article_context=article_context,
+            )
+        else:
+            system_prompt = _GREETING_SYSTEM_PROMPT.format(topic=topic)
         messages: list[ChatMessage] = [
             ChatMessage(role="system", content=system_prompt),
         ]
@@ -281,7 +301,8 @@ class TurnOrchestrator:
         Includes the system prompt, previous turns, and the current
         user message.
         """
-        system_prompt = _CONVERSATION_SYSTEM_PROMPT.format(topic=topic)
+        topic_label = topic if topic != "suggested" else "a trending news topic"
+        system_prompt = _CONVERSATION_SYSTEM_PROMPT.format(topic=topic_label)
         messages: list[ChatMessage] = [
             ChatMessage(role="system", content=system_prompt),
         ]

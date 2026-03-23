@@ -13,6 +13,9 @@ const ja = {
       hint: 'タップして再開',
       resume: '再開',
     },
+    suggestedForYou: 'あなたへのおすすめ',
+    trendingTopics: '注目トピック',
+    otherTopics: 'その他',
     signOut: 'サインアウト',
   },
 
@@ -24,6 +27,7 @@ const ja = {
     technology: 'テクノロジー',
     entertainment: 'エンタメ',
     general: '自由会話',
+    suggested: 'おすすめトピック',
   },
 
   // Talk Screen

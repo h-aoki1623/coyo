@@ -19,11 +19,13 @@ class ConversationRepository:
         *,
         user_id: uuid.UUID,
         time_limit_seconds: int,
+        topic_suggestion_id: uuid.UUID | None = None,
     ) -> Conversation:
         """Create a new conversation and flush to obtain its ID."""
         conversation = Conversation(
             user_id=user_id,
             time_limit_seconds=time_limit_seconds,
+            topic_suggestion_id=topic_suggestion_id,
         )
         self._session.add(conversation)
         await self._session.flush()

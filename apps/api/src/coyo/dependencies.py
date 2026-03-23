@@ -31,6 +31,14 @@ _PROVIDER_MAPPING: dict[str, AuthProvider] = {
 }
 
 
+def _extract_bearer_token(authorization: str) -> str:
+    """Extract token from 'Bearer <token>' header, or raise."""
+    parts = authorization.split(" ", 1)
+    if len(parts) != 2 or parts[0].lower() != "bearer":
+        raise AuthenticationError("Invalid Authorization header format")
+    return parts[1]
+
+
 def map_provider(sign_in_provider: str) -> AuthProvider:
     """Map Firebase sign_in_provider to our auth_provider value."""
     mapped = _PROVIDER_MAPPING.get(sign_in_provider)
@@ -57,11 +65,44 @@ async def get_firebase_token(
     if authorization is None:
         return None
 
-    parts = authorization.split(" ", 1)
-    if len(parts) != 2 or parts[0].lower() != "bearer":
-        raise AuthenticationError("Invalid Authorization header format")
+    token = _extract_bearer_token(authorization)
+    return await asyncio.to_thread(verify_firebase_token, token)
 
-    return await asyncio.to_thread(verify_firebase_token, parts[1])
+
+async def verify_cloud_task_token(
+    authorization: Annotated[str | None, Header()] = None,
+) -> None:
+    """Verify OIDC token from Cloud Tasks.
+
+    Skips verification when cloud_run_service_url is not configured (local dev).
+    """
+    from coyo.config import get_settings
+
+    settings = get_settings()
+    if not settings.cloud_run_service_url:
+        return
+
+    if authorization is None:
+        raise AuthenticationError("Missing Authorization header")
+
+    token = _extract_bearer_token(authorization)
+    try:
+        await asyncio.to_thread(
+            _verify_oidc_token, token, settings.cloud_run_service_url
+        )
+    except AuthenticationError:
+        raise
+    except Exception:
+        logger.warning("oidc_verification_failed", exc_info=True)
+        raise AuthenticationError("Invalid OIDC token") from None
+
+
+def _verify_oidc_token(token: str, audience: str) -> None:
+    """Verify Google OIDC token (blocking, run in thread)."""
+    from google.auth.transport.requests import Request
+    from google.oauth2 import id_token
+
+    id_token.verify_oauth2_token(token, Request(), audience)
 
 
 async def get_current_user(

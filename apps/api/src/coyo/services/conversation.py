@@ -15,7 +15,7 @@ from coyo.models.turn import Turn
 from coyo.repositories.conversation import ConversationRepository
 
 ALLOWED_TOPICS: frozenset[str] = frozenset(
-    {"sports", "business", "technology", "politics", "entertainment"}
+    {"sports", "business", "technology", "politics", "entertainment", "suggested"}
 )
 
 
@@ -40,22 +40,45 @@ class ConversationService:
         self,
         *,
         user_id: uuid.UUID,
-        topic: str,
+        topic: str | None = None,
+        topic_suggestion_id: uuid.UUID | None = None,
         time_limit_seconds: int = 1800,
     ) -> Conversation:
         """Start a new conversation session.
 
-        Validates the topic, creates the conversation record,
+        Accepts either a topic string or a topic_suggestion_id.
+        Validates the input, creates the conversation record,
         and returns the newly created conversation.
         """
-        if topic not in ALLOWED_TOPICS:
-            raise ValidationError(
-                f"Invalid topic '{topic}'. Allowed: {', '.join(sorted(ALLOWED_TOPICS))}"
+        if topic_suggestion_id is not None:
+            from datetime import date
+
+            # Deferred import to avoid circular dependency
+            from coyo.repositories.topic_suggestion import TopicSuggestionRepository
+
+            suggestion_repo = TopicSuggestionRepository(self._session)
+            suggestion = await suggestion_repo.get_by_id(topic_suggestion_id)
+            if suggestion is None or suggestion.generated_date != date.today():
+                raise NotFoundError("TopicSuggestion", str(topic_suggestion_id))
+            # Verify the user has access to this suggestion (IDOR prevention)
+            has_access = await suggestion_repo.user_has_suggestion(
+                user_id, topic_suggestion_id
             )
+            if not has_access:
+                raise NotFoundError("TopicSuggestion", str(topic_suggestion_id))
+            topic = "suggested"
+        elif topic is not None:
+            if topic not in ALLOWED_TOPICS:
+                raise ValidationError(
+                    f"Invalid topic '{topic}'. Allowed: {', '.join(sorted(ALLOWED_TOPICS))}"
+                )
+        else:
+            raise ValidationError("Either topic or topic_suggestion_id must be provided")
 
         conversation = await self._repo.create(
             user_id=user_id,
             time_limit_seconds=time_limit_seconds,
+            topic_suggestion_id=topic_suggestion_id,
         )
         await self._session.commit()
         return conversation
@@ -118,6 +141,12 @@ class ConversationService:
             score=None,
         )
         await self._session.commit()
+
+        # Enqueue interest extraction (Cloud Tasks or asyncio fallback)
+        from coyo.services.cloud_tasks import CloudTasksService
+
+        await CloudTasksService.enqueue_interest_extraction(conversation_id, user_id)
+
         # update_on_end already checked for None via get_by_id above
         return conversation  # type: ignore[return-value]
 

@@ -13,6 +13,9 @@ const en = {
       hint: 'Tap to resume',
       resume: 'Resume',
     },
+    suggestedForYou: 'Suggested for You',
+    trendingTopics: 'Trending Topics',
+    otherTopics: 'Other Topics',
     signOut: 'Sign Out',
   },
 
@@ -24,6 +27,7 @@ const en = {
     technology: 'Technology',
     entertainment: 'Entertainment',
     general: 'Free Conversation',
+    suggested: 'Suggested Topic',
   },
 
   // Talk Screen

@@ -245,6 +245,68 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/interests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Interests
+         * @description Get top interests for the current user, ordered by effective weight.
+         */
+        get: operations["get_interests_api_interests_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/topics/suggestions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Suggestions
+         * @description Get topic suggestions for the current user.
+         */
+        get: operations["get_suggestions_api_topics_suggestions_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/topics/generate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Generate Topics
+         * @description Generate trending topic suggestions (cron endpoint).
+         *
+         *     Protected by X-Cron-Secret header.
+         */
+        post: operations["generate_topics_api_topics_generate_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/health": {
         parameters: {
             query?: never;
@@ -292,7 +354,7 @@ export interface components {
              * @default general
              * @enum {string}
              */
-            topic: "sports" | "business" | "technology" | "politics" | "entertainment" | "general";
+            topic: "sports" | "business" | "technology" | "politics" | "entertainment" | "general" | "suggested";
         };
         /**
          * ConversationResponse
@@ -351,9 +413,13 @@ export interface components {
             /**
              * Topic
              * @description Conversation topic
-             * @enum {string}
              */
-            topic: "sports" | "business" | "technology" | "politics" | "entertainment";
+            topic?: ("sports" | "business" | "technology" | "politics" | "entertainment") | null;
+            /**
+             * Topicsuggestionid
+             * @description ID of a topic suggestion to start from
+             */
+            topicSuggestionId?: string | null;
         };
         /**
          * FeedbackResponse
@@ -379,7 +445,7 @@ export interface components {
              * @description Conversation topic for the greeting
              * @enum {string}
              */
-            topic: "sports" | "business" | "technology" | "politics" | "entertainment";
+            topic: "sports" | "business" | "technology" | "politics" | "entertainment" | "suggested";
         };
         /** HTTPValidationError */
         HTTPValidationError: {
@@ -455,6 +521,35 @@ export interface components {
             perPage: number;
         };
         /**
+         * InterestResponse
+         * @description A single user interest with its computed weight.
+         */
+        InterestResponse: {
+            /** Keyword */
+            keyword: string;
+            /**
+             * Keywordtype
+             * @enum {string}
+             */
+            keywordType: "topic" | "entity";
+            /** Isnewsrelevant */
+            isNewsRelevant: boolean;
+            /** Totalmentions */
+            totalMentions: number;
+            /** Effectiveweight */
+            effectiveWeight: number;
+            /** Lastmentionedconvidx */
+            lastMentionedConvIdx: number;
+        };
+        /**
+         * InterestsListResponse
+         * @description List of user interests ordered by effective weight.
+         */
+        InterestsListResponse: {
+            /** Interests */
+            interests: components["schemas"]["InterestResponse"][];
+        };
+        /**
          * SessionResponse
          * @description Response for session creation/sync.
          */
@@ -466,6 +561,37 @@ export interface components {
             /** Displayname */
             displayName: string | null;
             authProvider: components["schemas"]["AuthProvider"];
+        };
+        /**
+         * TopicSuggestionResponse
+         * @description A single topic suggestion for the home screen.
+         */
+        TopicSuggestionResponse: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Title */
+            title: string;
+            /** Summary */
+            summary: string;
+            /** Sourcekeyword */
+            sourceKeyword: string;
+            /** Pool */
+            pool: string;
+            /** Rank */
+            rank: number;
+        };
+        /**
+         * TopicSuggestionsListResponse
+         * @description Grouped topic suggestions for a user.
+         */
+        TopicSuggestionsListResponse: {
+            /** Personal */
+            personal: components["schemas"]["TopicSuggestionResponse"][];
+            /** Trending */
+            trending: components["schemas"]["TopicSuggestionResponse"][];
         };
         /**
          * TurnCorrectionResponse
@@ -935,6 +1061,103 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_interests_api_interests_get: {
+        parameters: {
+            query?: {
+                limit?: number;
+            };
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InterestsListResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_suggestions_api_topics_suggestions_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TopicSuggestionsListResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    generate_topics_api_topics_generate_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "x-cron-secret"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: number;
+                    };
+                };
             };
             /** @description Validation Error */
             422: {

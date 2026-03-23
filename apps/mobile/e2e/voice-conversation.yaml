@@ -27,8 +27,20 @@ appId: to.coyo.app
 
 - extendedWaitUntil:
     visible:
-      id: "topic-sports"
+      id: "home-greeting"
     timeout: 30000
+
+# Scroll to the Sports topic card (may be below the fold when suggestions are shown)
+# Scroll down to reveal topic cards (avoid sign-out button at bottom)
+- swipe:
+    start: "50%, 60%"
+    end: "50%, 30%"
+    duration: 500
+
+- extendedWaitUntil:
+    visible:
+      id: "topic-sports"
+    timeout: 5000
 
 - tapOn:
     id: "topic-sports"
@@ -179,7 +191,7 @@ appId: to.coyo.app
 
 - extendedWaitUntil:
     visible:
-      id: "topic-sports"
+      id: "home-greeting"
     timeout: 5000
 
 - takeScreenshot: "voice-06-returned-home"

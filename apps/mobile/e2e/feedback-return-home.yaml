@@ -32,7 +32,21 @@ appId: to.coyo.app
       id: "home-greeting"
     timeout: 30000
 
+# Scroll to the Sports topic card (may be below the fold when suggestions are shown)
+# Scroll down within the content area to reveal topic cards
+# (suggestions may push fixed topics below the fold)
+# Use swipe in the upper half of the screen to avoid hitting the sign-out button at the bottom
+- swipe:
+    start: "50%, 60%"
+    end: "50%, 30%"
+    duration: 500
+
 # Start a conversation on the Sports topic via testID
+- extendedWaitUntil:
+    visible:
+      id: "topic-sports"
+    timeout: 5000
+
 - tapOn:
     id: "topic-sports"
 
@@ -106,6 +120,13 @@ appId: to.coyo.app
 
 # Wait for navigation back to Home
 - waitForAnimationToEnd
+
+# Scroll up to reveal the greeting (page may be scrolled down from earlier)
+- swipe:
+    start: "50%, 30%"
+    end: "50%, 70%"
+    duration: 500
+
 - extendedWaitUntil:
     visible:
       id: "home-greeting"
