@@ -100,10 +100,16 @@ jobs:
             RATE_LIMIT_PER_MINUTE=30
             CORS_ALLOWED_ORIGINS=${{ vars.CORS_ALLOWED_ORIGINS || '[]' }}
             FIREBASE_PROJECT_ID=${{ vars.FIREBASE_PROJECT_ID }}
+            CLOUD_TASKS_PROJECT=${{ vars.GCP_PROJECT_ID }}
+            CLOUD_TASKS_LOCATION=${{ vars.CLOUD_RUN_REGION }}
+            CLOUD_TASKS_QUEUE=${{ vars.CLOUD_TASKS_QUEUE }}
+            CLOUD_RUN_SERVICE_URL=${{ vars.CLOUD_RUN_SERVICE_URL }}
+            CLOUD_TASKS_SERVICE_ACCOUNT=${{ vars.CLOUD_TASKS_SERVICE_ACCOUNT }}
           secrets: |
             DATABASE_URL=database-url:latest
             REDIS_URL=redis-url:latest
             OPENAI_API_KEY=openai-api-key:latest
+            CRON_SECRET=cron-secret:latest
 
       # Verify deployment
       - name: Health check
