@@ -36,6 +36,12 @@ class Settings(BaseSettings):
     # Cron
     cron_secret: str | None = None
 
+    # Cloud Tasks (None = local development, asyncio fallback)
+    cloud_tasks_project: str | None = None
+    cloud_tasks_location: str | None = None
+    cloud_tasks_queue: str | None = None
+    cloud_run_service_url: str | None = None
+
     # TTS Config
     tts_voice: str = "nova"
     tts_model: str = "tts-1"
@@ -58,6 +64,23 @@ class Settings(BaseSettings):
     rate_limit_per_minute: int = 30
 
     model_config = ConfigDict(env_file=".env", env_file_encoding="utf-8")
+
+    @model_validator(mode="after")
+    def validate_cloud_tasks_settings(self) -> Self:
+        """Ensure Cloud Tasks settings are all set or all None."""
+        fields = [
+            self.cloud_tasks_project,
+            self.cloud_tasks_location,
+            self.cloud_tasks_queue,
+            self.cloud_run_service_url,
+        ]
+        non_none = [f for f in fields if f is not None]
+        if non_none and len(non_none) != 4:
+            raise ValueError(
+                "Cloud Tasks settings must be all set or all None. "
+                f"Got {len(non_none)}/4 configured."
+            )
+        return self
 
     @model_validator(mode="after")
     def validate_cors_origins(self) -> Self:

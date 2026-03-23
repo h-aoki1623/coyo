@@ -242,6 +242,10 @@ def mock_settings():
     mock.cors_allowed_origins = ["http://localhost:8081"]
     mock.max_audio_size_bytes = 10 * 1024 * 1024
     mock.rate_limit_per_minute = 30
+    mock.cloud_tasks_project = None
+    mock.cloud_tasks_location = None
+    mock.cloud_tasks_queue = None
+    mock.cloud_run_service_url = None
 
     with patch("coyo.config.get_settings", return_value=mock):
         yield mock
