@@ -167,7 +167,7 @@ gcloud scheduler jobs create http coyo-topic-generation \
   --http-method=POST \
   --headers="X-Cron-Secret=${CRON_SECRET}" \
   --attempt-deadline=300s \
-  --max-retry-count=2 \
+  --max-retry-attempts=2 \
   --min-backoff=30s
 ```
 
