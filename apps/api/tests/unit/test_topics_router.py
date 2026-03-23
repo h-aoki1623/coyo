@@ -31,6 +31,7 @@ class TestGenerateTopicsEndpoint:
             mock_svc = AsyncMock()
             mock_svc.generate_common_topics = AsyncMock(return_value=3)
             mock_svc.assign_to_users = AsyncMock(return_value=10)
+            mock_svc.generate_personal_topics = AsyncMock(return_value=2)
             MockService.return_value = mock_svc
 
             response = await client.post(
@@ -42,6 +43,7 @@ class TestGenerateTopicsEndpoint:
         data = response.json()
         assert data["topics_generated"] == 3
         assert data["users_assigned"] == 10
+        assert data["personal_topics_generated"] == 2
 
     @pytest.mark.integration
     async def test_missing_cron_secret_returns_403(self, client: AsyncClient, mock_settings):
@@ -77,6 +79,36 @@ class TestGenerateTopicsEndpoint:
                 headers={"X-Cron-Secret": "any-value"},
             )
         assert response.status_code == 403
+
+    @pytest.mark.integration
+    async def test_personal_topic_failure_doesnt_break_response(
+        self, client: AsyncClient, mock_settings
+    ):
+        """If generate_personal_topics raises, response still returns 200 with 0."""
+        mock_settings.cron_secret = "test-cron-secret"
+
+        with (
+            patch("coyo.routers.topics.get_settings", return_value=mock_settings),
+            patch("coyo.routers.topics.TopicGenerationService") as MockService,
+        ):
+            mock_svc = AsyncMock()
+            mock_svc.generate_common_topics = AsyncMock(return_value=3)
+            mock_svc.assign_to_users = AsyncMock(return_value=10)
+            mock_svc.generate_personal_topics = AsyncMock(
+                side_effect=Exception("LLM down")
+            )
+            MockService.return_value = mock_svc
+
+            response = await client.post(
+                "/api/topics/generate",
+                headers={"X-Cron-Secret": "test-cron-secret"},
+            )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["personal_topics_generated"] == 0
+        assert data["topics_generated"] == 3
+        assert data["users_assigned"] == 10
 
 
 # ---------------------------------------------------------------------------

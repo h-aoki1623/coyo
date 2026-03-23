@@ -108,6 +108,28 @@ class TopicSuggestionRepository:
         result = await self._session.execute(stmt)
         return result.scalar_one_or_none() is not None
 
+    async def get_personal_suggestions(self, target_date: date) -> list[TopicSuggestion]:
+        """Get personal pool suggestions for a date (idempotency check)."""
+        stmt = (
+            select(TopicSuggestion)
+            .where(
+                TopicSuggestion.generated_date == target_date,
+                TopicSuggestion.pool_type == "personal",
+            )
+            .order_by(TopicSuggestion.created_at)
+        )
+        result = await self._session.execute(stmt)
+        return list(result.scalars().all())
+
+    async def get_active_users_with_conv_count(self) -> list[tuple[uuid.UUID, int]]:
+        """Get (user_id, conversation_count) for all active users."""
+        # Deferred import to avoid circular dependency: topic_suggestion -> user -> ...
+        from coyo.models.user import User
+
+        stmt = select(User.id, User.conversation_count)
+        result = await self._session.execute(stmt)
+        return list(result.tuples().all())
+
     async def get_active_user_ids(self) -> list[uuid.UUID]:
         """Get IDs of all users."""
         # Deferred import to avoid circular dependency: topic_suggestion -> user -> ...
