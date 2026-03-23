@@ -246,6 +246,7 @@ def mock_settings():
     mock.cloud_tasks_location = None
     mock.cloud_tasks_queue = None
     mock.cloud_run_service_url = None
+    mock.cloud_tasks_service_account = None
 
     with patch("coyo.config.get_settings", return_value=mock):
         yield mock
