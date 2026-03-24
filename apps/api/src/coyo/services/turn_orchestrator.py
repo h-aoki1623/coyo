@@ -36,9 +36,9 @@ from coyo.repositories.turn import TurnRepository
 from coyo.services.correction import CorrectionService
 from coyo.services.llm.base import ChatMessage, ChatOptions, TextChunk, WebSearchStarted
 from coyo.services.llm.openai_client import OpenAIClient
+from coyo.services.memory_context import MemoryContextService
 from coyo.services.stt import STTService
 from coyo.services.tts import TTSService
-from coyo.services.memory_context import MemoryContextService
 from coyo.services.web_search_filter import is_filler_turn, strip_citations
 
 logger = structlog.get_logger()

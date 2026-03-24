@@ -3,15 +3,19 @@
 from __future__ import annotations
 
 import math
-import uuid
 from dataclasses import dataclass
 from datetime import UTC, datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from coyo.models.user_interest import UserInterest
+
+if TYPE_CHECKING:
+    import uuid
+
+    from sqlalchemy.ext.asyncio import AsyncSession
 
 # 2-layer weight model parameters
 SHORT_DECAY: float = 0.85

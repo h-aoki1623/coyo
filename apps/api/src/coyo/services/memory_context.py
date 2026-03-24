@@ -2,19 +2,24 @@
 
 from __future__ import annotations
 
-import uuid
+from typing import TYPE_CHECKING
 
 import structlog
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from coyo.models.conversation_summary import ConversationSummary
 from coyo.models.user import User
-from coyo.models.user_profile_attribute import UserProfileAttribute
-from coyo.models.user_profile_summary import UserProfileSummary
 from coyo.repositories.conversation_summary import ConversationSummaryRepository
 from coyo.repositories.interest import InterestRepository, InterestWithWeight
 from coyo.repositories.profile_attribute import ProfileAttributeRepository
 from coyo.repositories.profile_summary import ProfileSummaryRepository
+
+if TYPE_CHECKING:
+    import uuid
+
+    from sqlalchemy.ext.asyncio import AsyncSession
+
+    from coyo.models.conversation_summary import ConversationSummary
+    from coyo.models.user_profile_attribute import UserProfileAttribute
+    from coyo.models.user_profile_summary import UserProfileSummary
 
 logger = structlog.get_logger()
 

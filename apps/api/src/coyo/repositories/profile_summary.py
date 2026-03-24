@@ -2,14 +2,18 @@
 
 from __future__ import annotations
 
-import uuid
 from datetime import UTC, datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from coyo.models.user_profile_summary import UserProfileSummary
+
+if TYPE_CHECKING:
+    import uuid
+
+    from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class ProfileSummaryRepository:

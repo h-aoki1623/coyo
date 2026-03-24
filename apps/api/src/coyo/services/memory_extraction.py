@@ -2,13 +2,11 @@
 
 from __future__ import annotations
 
-import uuid
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 
 import structlog
 from pydantic import BaseModel, Field, field_validator, model_validator
 from sqlalchemy import select, update
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from coyo.config import get_settings
 from coyo.db import get_session_factory
@@ -22,6 +20,11 @@ from coyo.repositories.profile_attribute import ProfileAttributeRepository
 from coyo.repositories.profile_summary import ProfileSummaryRepository
 from coyo.services.llm.base import ChatMessage, ChatOptions
 from coyo.services.llm.openai_client import OpenAIClient
+
+if TYPE_CHECKING:
+    import uuid
+
+    from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = structlog.get_logger()
 
