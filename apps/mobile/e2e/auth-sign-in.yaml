@@ -15,6 +15,9 @@ appId: to.coyo.app
 - launchApp:
     clearState: false
 
+# Wait for app to settle and auth state to resolve before checking visibility
+- waitForAnimationToEnd
+
 # If already signed in (Home screen visible), sign out first.
 # This handles the case where parallel test execution signed in before us.
 - runFlow:
