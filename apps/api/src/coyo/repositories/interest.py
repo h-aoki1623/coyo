@@ -1,8 +1,11 @@
 """Repository for UserInterest data access with 2-layer weight model."""
 
+from __future__ import annotations
+
 import math
 import uuid
 from dataclasses import dataclass
+from datetime import UTC, datetime
 
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
@@ -27,6 +30,7 @@ class InterestWithWeight:
     total_mentions: int
     effective_weight: float
     last_mentioned_conv_idx: int
+    summary: str | None
 
 
 def compute_effective_weight(
@@ -61,11 +65,14 @@ class InterestRepository:
         keyword_type: str,
         is_news_relevant: bool,
         current_conv_idx: int,
+        summary: str | None = None,
     ) -> UserInterest:
         """Insert or update an interest keyword with 2-layer model logic.
 
-        On insert: sets initial values.
+        On insert: sets initial values and summary if provided,
+            sets needs_summary_update = False.
         On update: applies decay to short_term, then boosts.
+            Does NOT update summary; sets needs_summary_update = True instead.
         """
         keyword = keyword.lower().strip()
         stmt = select(UserInterest).where(
@@ -84,6 +91,8 @@ class InterestRepository:
                 total_mentions=1,
                 short_term_stored=min(SHORT_BOOST, SHORT_CAP),
                 last_mentioned_conv_idx=current_conv_idx,
+                summary=summary,
+                needs_summary_update=False,
             )
             self._session.add(interest)
             try:
@@ -120,6 +129,7 @@ class InterestRepository:
         interest.short_term_stored = min(cur_short + SHORT_BOOST, SHORT_CAP)
         interest.last_mentioned_conv_idx = current_conv_idx
         interest.is_news_relevant = is_news_relevant
+        interest.needs_summary_update = True
 
     @staticmethod
     def _to_weighted(
@@ -139,6 +149,7 @@ class InterestRepository:
                 current_conv_idx,
             ),
             last_mentioned_conv_idx=interest.last_mentioned_conv_idx,
+            summary=interest.summary,
         )
 
     async def get_interests_for_user(
@@ -180,3 +191,36 @@ class InterestRepository:
         weighted = [self._to_weighted(i, current_conv_idx) for i in interests]
         weighted.sort(key=lambda x: x.effective_weight, reverse=True)
         return weighted[:limit]
+
+    async def get_interests_needing_summary_update(
+        self,
+        user_id: uuid.UUID,
+    ) -> list[UserInterest]:
+        """Get interests where needs_summary_update=True."""
+        stmt = select(UserInterest).where(
+            UserInterest.user_id == user_id,
+            UserInterest.needs_summary_update.is_(True),
+        )
+        result = await self._session.execute(stmt)
+        return list(result.scalars().all())
+
+    async def update_summary(
+        self,
+        user_id: uuid.UUID,
+        keyword: str,
+        summary: str,
+    ) -> None:
+        """Update interest summary, set summary_updated_at=now(), needs_summary_update=False."""
+        keyword = keyword.lower().strip()
+        stmt = select(UserInterest).where(
+            UserInterest.user_id == user_id,
+            UserInterest.keyword == keyword,
+        )
+        result = await self._session.execute(stmt)
+        interest = result.scalar_one_or_none()
+
+        if interest is not None:
+            interest.summary = summary
+            interest.summary_updated_at = datetime.now(UTC)
+            interest.needs_summary_update = False
+            await self._session.flush()

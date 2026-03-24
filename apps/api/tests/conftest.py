@@ -225,6 +225,21 @@ async def test_correction(
 
 
 @pytest.fixture(autouse=True)
+def mock_memory_context():
+    """Mock MemoryContextService.build_context to return None by default.
+
+    Prevents tests from needing real memory data. Tests that specifically
+    test memory context injection should override this fixture.
+    """
+    with patch(
+        "coyo.services.memory_context.MemoryContextService.build_context",
+        new_callable=AsyncMock,
+        return_value=None,
+    ):
+        yield
+
+
+@pytest.fixture(autouse=True)
 def mock_settings():
     """Mock get_settings to avoid needing real environment variables."""
     mock = MagicMock()

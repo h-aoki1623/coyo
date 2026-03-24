@@ -38,6 +38,7 @@ from coyo.services.llm.base import ChatMessage, ChatOptions, TextChunk, WebSearc
 from coyo.services.llm.openai_client import OpenAIClient
 from coyo.services.stt import STTService
 from coyo.services.tts import TTSService
+from coyo.services.memory_context import MemoryContextService
 from coyo.services.web_search_filter import is_filler_turn, strip_citations
 
 logger = structlog.get_logger()
@@ -139,7 +140,9 @@ class TurnOrchestrator:
         log.info("turn_user_saved", turn_id=str(user_turn.id), sequence=next_sequence)
 
         # -- Step 3: Build conversation history and stream LLM reply ------
-        messages = await self._build_messages(conversation_id, user_text, topic=topic)
+        messages = await self._build_messages(
+            conversation_id, user_text, user_id=user_id, topic=topic,
+        )
         full_ai_text = ""
 
         if is_filler_turn(user_text):
@@ -228,6 +231,7 @@ class TurnOrchestrator:
         self,
         *,
         conversation_id: uuid.UUID,
+        user_id: uuid.UUID,
         topic: str,
         article_context: str | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
@@ -247,6 +251,13 @@ class TurnOrchestrator:
             )
         else:
             system_prompt = _GREETING_SYSTEM_PROMPT.format(topic=topic)
+
+        memory_context = await MemoryContextService.build_context(
+            self._session, user_id,
+        )
+        if memory_context:
+            system_prompt = system_prompt + "\n\n" + memory_context
+
         messages: list[ChatMessage] = [
             ChatMessage(role="system", content=system_prompt),
         ]
@@ -294,6 +305,7 @@ class TurnOrchestrator:
         conversation_id: uuid.UUID,
         current_user_text: str,
         *,
+        user_id: uuid.UUID,
         topic: str = "general",
     ) -> list[ChatMessage]:
         """Build the LLM message list from conversation history.
@@ -303,6 +315,13 @@ class TurnOrchestrator:
         """
         topic_label = topic if topic != "suggested" else "a trending news topic"
         system_prompt = _CONVERSATION_SYSTEM_PROMPT.format(topic=topic_label)
+
+        memory_context = await MemoryContextService.build_context(
+            self._session, user_id,
+        )
+        if memory_context:
+            system_prompt = system_prompt + "\n\n" + memory_context
+
         messages: list[ChatMessage] = [
             ChatMessage(role="system", content=system_prompt),
         ]

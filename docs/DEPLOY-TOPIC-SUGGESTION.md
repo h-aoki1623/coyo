@@ -8,7 +8,7 @@ The topic suggestion feature consists of two pipelines:
 
 | Pipeline | Trigger | What it does |
 |---|---|---|
-| **Pipeline A** (Interest Extraction) | Automatic — after each conversation ends | Extracts user interests (topics & entities) from conversation transcripts via LLM |
+| **Pipeline A** (Memory Extraction) | Automatic — after each conversation ends | Extracts user interests, profile attributes, and conversation summaries via LLM. See [DEPLOY-MEMORY.md](./DEPLOY-MEMORY.md) for details |
 | **Pipeline B** (Topic Generation) | Scheduled — daily at 06:00 JST | Generates trending + personalized topic suggestions for all users |
 
 ### Architecture
@@ -17,13 +17,15 @@ The topic suggestion feature consists of two pipelines:
 [User ends conversation]
         │
         ▼
-[Cloud Tasks queue] ──HTTP POST──▶ [/api/tasks/extract-interests]
+[Cloud Tasks queue] ──HTTP POST──▶ [/api/tasks/extract-memory]
         │                                      │
         │                                      ▼
-        │                            [LLM: extract interests]
+        │                            [LLM: unified extraction]
         │                                      │
         │                                      ▼
-        │                            [Store in user_interests]
+        │                            [Store in user_interests +
+        │                             user_profile_attributes +
+        │                             conversation_summaries]
         │
 ========│=========== (daily at 06:00 JST) ==========================
         │
@@ -57,8 +59,10 @@ gcloud services enable \
 
 ## Step 2: Create Cloud Tasks Queue (Pipeline A)
 
+> **Note:** If deploying the memory feature, use queue name `memory-extraction` instead of `interest-extraction`. See [DEPLOY-MEMORY.md](./DEPLOY-MEMORY.md) for details.
+
 ```bash
-gcloud tasks queues create interest-extraction \
+gcloud tasks queues create memory-extraction \
   --location=asia-northeast1 \
   --max-dispatches-per-second=5 \
   --max-concurrent-dispatches=2 \
@@ -142,7 +146,7 @@ gcloud run services update ${SERVICE_NAME} \
   --update-env-vars "\
 CLOUD_TASKS_PROJECT=$(gcloud config get project),\
 CLOUD_TASKS_LOCATION=${REGION},\
-CLOUD_TASKS_QUEUE=interest-extraction,\
+CLOUD_TASKS_QUEUE=memory-extraction,\
 CLOUD_RUN_SERVICE_URL=${SERVICE_URL},\
 CLOUD_TASKS_SERVICE_ACCOUNT=${SA_EMAIL}" \
   --update-secrets "CRON_SECRET=cron-secret:latest"
@@ -154,7 +158,7 @@ CLOUD_TASKS_SERVICE_ACCOUNT=${SA_EMAIL}" \
 |---|---|---|
 | `CLOUD_TASKS_PROJECT` | GCP project ID | Cloud Tasks API project |
 | `CLOUD_TASKS_LOCATION` | e.g. `asia-northeast1` | Cloud Tasks queue region |
-| `CLOUD_TASKS_QUEUE` | `interest-extraction` | Queue name |
+| `CLOUD_TASKS_QUEUE` | `memory-extraction` | Queue name |
 | `CLOUD_RUN_SERVICE_URL` | Cloud Run service URL | Task callback URL + OIDC audience |
 | `CLOUD_TASKS_SERVICE_ACCOUNT` | SA email | Service account for OIDC token in Cloud Tasks |
 | `CRON_SECRET` | Secret Manager | HMAC secret for `/api/topics/generate` |
@@ -197,12 +201,12 @@ Pipeline A is triggered automatically when a user ends a conversation. Verify by
 
 ```bash
 # Check queue status
-gcloud tasks queues describe interest-extraction \
+gcloud tasks queues describe memory-extraction \
   --location=asia-northeast1
 
 # After a user ends a conversation, check for tasks
 gcloud tasks list \
-  --queue=interest-extraction \
+  --queue=memory-extraction \
   --location=asia-northeast1
 ```
 
@@ -210,7 +214,7 @@ Check Cloud Run logs for successful extraction:
 
 ```bash
 gcloud logging read \
-  'resource.type="cloud_run_revision" AND jsonPayload.event="interest_extraction_complete"' \
+  'resource.type="cloud_run_revision" AND jsonPayload.event="memory_extraction_complete"' \
   --limit=5 \
   --format="table(timestamp, jsonPayload.conversation_id, jsonPayload.keywords_count)"
 ```
@@ -252,7 +256,7 @@ curl -X POST "${SERVICE_URL}/api/topics/generate" \
 
 ## Verification Checklist
 
-- [ ] Cloud Tasks queue `interest-extraction` created
+- [ ] Cloud Tasks queue `memory-extraction` created
 - [ ] Cloud Scheduler job `coyo-topic-generation` created
 - [ ] `CRON_SECRET` stored in Secret Manager and attached to Cloud Run
 - [ ] 4 `CLOUD_TASKS_*` env vars set on Cloud Run
@@ -286,7 +290,7 @@ Cloud Tasks will retry up to `max-attempts` times with exponential backoff. The 
 ```bash
 # Check error logs
 gcloud logging read \
-  'resource.type="cloud_run_revision" AND severity>=ERROR AND jsonPayload.event="interest_extraction_failed"' \
+  'resource.type="cloud_run_revision" AND severity>=ERROR AND jsonPayload.event="memory_extraction_failed"' \
   --limit=10
 ```
 

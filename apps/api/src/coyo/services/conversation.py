@@ -142,10 +142,10 @@ class ConversationService:
         )
         await self._session.commit()
 
-        # Enqueue interest extraction (Cloud Tasks or asyncio fallback)
+        # Enqueue memory extraction (Cloud Tasks or asyncio fallback)
         from coyo.services.cloud_tasks import CloudTasksService
 
-        await CloudTasksService.enqueue_interest_extraction(conversation_id, user_id)
+        await CloudTasksService.enqueue_memory_extraction(conversation_id, user_id)
 
         # update_on_end already checked for None via get_by_id above
         return conversation  # type: ignore[return-value]

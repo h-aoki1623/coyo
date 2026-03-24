@@ -68,7 +68,7 @@ class TestProcessGreetingWithArticleContext:
         orchestrator._llm.chat = capture_chat
 
         async for _ in orchestrator.process_greeting(
-            conversation_id=uuid.uuid4(),
+            conversation_id=uuid.uuid4(), user_id=uuid.uuid4(),
             topic="suggested",
             article_context=article_context,
         ):
@@ -93,7 +93,7 @@ class TestProcessGreetingWithArticleContext:
         orchestrator._llm.chat = capture_chat
 
         async for _ in orchestrator.process_greeting(
-            conversation_id=uuid.uuid4(),
+            conversation_id=uuid.uuid4(), user_id=uuid.uuid4(),
             topic="sports",
         ):
             pass
@@ -107,7 +107,7 @@ class TestProcessGreetingWithArticleContext:
         """The event sequence should be correct even with article_context."""
         events = []
         async for event in orchestrator.process_greeting(
-            conversation_id=uuid.uuid4(),
+            conversation_id=uuid.uuid4(), user_id=uuid.uuid4(),
             topic="suggested",
             article_context="Title: Test\n\nContent here.",
         ):
@@ -132,7 +132,7 @@ class TestProcessGreetingWithArticleContext:
 
         # Empty string is falsy, so it should use the regular prompt
         async for _ in orchestrator.process_greeting(
-            conversation_id=uuid.uuid4(),
+            conversation_id=uuid.uuid4(), user_id=uuid.uuid4(),
             topic="technology",
             article_context="",
         ):
@@ -168,6 +168,7 @@ class TestBuildMessagesWithSuggestedTopic:
         messages = await orchestrator._build_messages(
             uuid.uuid4(),
             "Hello",
+            user_id=uuid.uuid4(),
             topic="suggested",
         )
         system_content = messages[0].content
@@ -182,6 +183,7 @@ class TestBuildMessagesWithSuggestedTopic:
         messages = await orchestrator._build_messages(
             uuid.uuid4(),
             "Hello",
+            user_id=uuid.uuid4(),
             topic="technology",
         )
         system_content = messages[0].content
@@ -193,6 +195,7 @@ class TestBuildMessagesWithSuggestedTopic:
         messages = await orchestrator._build_messages(
             uuid.uuid4(),
             "Tell me about AI",
+            user_id=uuid.uuid4(),
             topic="suggested",
         )
         assert messages[-1].role == "user"
@@ -216,6 +219,7 @@ class TestBuildMessagesWithSuggestedTopic:
         messages = await orchestrator._build_messages(
             uuid.uuid4(),
             "What about sports?",
+            user_id=uuid.uuid4(),
             topic="suggested",
         )
         # system + 2 history + current user = 4
