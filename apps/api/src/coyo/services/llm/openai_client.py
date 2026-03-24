@@ -135,7 +135,9 @@ class OpenAIClient(LLMClient):
             content = response.choices[0].message.content
             if content is None:
                 raise ExternalServiceError("OpenAI", "Empty response content")
-            return response_model.model_validate_json(content)
+            import json as _json
+
+            return response_model.model_validate(_json.loads(content))
         except ExternalServiceError:
             raise
         except Exception as exc:

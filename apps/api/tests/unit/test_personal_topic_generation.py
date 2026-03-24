@@ -38,6 +38,7 @@ def _make_interest(keyword: str, weight: float = 1.0) -> InterestWithWeight:
         total_mentions=3,
         effective_weight=weight,
         last_mentioned_conv_idx=5,
+        summary=None,
     )
 
 
