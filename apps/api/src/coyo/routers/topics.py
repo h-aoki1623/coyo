@@ -1,7 +1,6 @@
 """Topic suggestion endpoints."""
 
 import hmac
-from datetime import date
 
 import structlog
 from fastapi import APIRouter, Depends, Header, Request
@@ -30,9 +29,7 @@ async def get_suggestions(
 ) -> TopicSuggestionsListResponse:
     """Get topic suggestions for the current user."""
     repo = TopicSuggestionRepository(db)
-    today = date.today()
-
-    suggestions = await repo.get_suggestions_for_user(user.id, today)
+    suggestions = await repo.get_suggestions_for_user(user.id)
 
     personal: list[TopicSuggestionResponse] = []
     trending: list[TopicSuggestionResponse] = []

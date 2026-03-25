@@ -3,7 +3,7 @@
 import uuid
 from datetime import date
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from coyo.models.topic_suggestion import TopicSuggestion, UserTopicSuggestion
@@ -60,9 +60,23 @@ class TopicSuggestionRepository:
     async def get_suggestions_for_user(
         self,
         user_id: uuid.UUID,
-        target_date: date,
     ) -> list[tuple[TopicSuggestion, float]]:
-        """Get topic suggestions for a user on a given date, ordered by relevance."""
+        """Get topic suggestions from the most recent generated_date for a user.
+
+        Uses MAX(generated_date) to find the latest batch, ordered by relevance.
+        Returns an empty list if the user has no assigned suggestions (the MAX
+        subquery returns NULL, causing the equality filter to match no rows).
+        """
+        latest_date_subq = (
+            select(func.max(TopicSuggestion.generated_date))
+            .join(
+                UserTopicSuggestion,
+                UserTopicSuggestion.topic_suggestion_id == TopicSuggestion.id,
+            )
+            .where(UserTopicSuggestion.user_id == user_id)
+            .scalar_subquery()
+        )
+
         stmt = (
             select(TopicSuggestion, UserTopicSuggestion.relevance_score)
             .join(
@@ -71,7 +85,7 @@ class TopicSuggestionRepository:
             )
             .where(
                 UserTopicSuggestion.user_id == user_id,
-                TopicSuggestion.generated_date == target_date,
+                TopicSuggestion.generated_date == latest_date_subq,
             )
             .order_by(UserTopicSuggestion.relevance_score.desc())
         )
