@@ -4,7 +4,7 @@ The turn orchestrator is the core of the real-time conversation flow.
 When the user submits audio, this service coordinates the following steps
 as a streaming SSE response:
 
-1. **STT** - Transcribe user audio via OpenAI Whisper
+1. **STT** - Transcribe user audio via OpenAI transcription API
    -> SSE event: stt_result
 
 2. **LLM Reply (streaming)** - Generate AI conversational reply
@@ -36,11 +36,15 @@ from coyo.repositories.turn import TurnRepository
 from coyo.services.correction import CorrectionService
 from coyo.services.llm.base import ChatMessage, ChatOptions, TextChunk, WebSearchStarted
 from coyo.services.llm.openai_client import OpenAIClient
+from coyo.services.memory_context import MemoryContextService
 from coyo.services.stt import STTService
 from coyo.services.tts import TTSService
 from coyo.services.web_search_filter import is_filler_turn, strip_citations
 
 logger = structlog.get_logger()
+
+_STT_CONTEXT_TURN_COUNT = 4
+_STT_MAX_PROMPT_CHARS = 800
 
 _CONVERSATION_SYSTEM_PROMPT = """\
 You are a friendly English conversation partner. The current topic is {topic}.
@@ -124,11 +128,17 @@ class TurnOrchestrator:
         log.info("turn_pipeline_start")
 
         # -- Step 1: STT transcription ------------------------------------
-        user_text = await self._stt.transcribe(audio_data, filename=audio_filename)
+        previous_turns = await self._turn_repo.get_by_conversation_id(
+            conversation_id,
+        )
+        stt_prompt = self._format_stt_prompt(previous_turns, topic)
+        user_text = await self._stt.transcribe(
+            audio_data, filename=audio_filename, prompt=stt_prompt,
+        )
         yield _make_event("stt_result", {"text": user_text})
 
         # -- Step 2: Save user turn to DB ---------------------------------
-        next_sequence = await self._get_next_sequence(conversation_id)
+        next_sequence = (previous_turns[-1].sequence + 1) if previous_turns else 1
         user_turn = await self._turn_repo.create(
             conversation_id=conversation_id,
             role="user",
@@ -139,7 +149,9 @@ class TurnOrchestrator:
         log.info("turn_user_saved", turn_id=str(user_turn.id), sequence=next_sequence)
 
         # -- Step 3: Build conversation history and stream LLM reply ------
-        messages = await self._build_messages(conversation_id, user_text, topic=topic)
+        messages = await self._build_messages(
+            conversation_id, user_text, user_id=user_id, topic=topic,
+        )
         full_ai_text = ""
 
         if is_filler_turn(user_text):
@@ -228,6 +240,7 @@ class TurnOrchestrator:
         self,
         *,
         conversation_id: uuid.UUID,
+        user_id: uuid.UUID,
         topic: str,
         article_context: str | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
@@ -247,6 +260,13 @@ class TurnOrchestrator:
             )
         else:
             system_prompt = _GREETING_SYSTEM_PROMPT.format(topic=topic)
+
+        memory_context = await MemoryContextService.build_context(
+            self._session, user_id,
+        )
+        if memory_context:
+            system_prompt = system_prompt + "\n\n" + memory_context
+
         messages: list[ChatMessage] = [
             ChatMessage(role="system", content=system_prompt),
         ]
@@ -282,18 +302,35 @@ class TurnOrchestrator:
         yield _make_event("turn_complete", {})
         log.info("greeting_pipeline_done")
 
-    async def _get_next_sequence(self, conversation_id: uuid.UUID) -> int:
-        """Determine the next sequence number for a conversation."""
-        turns = await self._turn_repo.get_by_conversation_id(conversation_id)
-        if not turns:
-            return 1
-        return turns[-1].sequence + 1
+    @staticmethod
+    def _format_stt_prompt(turns: list[Any], topic: str) -> str:
+        """Format a prompt hint for the STT model.
+
+        Combines the conversation topic with recent turn texts so the
+        transcription model can leverage context for better accuracy,
+        especially for proper nouns and domain-specific terms.
+        """
+        parts: list[str] = []
+
+        topic_label = topic if topic != "suggested" else "a trending news topic"
+        parts.append(f"Topic: {topic_label}.")
+
+        # Use the last few turns as context (token limit is 244 for Whisper,
+        # but gpt-4o-transcribe is more generous; keep it concise regardless)
+        recent_turns = turns[-_STT_CONTEXT_TURN_COUNT:]
+        for turn in recent_turns:
+            parts.append(turn.text)
+
+        prompt = " ".join(parts)
+        # Truncate to stay within model prompt token limits
+        return prompt[:_STT_MAX_PROMPT_CHARS]
 
     async def _build_messages(
         self,
         conversation_id: uuid.UUID,
         current_user_text: str,
         *,
+        user_id: uuid.UUID,
         topic: str = "general",
     ) -> list[ChatMessage]:
         """Build the LLM message list from conversation history.
@@ -303,6 +340,13 @@ class TurnOrchestrator:
         """
         topic_label = topic if topic != "suggested" else "a trending news topic"
         system_prompt = _CONVERSATION_SYSTEM_PROMPT.format(topic=topic_label)
+
+        memory_context = await MemoryContextService.build_context(
+            self._session, user_id,
+        )
+        if memory_context:
+            system_prompt = system_prompt + "\n\n" + memory_context
+
         messages: list[ChatMessage] = [
             ChatMessage(role="system", content=system_prompt),
         ]

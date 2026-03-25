@@ -169,6 +169,7 @@ async def submit_greeting(
         try:
             async for event in orchestrator.process_greeting(
                 conversation_id=conversation_id,
+                user_id=user.id,
                 topic=body.topic,
                 article_context=article_context,
             ):

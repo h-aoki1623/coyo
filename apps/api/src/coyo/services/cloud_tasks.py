@@ -45,11 +45,11 @@ class CloudTasksService:
     """Enqueue work via Cloud Tasks or fall back to asyncio."""
 
     @staticmethod
-    async def enqueue_interest_extraction(
+    async def enqueue_memory_extraction(
         conversation_id: uuid.UUID,
         user_id: uuid.UUID,
     ) -> None:
-        """Enqueue interest extraction for a completed conversation.
+        """Enqueue memory extraction for a completed conversation.
 
         When Cloud Tasks is configured, creates an HTTP task targeting
         the task handler endpoint. Otherwise, falls back to asyncio.create_task().
@@ -57,18 +57,18 @@ class CloudTasksService:
         settings = get_settings()
 
         if not settings.cloud_tasks_queue:
-            CloudTasksService._fallback_asyncio(conversation_id, user_id)
+            CloudTasksService._fallback_asyncio_memory(conversation_id, user_id)
             return
 
-        await CloudTasksService._enqueue_cloud_task(settings, conversation_id, user_id)
+        await CloudTasksService._enqueue_memory_task(settings, conversation_id, user_id)
 
     @staticmethod
-    def _fallback_asyncio(
+    def _fallback_asyncio_memory(
         conversation_id: uuid.UUID,
         user_id: uuid.UUID,
     ) -> None:
         """Local development fallback using asyncio.create_task."""
-        from coyo.services.interest_extraction import InterestExtractionService
+        from coyo.services.memory_extraction import MemoryExtractionService
 
         logger.info(
             "cloud_tasks_fallback_asyncio",
@@ -76,13 +76,13 @@ class CloudTasksService:
             user_id=str(user_id),
         )
         task = asyncio.create_task(
-            InterestExtractionService.extract_background(conversation_id, user_id)
+            MemoryExtractionService.extract_background(conversation_id, user_id)
         )
         _background_tasks.add(task)
         task.add_done_callback(_background_tasks.discard)
 
     @staticmethod
-    async def _enqueue_cloud_task(
+    async def _enqueue_memory_task(
         settings: Settings,
         conversation_id: uuid.UUID,
         user_id: uuid.UUID,
@@ -94,7 +94,7 @@ class CloudTasksService:
         """
         try:
             result = await asyncio.to_thread(
-                CloudTasksService._create_task_sync,
+                CloudTasksService._create_memory_task_sync,
                 settings,
                 conversation_id,
                 user_id,
@@ -113,13 +113,18 @@ class CloudTasksService:
             )
 
     @staticmethod
-    def _create_task_sync(
+    def _create_memory_task_sync(
         settings: Settings,
         conversation_id: uuid.UUID,
         user_id: uuid.UUID,
     ) -> tasks_v2.Task:
         """Blocking Cloud Tasks API call (run via asyncio.to_thread)."""
         from google.cloud import tasks_v2
+
+        assert settings.cloud_tasks_project is not None
+        assert settings.cloud_tasks_location is not None
+        assert settings.cloud_tasks_queue is not None
+        assert settings.cloud_run_service_url is not None
 
         client = _get_cloud_tasks_client()
         parent = client.queue_path(
@@ -138,7 +143,7 @@ class CloudTasksService:
             task=tasks_v2.Task(
                 http_request=tasks_v2.HttpRequest(
                     http_method=tasks_v2.HttpMethod.POST,
-                    url=f"{settings.cloud_run_service_url}/api/tasks/extract-interests",
+                    url=f"{settings.cloud_run_service_url}/api/tasks/extract-memory",
                     headers={"Content-Type": "application/json"},
                     body=payload.encode(),
                     oidc_token=tasks_v2.OidcToken(

@@ -64,6 +64,21 @@ class UserInterest(Base):
         nullable=False,
         server_default="0",
     )
+
+    summary: Mapped[str | None] = mapped_column(
+        String(200),
+        nullable=True,
+    )
+    summary_updated_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
+    needs_summary_update: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+        server_default="false",
+        default=False,
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),

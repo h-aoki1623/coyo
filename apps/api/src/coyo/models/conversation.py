@@ -78,6 +78,13 @@ class Conversation(BaseModel):
         default=False,
         comment="Whether interest keywords have been extracted from this conversation",
     )
+    memory_extracted: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+        server_default="false",
+        default=False,
+        comment="Whether memory has been extracted from this conversation",
+    )
 
     # Relationships
     user: Mapped[User] = relationship(back_populates="conversations")

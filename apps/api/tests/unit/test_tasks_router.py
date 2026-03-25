@@ -45,21 +45,21 @@ async def tasks_client(
     app.dependency_overrides.clear()
 
 
-class TestExtractInterestsEndpoint:
-    """Tests for POST /api/tasks/extract-interests."""
+class TestExtractMemoryEndpoint:
+    """Tests for POST /api/tasks/extract-memory."""
 
     @pytest.mark.unit
-    async def test_extract_interests_success(self, tasks_client: AsyncClient):
+    async def test_extract_memory_success(self, tasks_client: AsyncClient):
         """POST with valid body returns 200 {"status": "ok"}."""
         conv_id = str(uuid.uuid4())
         user_id = str(uuid.uuid4())
 
         with patch(
-            "coyo.routers.tasks.InterestExtractionService.extract",
+            "coyo.routers.tasks.MemoryExtractionService.extract",
             new_callable=AsyncMock,
         ):
             response = await tasks_client.post(
-                "/api/tasks/extract-interests",
+                "/api/tasks/extract-memory",
                 json={"conversation_id": conv_id, "user_id": user_id},
             )
 
@@ -67,46 +67,46 @@ class TestExtractInterestsEndpoint:
         assert response.json() == {"status": "ok"}
 
     @pytest.mark.unit
-    async def test_extract_interests_calls_extract(self, tasks_client: AsyncClient):
-        """Verify it calls InterestExtractionService.extract with correct args."""
+    async def test_extract_memory_calls_extract(self, tasks_client: AsyncClient):
+        """Verify it calls MemoryExtractionService.extract with correct args."""
         conv_id = uuid.uuid4()
         user_id = uuid.uuid4()
 
         with patch(
-            "coyo.routers.tasks.InterestExtractionService.extract",
+            "coyo.routers.tasks.MemoryExtractionService.extract",
             new_callable=AsyncMock,
         ) as mock_extract:
             await tasks_client.post(
-                "/api/tasks/extract-interests",
+                "/api/tasks/extract-memory",
                 json={"conversation_id": str(conv_id), "user_id": str(user_id)},
             )
 
         mock_extract.assert_called_once_with(conv_id, user_id)
 
     @pytest.mark.unit
-    async def test_extract_interests_invalid_body_missing_fields(
+    async def test_extract_memory_invalid_body_missing_fields(
         self, tasks_client: AsyncClient
     ):
         """Missing required fields returns 422."""
         response = await tasks_client.post(
-            "/api/tasks/extract-interests",
+            "/api/tasks/extract-memory",
             json={},
         )
         assert response.status_code == 422
 
     @pytest.mark.unit
-    async def test_extract_interests_invalid_body_bad_uuid(
+    async def test_extract_memory_invalid_body_bad_uuid(
         self, tasks_client: AsyncClient
     ):
         """Invalid UUID format returns 422."""
         response = await tasks_client.post(
-            "/api/tasks/extract-interests",
+            "/api/tasks/extract-memory",
             json={"conversation_id": "not-a-uuid", "user_id": "also-bad"},
         )
         assert response.status_code == 422
 
     @pytest.mark.unit
-    async def test_extract_interests_propagates_errors(
+    async def test_extract_memory_propagates_errors(
         self, tasks_client: AsyncClient
     ):
         """When extract() raises, the error results in a 500 response.
@@ -119,13 +119,13 @@ class TestExtractInterestsEndpoint:
         user_id = str(uuid.uuid4())
 
         with patch(
-            "coyo.routers.tasks.InterestExtractionService.extract",
+            "coyo.routers.tasks.MemoryExtractionService.extract",
             new_callable=AsyncMock,
             side_effect=RuntimeError("LLM timeout"),
         ):
             try:
                 response = await tasks_client.post(
-                    "/api/tasks/extract-interests",
+                    "/api/tasks/extract-memory",
                     json={"conversation_id": conv_id, "user_id": user_id},
                 )
                 # If the middleware catches it, we get a 500

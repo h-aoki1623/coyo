@@ -132,7 +132,7 @@ class TestProcessGreeting:
 
         events = []
         async for event in orchestrator.process_greeting(
-            conversation_id=conversation_id, topic="sports"
+            conversation_id=conversation_id, user_id=uuid.uuid4(), topic="sports"
         ):
             events.append(event)
 
@@ -155,7 +155,7 @@ class TestProcessGreeting:
 
         chunk_texts = []
         async for event in orchestrator.process_greeting(
-            conversation_id=conversation_id, topic="sports"
+            conversation_id=conversation_id, user_id=uuid.uuid4(), topic="sports"
         ):
             if event["event"] == "ai_response_chunk":
                 chunk_texts.append(event["data"]["text"])
@@ -171,7 +171,7 @@ class TestProcessGreeting:
 
         done_event = None
         async for event in orchestrator.process_greeting(
-            conversation_id=conversation_id, topic="sports"
+            conversation_id=conversation_id, user_id=uuid.uuid4(), topic="sports"
         ):
             if event["event"] == "ai_response_done":
                 done_event = event
@@ -187,7 +187,7 @@ class TestProcessGreeting:
         conversation_id = uuid.uuid4()
 
         async for _ in orchestrator.process_greeting(
-            conversation_id=conversation_id, topic="sports"
+            conversation_id=conversation_id, user_id=uuid.uuid4(), topic="sports"
         ):
             pass
 
@@ -207,7 +207,7 @@ class TestProcessGreeting:
 
         tts_event = None
         async for event in orchestrator.process_greeting(
-            conversation_id=conversation_id, topic="sports"
+            conversation_id=conversation_id, user_id=uuid.uuid4(), topic="sports"
         ):
             if event["event"] == "tts_audio_url":
                 tts_event = event
@@ -227,7 +227,7 @@ class TestProcessGreeting:
         db_session.commit = AsyncMock()
 
         async for _ in orchestrator.process_greeting(
-            conversation_id=conversation_id, topic="sports"
+            conversation_id=conversation_id, user_id=uuid.uuid4(), topic="sports"
         ):
             pass
 
@@ -250,7 +250,7 @@ class TestProcessGreeting:
         orchestrator._llm.chat = capture_chat
 
         async for _ in orchestrator.process_greeting(
-            conversation_id=conversation_id, topic=topic
+            conversation_id=conversation_id, user_id=uuid.uuid4(), topic=topic
         ):
             pass
 
@@ -271,7 +271,7 @@ class TestProcessGreeting:
 
         events = []
         async for event in orchestrator.process_greeting(
-            conversation_id=uuid.uuid4(), topic="sports"
+            conversation_id=uuid.uuid4(), user_id=uuid.uuid4(), topic="sports"
         ):
             events.append(event)
 
