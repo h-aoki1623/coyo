@@ -146,8 +146,37 @@ class TestSTTService:
         assert file_tuple[0] == "audio.m4a"
 
     @pytest.mark.unit
-    async def test_transcribe_uses_whisper_model(self, stt_service, mock_openai_client):
-        """Verify that the Whisper model is used for transcription."""
+    async def test_transcribe_uses_configured_model(self, stt_service, mock_openai_client):
+        """Verify that the configured STT model is used for transcription."""
         await stt_service.transcribe(b"audio-data")
         call_args = mock_openai_client.audio.transcriptions.create.call_args
-        assert call_args.kwargs["model"] == "whisper-1"
+        assert call_args.kwargs["model"] == "gpt-4o-transcribe"
+
+    @pytest.mark.unit
+    async def test_transcribe_without_prompt_omits_prompt_param(
+        self, stt_service, mock_openai_client
+    ):
+        """Verify that prompt is not passed when not provided."""
+        await stt_service.transcribe(b"audio-data")
+        call_args = mock_openai_client.audio.transcriptions.create.call_args
+        assert "prompt" not in call_args.kwargs
+
+    @pytest.mark.unit
+    async def test_transcribe_with_prompt_passes_prompt_param(
+        self, stt_service, mock_openai_client
+    ):
+        """Verify that prompt is passed to the API when provided."""
+        await stt_service.transcribe(
+            b"audio-data", prompt="Topic: tennis. Jannik Sinner won the match.",
+        )
+        call_args = mock_openai_client.audio.transcriptions.create.call_args
+        assert call_args.kwargs["prompt"] == "Topic: tennis. Jannik Sinner won the match."
+
+    @pytest.mark.unit
+    async def test_transcribe_with_empty_prompt_omits_prompt_param(
+        self, stt_service, mock_openai_client
+    ):
+        """Verify that empty string prompt is not passed."""
+        await stt_service.transcribe(b"audio-data", prompt="")
+        call_args = mock_openai_client.audio.transcriptions.create.call_args
+        assert "prompt" not in call_args.kwargs
