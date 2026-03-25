@@ -1,7 +1,7 @@
 """Unit tests for the CorrectionService."""
 
 import uuid
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -293,3 +293,51 @@ class TestCorrectionAnalysisSchema:
         )
         assert analysis.has_errors is False
         assert len(analysis.items) == 0
+
+
+class TestCorrectionPromptContent:
+    """Tests that _CORRECTION_SYSTEM_PROMPT contains spoken-English instructions."""
+
+    @pytest.mark.unit
+    def test_prompt_mentions_transcribed_spoken_context(self):
+        """Verify the prompt indicates input is transcribed spoken English."""
+        from coyo.services.correction import _CORRECTION_SYSTEM_PROMPT
+
+        prompt_lower = _CORRECTION_SYSTEM_PROMPT.lower()
+        assert "transcribed" in prompt_lower, (
+            "Prompt must mention that input is transcribed speech"
+        )
+        assert "spoken" in prompt_lower, (
+            "Prompt must mention spoken English context"
+        )
+
+    @pytest.mark.unit
+    def test_prompt_accepts_natural_spoken_patterns(self):
+        """Verify the prompt instructs to accept filler words, fragments, and contractions."""
+        from coyo.services.correction import _CORRECTION_SYSTEM_PROMPT
+
+        prompt_lower = _CORRECTION_SYSTEM_PROMPT.lower()
+        assert "filler" in prompt_lower, (
+            "Prompt must mention filler words as acceptable"
+        )
+        assert "fragment" in prompt_lower, (
+            "Prompt must mention sentence fragments as acceptable"
+        )
+        assert "contraction" in prompt_lower, (
+            "Prompt must mention contractions as acceptable"
+        )
+
+    @pytest.mark.unit
+    def test_prompt_contains_json_schema_instruction(self):
+        """Verify the prompt still includes the JSON output schema instruction."""
+        from coyo.services.correction import _CORRECTION_SYSTEM_PROMPT
+
+        assert "has_errors" in _CORRECTION_SYSTEM_PROMPT, (
+            "Prompt must reference the has_errors JSON field"
+        )
+        assert "corrected_text" in _CORRECTION_SYSTEM_PROMPT, (
+            "Prompt must reference the corrected_text JSON field"
+        )
+        assert "items" in _CORRECTION_SYSTEM_PROMPT, (
+            "Prompt must reference the items JSON field"
+        )
