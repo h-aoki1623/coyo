@@ -28,9 +28,9 @@ class Settings(BaseSettings):
     openai_api_key: str
 
     # LLM Config
-    llm_conversation_model: str = "gpt-4.1-mini"
-    llm_correction_model: str = "gpt-4.1-mini"
-    llm_topic_model: str = "gpt-4.1-mini"
+    llm_conversation_model: str = "gpt-5.4-mini"
+    llm_correction_model: str = "gpt-5.4-mini"
+    llm_topic_model: str = "gpt-5.4-nano"
     llm_interest_model: str = "gpt-5.4-nano"
 
     # Cron
