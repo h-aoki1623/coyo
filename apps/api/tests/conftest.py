@@ -248,6 +248,7 @@ def mock_settings():
     mock.database_url = TEST_DATABASE_URL
     mock.redis_url = "redis://localhost:6379"
     mock.openai_api_key = "test-api-key"
+    mock.stt_model = "gpt-4o-transcribe"
     mock.llm_conversation_model = "gpt-5-mini"
     mock.llm_correction_model = "gpt-5-mini"
     mock.tts_voice = "nova"

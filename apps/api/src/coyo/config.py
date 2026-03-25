@@ -43,6 +43,11 @@ class Settings(BaseSettings):
     cloud_run_service_url: str | None = None
     cloud_tasks_service_account: str | None = None
 
+    # STT Config
+    stt_model: Literal[
+        "whisper-1", "gpt-4o-transcribe", "gpt-4o-mini-transcribe",
+    ] = "gpt-4o-transcribe"
+
     # TTS Config
     tts_voice: str = "nova"
     tts_model: str = "tts-1"
