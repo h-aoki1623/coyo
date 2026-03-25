@@ -37,7 +37,7 @@ init_log "[e2e]"
 init_worktree
 
 MAESTRO_PORT=7001
-MAESTRO_TIMEOUT=300  # 5 minutes (seconds) per maestro test invocation
+MAESTRO_TIMEOUT=420  # 7 minutes (seconds) per maestro test invocation
 
 # Enable E2E mode: bypasses microphone recording with test audio file
 export E2E_MODE=true

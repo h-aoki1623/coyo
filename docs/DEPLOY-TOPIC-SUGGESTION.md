@@ -336,5 +336,5 @@ LIMIT 20;
 | Cloud Tasks | ~$0 | Free tier: 1M tasks/month |
 | Cloud Scheduler | ~$0 | Free tier: 3 jobs/month |
 | OpenAI (interest extraction) | ~$2 | gpt-5.4-nano, ~1,000 calls × ~500 tokens |
-| OpenAI (topic generation) | ~$15 | gpt-4.1-mini + web search, 30 calls/day × 30 days |
+| OpenAI (topic generation) | ~$15 | gpt-5.4-nano + web search, 30 calls/day × 30 days |
 | **Total (incremental)** | **~$17/month** | On top of base deployment costs |
