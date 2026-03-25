@@ -1,15 +1,10 @@
 """Unit tests for the topics router endpoints."""
 
 import uuid
-from datetime import date
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from httpx import AsyncClient
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from coyo.models.user import User
-
 
 # ---------------------------------------------------------------------------
 # POST /api/topics/generate — cron endpoint
