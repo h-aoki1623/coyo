@@ -18,7 +18,7 @@ from coyo.services.memory_extraction import (
     MemoryExtractionResult,
     MemoryExtractionService,
     MemoryItem,
-    TopicItem,
+    KeywordItem,
     is_semantically_same,
     trim_to_word_boundary,
 )
@@ -97,23 +97,23 @@ class TestTrimToWordBoundary:
 # ---------------------------------------------------------------------------
 
 
-class TestTopicItem:
-    """Tests for TopicItem keyword normalization."""
+class TestKeywordItem:
+    """Tests for KeywordItem keyword normalization."""
 
     @pytest.mark.unit
     def test_keyword_lowercased(self):
-        item = TopicItem(keyword="Tennis", is_news_relevant=True)
+        item = KeywordItem(keyword="Tennis", is_news_relevant=True)
         assert item.keyword == "tennis"
 
     @pytest.mark.unit
     def test_keyword_stripped(self):
-        item = TopicItem(keyword="  tennis  ", is_news_relevant=True)
+        item = KeywordItem(keyword="  tennis  ", is_news_relevant=True)
         assert item.keyword == "tennis"
 
     @pytest.mark.unit
     def test_keyword_truncated_at_max_length(self):
         long_kw = "a" * 200
-        item = TopicItem(keyword=long_kw, is_news_relevant=False)
+        item = KeywordItem(keyword=long_kw, is_news_relevant=False)
         assert len(item.keyword) == 100
 
 
@@ -124,7 +124,7 @@ class TestMemoryExtractionResult:
     def test_default_empty_lists(self):
         result = MemoryExtractionResult(conversation_summary="test")
         assert result.memories == []
-        assert result.topics == []
+        assert result.categories == []
         assert result.entities == []
 
     @pytest.mark.unit
@@ -132,7 +132,7 @@ class TestMemoryExtractionResult:
         result = MemoryExtractionResult.model_validate_json(
             '{"conversation_summary": "Talked about work",'
             '"memories": [{"key": "job_industry", "value": "IT", "confidence": 0.9}],'
-            '"topics": [{"keyword": "technology", "is_news_relevant": true}],'
+            '"categories": [{"keyword": "technology", "is_news_relevant": true}],'
             '"entities": []}'
         )
         assert result.conversation_summary == "Talked about work"
@@ -259,7 +259,7 @@ class TestExtractConversationSummary:
         mock_result = MemoryExtractionResult(
             conversation_summary="User discussed their work in IT.",
             memories=[],
-            topics=[],
+            categories=[],
             entities=[],
         )
 
@@ -319,7 +319,7 @@ class TestExtractMemories:
                     confidence=0.9,
                 )
             ],
-            topics=[],
+            categories=[],
             entities=[],
         )
 
@@ -386,7 +386,7 @@ class TestExtractMemories:
                     confidence=0.9,
                 )
             ],
-            topics=[],
+            categories=[],
             entities=[],
         )
 
@@ -451,7 +451,7 @@ class TestExtractMemories:
                     confidence=1.0,
                 )
             ],
-            topics=[],
+            categories=[],
             entities=[],
         )
 
@@ -517,7 +517,7 @@ class TestExtractMemories:
                     confidence=0.5,
                 )
             ],
-            topics=[],
+            categories=[],
             entities=[],
         )
 
@@ -583,7 +583,7 @@ class TestExtractMemories:
                     is_negation=True,
                 )
             ],
-            topics=[],
+            categories=[],
             entities=[],
         )
 
@@ -636,15 +636,15 @@ class TestExtractInterests:
         mock_result = MemoryExtractionResult(
             conversation_summary="User discussed basketball.",
             memories=[],
-            topics=[
-                TopicItem(
+            categories=[
+                KeywordItem(
                     keyword="basketball",
                     is_news_relevant=True,
                     summary="User enjoys watching NBA games.",
                 )
             ],
             entities=[
-                TopicItem(
+                KeywordItem(
                     keyword="nba",
                     is_news_relevant=True,
                     summary="User follows NBA league.",
@@ -652,27 +652,33 @@ class TestExtractInterests:
             ],
         )
 
-        with patch.object(
-            MemoryExtractionService,
-            "_call_llm",
-            new_callable=AsyncMock,
-            return_value=mock_result,
+        with (
+            patch.object(
+                MemoryExtractionService,
+                "_call_llm",
+                new_callable=AsyncMock,
+                return_value=mock_result,
+            ),
+            patch.object(
+                MemoryExtractionService,
+                "_upsert_interests",
+                new_callable=AsyncMock,
+                return_value={"basketball", "nba"},
+            ) as mock_upsert,
         ):
             await MemoryExtractionService._extract(
                 db_session, conversation.id, test_user.id
             )
 
-        stmt = select(UserInterest).where(UserInterest.user_id == test_user.id)
-        result = await db_session.execute(stmt)
-        interests = result.scalars().all()
-        assert len(interests) == 2
-        keywords = {i.keyword for i in interests}
-        assert "basketball" in keywords
-        assert "nba" in keywords
-
-        bball = next(i for i in interests if i.keyword == "basketball")
-        assert bball.summary == "User enjoys watching NBA games."
-        assert bball.keyword_type == "topic"
+        # Verify _upsert_interests was called with correct extraction data
+        mock_upsert.assert_called_once()
+        call_args = mock_upsert.call_args
+        assert call_args[0][1] == test_user.id  # user_id
+        extraction_arg = call_args[0][2]  # extraction result
+        assert len(extraction_arg.categories) == 1
+        assert extraction_arg.categories[0].keyword == "basketball"
+        assert len(extraction_arg.entities) == 1
+        assert extraction_arg.entities[0].keyword == "nba"
 
 
 class TestExtractBatchInterval:
@@ -709,7 +715,7 @@ class TestExtractBatchInterval:
         mock_result = MemoryExtractionResult(
             conversation_summary="User talked about tennis.",
             memories=[],
-            topics=[TopicItem(keyword="tennis", is_news_relevant=True)],
+            categories=[KeywordItem(keyword="tennis", is_news_relevant=True)],
             entities=[],
         )
 
@@ -719,6 +725,12 @@ class TestExtractBatchInterval:
                 "_call_llm",
                 new_callable=AsyncMock,
                 return_value=mock_result,
+            ),
+            patch.object(
+                MemoryExtractionService,
+                "_upsert_interests",
+                new_callable=AsyncMock,
+                return_value={"tennis"},
             ),
             patch.object(
                 MemoryExtractionService,
@@ -766,7 +778,7 @@ class TestExtractBatchInterval:
         mock_result = MemoryExtractionResult(
             conversation_summary="User talked about tennis.",
             memories=[],
-            topics=[TopicItem(keyword="tennis", is_news_relevant=True)],
+            categories=[KeywordItem(keyword="tennis", is_news_relevant=True)],
             entities=[],
         )
 
@@ -776,6 +788,12 @@ class TestExtractBatchInterval:
                 "_call_llm",
                 new_callable=AsyncMock,
                 return_value=mock_result,
+            ),
+            patch.object(
+                MemoryExtractionService,
+                "_upsert_interests",
+                new_callable=AsyncMock,
+                return_value={"tennis"},
             ),
             patch.object(
                 MemoryExtractionService,

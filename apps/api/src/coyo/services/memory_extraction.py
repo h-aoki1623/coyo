@@ -28,7 +28,7 @@ if TYPE_CHECKING:
 
 logger = structlog.get_logger()
 
-MAX_TOPICS = 3
+MAX_CATEGORIES = 3
 MAX_ENTITIES = 5
 _MAX_KEYWORD_LENGTH = 100
 _MAX_SUMMARY_LENGTH = 200
@@ -52,7 +52,7 @@ class MemoryItem(BaseModel):
     is_negation: bool = False
 
 
-class TopicItem(BaseModel):
+class KeywordItem(BaseModel):
     """A single extracted keyword with optional summary."""
 
     keyword: str
@@ -73,19 +73,19 @@ class MemoryExtractionResult(BaseModel):
 
     conversation_summary: str
     memories: list[MemoryItem] = []
-    topics: list[TopicItem] = []
-    entities: list[TopicItem] = []
+    categories: list[KeywordItem] = []
+    entities: list[KeywordItem] = []
 
     @model_validator(mode="before")
     @classmethod
-    def normalize_raw_topics_and_entities(cls, data: dict) -> dict:
-        """Normalize plain strings in topics/entities to dicts before validation.
+    def normalize_raw_categories_and_entities(cls, data: dict) -> dict:
+        """Normalize plain strings in categories/entities to dicts before validation.
 
         LLMs sometimes return plain keyword strings instead of full objects.
         This converts them to the expected dict format before Pydantic validates.
         """
         if isinstance(data, dict):
-            for field in ("topics", "entities"):
+            for field in ("categories", "entities"):
                 items = data.get(field, [])
                 if isinstance(items, list):
                     data[field] = [
@@ -107,9 +107,9 @@ The conversation transcript will be provided in the user message.
 Return JSON only with this exact structure:
 {
   "conversation_summary": "1-2 sentence summary of what was discussed (max 60 words, English)",
-  "memories": [...],
-  "topics": [...],
-  "entities": [...]
+  "memories": [{"key": "...", "value": "...", "confidence": 0.0, "is_negation": false}],
+  "categories": [{"keyword": "...", "is_news_relevant": true/false, "summary": "..." or null}],
+  "entities": [{"keyword": "...", "is_news_relevant": true/false, "summary": "..." or null}]
 }
 
 === MEMORIES ===
@@ -126,21 +126,56 @@ Rules:
 - Do NOT extract passwords, financial details, health conditions
 - If no relevant facts, return "memories": []
 
-=== TOPICS & ENTITIES ===
-- topics: broad subjects (max 3, English, lowercase)
-- entities: specific proper nouns (max 5, English)
-- Deduplicate within each list
-- ALL keywords must be in English, lowercase
-- is_news_relevant: judge by the CATEGORY of the keyword, not by how \
-the user mentioned it. true for categories that regularly produce news \
-(sports, politics, economy, tech, entertainment, companies, athletes, etc.) \
-false for inherently evergreen categories (cooking, travel tips, daily \
-routines, language learning, personal hobbies with no pro scene). \
-Example: "tennis" is true (pro tournaments exist) even if the user said \
-"I play tennis" rather than "I watch tennis".
+=== VALIDITY RULES FOR KEYWORDS ===
+
+All keywords must pass this test:
+  "I'm interested in ___" sounds natural in English. If not, skip it.
+
+[For categories]
+- categories: broad interest subjects (max 3, English, lowercase)
+- Must correspond to an IAB Content Taxonomy category (Tier 1 through Tier 4)
+  e.g., "sports", "technology"                            ← Tier 1
+        "tennis", "cooking", "generative AI"              ← Tier 2
+        "running and jogging", "barbecues and grilling"   ← Tier 3
+        "herbs and supplements"                           ← Tier 4
+
+[For entities]
+- entities: specific proper nouns (max 5, English, lowercase)
+- Must be a proper noun with a unique real-world identity
+  (person, event, organization, product — Knowledge Graph level)
+
+[Granularity — applies to both categories and entities]
+- Choose the tier that best reflects the SCOPE OF INTEREST the user expressed,
+  not simply the most specific term mentioned in the conversation.
+  → If the user expresses a broad interest that happens to include a specific activity,
+    use the broader tier to avoid narrowing the interest unnecessarily.
+  → Only use a more specific tier when the user explicitly focuses on that subcategory.
+
+  e.g., BAD: User says "I enjoy working out. I did some yoga this morning."
+        → Do NOT extract "Yoga" (Tier 3); the user's interest is "Fitness and Exercise" (Tier 2)
+  e.g., GOOD: User says "I'm really into yoga. I practice it every day."
+        → Extract "Yoga" (Tier 3); the user explicitly focuses on yoga itself
+
+- Use a broader tier when the conversation is too vague to identify a specific one.
+  e.g., user says "I like watching sports in general" → "Sports" (Tier 1) is acceptable
+- Must NOT be a rule, mechanic, system, or sub-element of a category.
+  e.g., "challenge system" → extract "tennis" instead
+        "pick and roll"    → extract "basketball" instead
+        "video review"     → extract "tennis" instead
+- Must NOT be a common noun used generically without a specific referent.
+  e.g., "the player", "a famous chef", "my favorite team" → skip
+
+[Deduplication — semantic, not exact match]
+- If two keywords refer to the same concept, keep only the shorter/broader one.
+  e.g., "grand slam" + "grand slam tournaments" → keep "grand slam" only
+
+[is_news_relevant]
+- true:  keyword generates regular news (sports, politics, economy, tech, etc.)
+         Ask: does "{keyword} news" return fresh articles regularly?
+- false: evergreen categories (food, daily life, grammar, hobbies)
 
 === INTEREST SUMMARIES ===
-For each topic/entity, generate summary if conversation has specific user info about that keyword.
+For each category/entity, generate summary if conversation has specific info about it.
 - Third person ("User is...", "User started...")
 - Hard limit: 200 characters
 - Return null if no specific info beyond keyword itself
@@ -343,7 +378,7 @@ class MemoryExtractionService:
             session, user_id, extraction.memories
         )
 
-        # 7. Upsert interests (topics + entities)
+        # 7. Upsert interests (categories + entities) via post-processing pipeline
         seen_keywords = await MemoryExtractionService._upsert_interests(
             session, user_id, extraction, current_conv_idx
         )
@@ -389,7 +424,7 @@ class MemoryExtractionService:
 
     @staticmethod
     async def _call_llm(transcript: str) -> MemoryExtractionResult:
-        """Call LLM to extract memories, topics, and entities from transcript."""
+        """Call LLM to extract memories, categories, and entities from transcript."""
         settings = get_settings()
         llm = OpenAIClient(model=settings.llm_interest_model)
 
@@ -474,32 +509,61 @@ class MemoryExtractionService:
         extraction: MemoryExtractionResult,
         current_conv_idx: int,
     ) -> set[str]:
-        """Upsert interest keywords from extraction result."""
+        """Upsert interest keywords via the post-processing pipeline."""
+        from coyo.services.embedding import get_embedding_service
+        from coyo.services.iab_taxonomy import get_iab_taxonomy_service
+        from coyo.services.keyword_postprocessor import (
+            KeywordPostprocessor,
+            RawKeyword,
+        )
+
         repo = InterestRepository(session)
+
+        # Build raw keywords from LLM extraction
+        raw_keywords = [
+            RawKeyword(
+                keyword=item.keyword,
+                keyword_type="category",
+                is_news_relevant=item.is_news_relevant,
+                summary=item.summary,
+            )
+            for item in extraction.categories[:MAX_CATEGORIES]
+            if item.keyword
+        ] + [
+            RawKeyword(
+                keyword=item.keyword,
+                keyword_type="entity",
+                is_news_relevant=item.is_news_relevant,
+                summary=item.summary,
+            )
+            for item in extraction.entities[:MAX_ENTITIES]
+            if item.keyword
+        ]
+
+        # Fetch existing keywords for deduplication
+        existing_keyword_texts = await repo.get_existing_keywords(user_id)
+
+        # Run post-processing pipeline (Process A/B/C)
+        postprocessor = KeywordPostprocessor(
+            embedding_service=get_embedding_service(),
+            iab_taxonomy_service=get_iab_taxonomy_service(),
+        )
+        processed = await postprocessor.process(raw_keywords, existing_keyword_texts)
+
+        # Upsert processed keywords
         seen_keywords: set[str] = set()
-
-        for item in extraction.topics[:MAX_TOPICS]:
-            if item.keyword and item.keyword not in seen_keywords:
-                seen_keywords.add(item.keyword)
+        for kw in processed:
+            target = kw.merge_target or kw.keyword
+            if target not in seen_keywords:
+                seen_keywords.add(target)
                 await repo.upsert_interest(
                     user_id=user_id,
-                    keyword=item.keyword,
-                    keyword_type="topic",
-                    is_news_relevant=item.is_news_relevant,
+                    keyword=target,
+                    keyword_type=kw.keyword_type,
+                    is_news_relevant=kw.is_news_relevant,
                     current_conv_idx=current_conv_idx,
-                    summary=item.summary,
-                )
-
-        for item in extraction.entities[:MAX_ENTITIES]:
-            if item.keyword and item.keyword not in seen_keywords:
-                seen_keywords.add(item.keyword)
-                await repo.upsert_interest(
-                    user_id=user_id,
-                    keyword=item.keyword,
-                    keyword_type="entity",
-                    is_news_relevant=item.is_news_relevant,
-                    current_conv_idx=current_conv_idx,
-                    summary=item.summary,
+                    summary=kw.summary if kw.merge_target is None else None,
+                    iab_category_id=kw.iab_category_id,
                 )
 
         return seen_keywords

@@ -29,7 +29,7 @@ class TestGetInterests:
         await repo.upsert_interest(
             user_id=test_user.id,
             keyword="tennis",
-            keyword_type="topic",
+            keyword_type="category",
             is_news_relevant=True,
             current_conv_idx=1,
         )
@@ -68,7 +68,7 @@ class TestGetInterests:
             await repo.upsert_interest(
                 user_id=test_user.id,
                 keyword="tennis",
-                keyword_type="topic",
+                keyword_type="category",
                 is_news_relevant=True,
                 current_conv_idx=i,
             )
@@ -76,7 +76,7 @@ class TestGetInterests:
         await repo.upsert_interest(
             user_id=test_user.id,
             keyword="cooking",
-            keyword_type="topic",
+            keyword_type="category",
             is_news_relevant=False,
             current_conv_idx=1,
         )
