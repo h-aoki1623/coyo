@@ -25,7 +25,7 @@ class UserInterest(Base):
     __tablename__ = "user_interests"
     __table_args__ = (
         sa.CheckConstraint(
-            "keyword_type IN ('topic', 'entity')",
+            "keyword_type IN ('category', 'entity')",
             name="ck_user_interests_keyword_type",
         ),
     )
@@ -42,7 +42,7 @@ class UserInterest(Base):
     keyword_type: Mapped[str] = mapped_column(
         String(10),
         nullable=False,
-        comment="'topic' or 'entity'",
+        comment="'category' or 'entity'",
     )
     is_news_relevant: Mapped[bool] = mapped_column(
         Boolean,
@@ -63,6 +63,10 @@ class UserInterest(Base):
         Integer,
         nullable=False,
         server_default="0",
+    )
+    iab_category_id: Mapped[str | None] = mapped_column(
+        String(10),
+        nullable=True,
     )
 
     summary: Mapped[str | None] = mapped_column(

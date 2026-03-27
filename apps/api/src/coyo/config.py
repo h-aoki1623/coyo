@@ -33,6 +33,14 @@ class Settings(BaseSettings):
     llm_topic_model: str = "gpt-5.4-nano"
     llm_interest_model: str = "gpt-5.4-nano"
 
+    # Embedding Config
+    embedding_model: str = "text-embedding-3-small"
+
+    # Keyword Post-Processing Thresholds
+    keyword_normalize_threshold: float = 0.92
+    keyword_validate_threshold: float = 0.75
+    keyword_dedup_threshold: float = 0.90
+
     # Cron
     cron_secret: str | None = None
 

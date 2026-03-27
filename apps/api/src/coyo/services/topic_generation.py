@@ -276,7 +276,7 @@ class TopicGenerationService:
             interests = await self._interest_repo.get_top_interests(
                 user_id,
                 conv_count,
-                keyword_type="topic",
+                keyword_type="category",
                 is_news_relevant=True,
                 limit=_PERSONAL_MAX_KEYWORDS,
             )
