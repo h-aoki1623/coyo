@@ -10,7 +10,7 @@ def cosine_similarity(a: list[float], b: list[float]) -> float:
 
     Returns a value in [-1, 1]. Returns 0.0 if either vector is zero.
     """
-    dot = sum(x * y for x, y in zip(a, b))
+    dot = sum(x * y for x, y in zip(a, b, strict=True))
     norm_a = math.sqrt(sum(x * x for x in a))
     norm_b = math.sqrt(sum(x * x for x in b))
     if norm_a < 1e-10 or norm_b < 1e-10:

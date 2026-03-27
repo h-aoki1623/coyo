@@ -153,7 +153,7 @@ All keywords must pass this test:
 
   e.g., BAD: User says "I enjoy working out. I did some yoga this morning."
         → Do NOT extract "Yoga" (Tier 3); the user's interest is "Fitness and Exercise" (Tier 2)
-  e.g., GOOD: User says "I'm really into yoga. I practice it every day and follow specific instructors."
+  e.g., GOOD: User says "I'm really into yoga. I practice it every day."
         → Extract "Yoga" (Tier 3); the user explicitly focuses on yoga itself
 
 - Use a broader tier when the conversation is too vague to identify a specific one.
@@ -175,7 +175,7 @@ All keywords must pass this test:
 - false: evergreen categories (food, daily life, grammar, hobbies)
 
 === INTEREST SUMMARIES ===
-For each category/entity, generate summary if conversation has specific user info about that keyword.
+For each category/entity, generate summary if conversation has specific info about it.
 - Third person ("User is...", "User started...")
 - Hard limit: 200 characters
 - Return null if no specific info beyond keyword itself
