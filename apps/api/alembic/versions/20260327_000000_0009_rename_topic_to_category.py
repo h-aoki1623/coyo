@@ -21,13 +21,13 @@ depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
-    # 1. Update existing rows from 'topic' to 'category'
+    # 1. Drop old CHECK constraint first (must precede data update)
+    op.drop_constraint("ck_user_interests_keyword_type", "user_interests")
+
+    # 2. Update existing rows from 'topic' to 'category'
     op.execute(
         "UPDATE user_interests SET keyword_type = 'category' WHERE keyword_type = 'topic'"
     )
-
-    # 2. Drop old CHECK constraint
-    op.drop_constraint("ck_user_interests_keyword_type", "user_interests")
 
     # 3. Create new CHECK constraint with 'category' instead of 'topic'
     op.create_check_constraint(
@@ -47,15 +47,17 @@ def downgrade() -> None:
     # Remove iab_category_id column
     op.drop_column("user_interests", "iab_category_id")
 
-    # Revert CHECK constraint
+    # Drop CHECK constraint first (must precede data update)
     op.drop_constraint("ck_user_interests_keyword_type", "user_interests")
-    op.create_check_constraint(
-        "ck_user_interests_keyword_type",
-        "user_interests",
-        "keyword_type IN ('topic', 'entity')",
-    )
 
     # Revert data
     op.execute(
         "UPDATE user_interests SET keyword_type = 'topic' WHERE keyword_type = 'category'"
+    )
+
+    # Recreate CHECK constraint with original values
+    op.create_check_constraint(
+        "ck_user_interests_keyword_type",
+        "user_interests",
+        "keyword_type IN ('topic', 'entity')",
     )
