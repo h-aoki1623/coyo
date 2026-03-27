@@ -90,12 +90,12 @@ class TestInterestRepositoryUpsert:
         interest = await repo.upsert_interest(
             user_id=test_user.id,
             keyword="tennis",
-            keyword_type="topic",
+            keyword_type="category",
             is_news_relevant=True,
             current_conv_idx=1,
         )
         assert interest.keyword == "tennis"
-        assert interest.keyword_type == "topic"
+        assert interest.keyword_type == "category"
         assert interest.is_news_relevant is True
         assert interest.total_mentions == 1
         assert interest.short_term_stored == pytest.approx(SHORT_BOOST)
@@ -109,14 +109,14 @@ class TestInterestRepositoryUpsert:
         await repo.upsert_interest(
             user_id=test_user.id,
             keyword="tennis",
-            keyword_type="topic",
+            keyword_type="category",
             is_news_relevant=True,
             current_conv_idx=1,
         )
         interest = await repo.upsert_interest(
             user_id=test_user.id,
             keyword="tennis",
-            keyword_type="topic",
+            keyword_type="category",
             is_news_relevant=True,
             current_conv_idx=2,
         )
@@ -130,7 +130,7 @@ class TestInterestRepositoryUpsert:
         await repo.upsert_interest(
             user_id=test_user.id,
             keyword="tennis",
-            keyword_type="topic",
+            keyword_type="category",
             is_news_relevant=True,
             current_conv_idx=1,
         )
@@ -138,7 +138,7 @@ class TestInterestRepositoryUpsert:
         interest = await repo.upsert_interest(
             user_id=test_user.id,
             keyword="tennis",
-            keyword_type="topic",
+            keyword_type="category",
             is_news_relevant=True,
             current_conv_idx=4,
         )
@@ -156,7 +156,7 @@ class TestInterestRepositoryUpsert:
             interest = await repo.upsert_interest(
                 user_id=test_user.id,
                 keyword="tennis",
-                keyword_type="topic",
+                keyword_type="category",
                 is_news_relevant=True,
                 current_conv_idx=i,
             )
@@ -170,14 +170,14 @@ class TestInterestRepositoryUpsert:
         await repo.upsert_interest(
             user_id=test_user.id,
             keyword="tennis",
-            keyword_type="topic",
+            keyword_type="category",
             is_news_relevant=False,
             current_conv_idx=1,
         )
         interest = await repo.upsert_interest(
             user_id=test_user.id,
             keyword="tennis",
-            keyword_type="topic",
+            keyword_type="category",
             is_news_relevant=True,
             current_conv_idx=2,
         )
@@ -205,14 +205,14 @@ class TestInterestRepositoryQuery:
             await repo.upsert_interest(
                 user_id=test_user.id,
                 keyword="tennis",
-                keyword_type="topic",
+                keyword_type="category",
                 is_news_relevant=True,
                 current_conv_idx=i,
             )
         await repo.upsert_interest(
             user_id=test_user.id,
             keyword="cooking",
-            keyword_type="topic",
+            keyword_type="category",
             is_news_relevant=False,
             current_conv_idx=1,
         )
@@ -231,7 +231,7 @@ class TestInterestRepositoryQuery:
             await repo.upsert_interest(
                 user_id=test_user.id,
                 keyword=keyword,
-                keyword_type="topic",
+                keyword_type="category",
                 is_news_relevant=True,
                 current_conv_idx=1,
             )
@@ -249,7 +249,7 @@ class TestInterestRepositoryQuery:
         await repo.upsert_interest(
             user_id=test_user.id,
             keyword="tennis",
-            keyword_type="topic",
+            keyword_type="category",
             is_news_relevant=True,
             current_conv_idx=1,
         )
@@ -262,7 +262,7 @@ class TestInterestRepositoryQuery:
         )
 
         topics = await repo.get_top_interests(
-            test_user.id, 1, keyword_type="topic"
+            test_user.id, 1, keyword_type="category"
         )
         entities = await repo.get_top_interests(
             test_user.id, 1, keyword_type="entity"
@@ -280,14 +280,14 @@ class TestInterestRepositoryQuery:
         await repo.upsert_interest(
             user_id=test_user.id,
             keyword="tennis",
-            keyword_type="topic",
+            keyword_type="category",
             is_news_relevant=True,
             current_conv_idx=1,
         )
         await repo.upsert_interest(
             user_id=test_user.id,
             keyword="cooking",
-            keyword_type="topic",
+            keyword_type="category",
             is_news_relevant=False,
             current_conv_idx=1,
         )
@@ -314,14 +314,14 @@ class TestInterestRepositoryQuery:
         await repo.upsert_interest(
             user_id=test_user.id,
             keyword="tennis",
-            keyword_type="topic",
+            keyword_type="category",
             is_news_relevant=True,
             current_conv_idx=1,
         )
         await repo.upsert_interest(
             user_id=other_user.id,
             keyword="chess",
-            keyword_type="topic",
+            keyword_type="category",
             is_news_relevant=True,
             current_conv_idx=1,
         )

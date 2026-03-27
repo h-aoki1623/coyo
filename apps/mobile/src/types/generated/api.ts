@@ -265,6 +265,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/tasks/extract-memory": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Extract Memory
+         * @description Handle memory extraction task from Cloud Tasks.
+         *
+         *     Cloud Tasks retries on 5xx responses, so errors are propagated.
+         */
+        post: operations["extract_memory_api_tasks_extract_memory_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/topics/suggestions": {
         parameters: {
             query?: never;
@@ -422,6 +444,22 @@ export interface components {
             topicSuggestionId?: string | null;
         };
         /**
+         * ExtractMemoryRequest
+         * @description Request body for memory extraction task.
+         */
+        ExtractMemoryRequest: {
+            /**
+             * Conversation Id
+             * Format: uuid
+             */
+            conversation_id: string;
+            /**
+             * User Id
+             * Format: uuid
+             */
+            user_id: string;
+        };
+        /**
          * FeedbackResponse
          * @description Feedback summary with corrections for a completed conversation.
          */
@@ -531,7 +569,7 @@ export interface components {
              * Keywordtype
              * @enum {string}
              */
-            keywordType: "topic" | "entity";
+            keywordType: "category" | "entity";
             /** Isnewsrelevant */
             isNewsRelevant: boolean;
             /** Totalmentions */
@@ -1093,6 +1131,43 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["InterestsListResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    extract_memory_api_tasks_extract_memory_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExtractMemoryRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: string;
+                    };
                 };
             };
             /** @description Validation Error */

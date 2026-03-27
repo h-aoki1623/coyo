@@ -75,7 +75,7 @@ class TestBuildContext:
         mock_interests = [
             InterestWithWeight(
                 keyword="tennis",
-                keyword_type="topic",
+                keyword_type="category",
                 is_news_relevant=True,
                 total_mentions=3,
                 effective_weight=1.5,
@@ -130,7 +130,7 @@ class TestBuildContext:
         mock_interests = [
             InterestWithWeight(
                 keyword="cooking",
-                keyword_type="topic",
+                keyword_type="category",
                 is_news_relevant=False,
                 total_mentions=1,
                 effective_weight=0.8,
@@ -182,7 +182,7 @@ class TestFormatMemoryBlock:
         interests = [
             InterestWithWeight(
                 keyword="tennis",
-                keyword_type="topic",
+                keyword_type="category",
                 is_news_relevant=True,
                 total_mentions=3,
                 effective_weight=1.5,
@@ -204,7 +204,7 @@ class TestFormatMemoryBlock:
         interests = [
             InterestWithWeight(
                 keyword="cooking",
-                keyword_type="topic",
+                keyword_type="category",
                 is_news_relevant=False,
                 total_mentions=1,
                 effective_weight=0.5,
@@ -296,7 +296,7 @@ class TestFormatMemoryBlock:
             top_interests=[
                 InterestWithWeight(
                     keyword="test",
-                    keyword_type="topic",
+                    keyword_type="category",
                     is_news_relevant=False,
                     total_mentions=1,
                     effective_weight=0.5,

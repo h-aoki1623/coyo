@@ -12,7 +12,7 @@ class TestInterestResponse:
     def test_valid_construction(self):
         resp = InterestResponse(
             keyword="tennis",
-            keyword_type="topic",
+            keyword_type="category",
             is_news_relevant=True,
             total_mentions=5,
             effective_weight=2.1,
@@ -25,7 +25,7 @@ class TestInterestResponse:
     def test_camel_case_serialization(self):
         resp = InterestResponse(
             keyword="tennis",
-            keyword_type="topic",
+            keyword_type="category",
             is_news_relevant=True,
             total_mentions=5,
             effective_weight=2.1,
@@ -51,7 +51,7 @@ class TestInterestsListResponse:
     def test_with_items(self):
         item = InterestResponse(
             keyword="tennis",
-            keyword_type="topic",
+            keyword_type="category",
             is_news_relevant=True,
             total_mentions=5,
             effective_weight=2.1,

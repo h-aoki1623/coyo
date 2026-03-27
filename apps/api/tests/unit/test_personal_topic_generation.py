@@ -33,7 +33,7 @@ def _make_interest(keyword: str, weight: float = 1.0) -> InterestWithWeight:
     """Create an InterestWithWeight for testing."""
     return InterestWithWeight(
         keyword=keyword,
-        keyword_type="topic",
+        keyword_type="category",
         is_news_relevant=True,
         total_mentions=3,
         effective_weight=weight,

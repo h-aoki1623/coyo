@@ -9,7 +9,7 @@ class InterestResponse(CamelModel):
     """A single user interest with its computed weight."""
 
     keyword: str
-    keyword_type: Literal["topic", "entity"]
+    keyword_type: Literal["category", "entity"]
     is_news_relevant: bool
     total_mentions: int
     effective_weight: float

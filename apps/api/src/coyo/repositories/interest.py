@@ -35,6 +35,7 @@ class InterestWithWeight:
     effective_weight: float
     last_mentioned_conv_idx: int
     summary: str | None
+    iab_category_id: str | None = None
 
 
 def compute_effective_weight(
@@ -70,6 +71,7 @@ class InterestRepository:
         is_news_relevant: bool,
         current_conv_idx: int,
         summary: str | None = None,
+        iab_category_id: str | None = None,
     ) -> UserInterest:
         """Insert or update an interest keyword with 2-layer model logic.
 
@@ -97,6 +99,7 @@ class InterestRepository:
                 last_mentioned_conv_idx=current_conv_idx,
                 summary=summary,
                 needs_summary_update=False,
+                iab_category_id=iab_category_id,
             )
             self._session.add(interest)
             try:
@@ -111,10 +114,14 @@ class InterestRepository:
                     )
                 )
                 interest = result.scalar_one()
-                self._apply_mention(interest, is_news_relevant, current_conv_idx)
+                self._apply_mention(
+                    interest, is_news_relevant, current_conv_idx, iab_category_id
+                )
                 await self._session.flush()
         else:
-            self._apply_mention(interest, is_news_relevant, current_conv_idx)
+            self._apply_mention(
+                interest, is_news_relevant, current_conv_idx, iab_category_id
+            )
             await self._session.flush()
 
         return interest
@@ -124,6 +131,7 @@ class InterestRepository:
         interest: UserInterest,
         is_news_relevant: bool,
         current_conv_idx: int,
+        iab_category_id: str | None = None,
     ) -> None:
         """Apply a mention: decay short_term, boost, and update metadata."""
         gap = max(0, current_conv_idx - interest.last_mentioned_conv_idx)
@@ -134,6 +142,8 @@ class InterestRepository:
         interest.last_mentioned_conv_idx = current_conv_idx
         interest.is_news_relevant = is_news_relevant
         interest.needs_summary_update = True
+        if iab_category_id is not None:
+            interest.iab_category_id = iab_category_id
 
     @staticmethod
     def _to_weighted(
@@ -154,6 +164,7 @@ class InterestRepository:
             ),
             last_mentioned_conv_idx=interest.last_mentioned_conv_idx,
             summary=interest.summary,
+            iab_category_id=interest.iab_category_id,
         )
 
     async def get_interests_for_user(
@@ -205,6 +216,15 @@ class InterestRepository:
             UserInterest.user_id == user_id,
             UserInterest.needs_summary_update.is_(True),
         )
+        result = await self._session.execute(stmt)
+        return list(result.scalars().all())
+
+    async def get_existing_keywords(
+        self,
+        user_id: uuid.UUID,
+    ) -> list[str]:
+        """Get all keyword strings for a user (for embedding deduplication)."""
+        stmt = select(UserInterest.keyword).where(UserInterest.user_id == user_id)
         result = await self._session.execute(stmt)
         return list(result.scalars().all())
 
