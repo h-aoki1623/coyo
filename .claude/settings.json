@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \".claude/hooks/pre-commit-test-reminder.js\""
+            "command": "bash .claude/hooks/pre-commit-test-reminder.sh"
           }
         ]
       }
