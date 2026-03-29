@@ -1,0 +1,19 @@
+pre-commit:
+  parallel: true
+  commands:
+    oxlint:
+      glob: "*.{ts,tsx,js,jsx}"
+      root: "apps/mobile/"
+      run: npx oxlint --fix {staged_files}
+    tsc:
+      glob: "*.{ts,tsx}"
+      root: "apps/mobile/"
+      run: npx tsc --noEmit
+    ruff:
+      glob: "*.py"
+      root: "apps/api/"
+      run: .venv/bin/ruff check --fix {staged_files} && .venv/bin/ruff format {staged_files}
+    mypy:
+      glob: "*.py"
+      root: "apps/api/"
+      run: .venv/bin/mypy {staged_files}
