@@ -6,6 +6,10 @@
         "hooks": [
           {
             "type": "command",
+            "command": "bash .claude/hooks/block-no-verify.sh"
+          },
+          {
+            "type": "command",
             "command": "bash .claude/hooks/pre-commit-test-reminder.sh"
           }
         ]
