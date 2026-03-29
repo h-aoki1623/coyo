@@ -9,9 +9,9 @@ case "$file" in
   *) exit 0 ;;
 esac
 
-ruff check --fix "$file" >/dev/null 2>&1 || true
-ruff format "$file" >/dev/null 2>&1 || true
-diag="$(ruff check "$file" 2>&1 | head -20)"
+apps/api/.venv/bin/ruff check --fix "$file" >/dev/null 2>&1 || true
+apps/api/.venv/bin/ruff format "$file" >/dev/null 2>&1 || true
+diag="$(apps/api/.venv/bin/ruff check "$file" 2>&1 | head -20)"
 
 if [ -n "$diag" ]; then
   jq -Rn --arg msg "$diag" '{
