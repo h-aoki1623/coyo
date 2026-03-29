@@ -27,12 +27,16 @@ Symlinking causes tests to import the **main repo's source code** instead of the
 After creating a worktree, run the following setup before making any changes:
 
 ```bash
-# 1. Backend: create independent .venv
+# 1. Root: install lefthook and dev tools
+cd <worktree>
+npm install
+
+# 2. Backend: create independent .venv
 cd <worktree>/apps/api
 uv venv && uv pip install -e ".[dev]"
 cp <main-repo>/apps/api/.env .env   # Copy, not symlink
 
-# 2. Mobile: create independent node_modules
+# 3. Mobile: create independent node_modules
 cd <worktree>/apps/mobile
 npm ci
 ```

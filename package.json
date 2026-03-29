@@ -1,0 +1,11 @@
+{
+  "name": "coyo",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "postinstall": "npx lefthook install"
+  },
+  "devDependencies": {
+    "lefthook": "^1.11.0"
+  }
+}
