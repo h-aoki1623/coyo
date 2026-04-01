@@ -1,0 +1,29 @@
+id: cp-tourism-01
+source: corpus
+domain: tourism
+transcript:
+- role: user
+  text: Hello , I have a reservation for a double .
+- role: ai
+  text: What's your last name ?
+- role: user
+  text: It's Smith . Here is my driver's license .
+- role: ai
+  text: Yes , I do show your reservation . How could you like to pay for the room
+    ?
+- role: user
+  text: I'd like to put it on my VISA .
+- role: ai
+  text: Fine . Here is your room key , here is also a map of our hotel . The swimming
+    pool , gym and sauna are all located on first floor .
+- role: user
+  text: Great , is our room ready yet ?
+- role: ai
+  text: Yes . If you want to order room service , just press 0 on your phone , and
+    that will connect you with the front desk .
+gold_labels:
+  categories: []
+  entities: []
+notes: This is a routine hotel check-in conversation. While 'VISA' is mentioned, it's
+  used as a payment method, not as a topic of interest. No genuine interests or engagement
+  with specific topics are expressed by the user.

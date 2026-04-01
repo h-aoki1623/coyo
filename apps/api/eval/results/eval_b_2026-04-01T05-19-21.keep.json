@@ -1,0 +1,2158 @@
+{
+  "timestamp": "2026-04-01T05:19:21.460747+00:00",
+  "model": "gpt-5.4-nano",
+  "test_case_count": 71,
+  "category_metrics": {
+    "precision": 0.40625,
+    "recall": 0.38235294117647056,
+    "f1": 0.393939393939394,
+    "tp_count": 13,
+    "fp_count": 19,
+    "fn_count": 21,
+    "iab_match": {
+      "iab_matched_count": 6,
+      "total_category_count": 32,
+      "iab_match_rate": 0.1875
+    },
+    "normalization_accuracy": {
+      "checked": 6,
+      "correct": 6,
+      "accuracy": 1.0
+    }
+  },
+  "entity_metrics": {
+    "precision": 0.13793103448275862,
+    "recall": 0.8571428571428571,
+    "f1": 0.23762376237623764,
+    "tp_count": 12,
+    "fp_count": 75,
+    "fn_count": 2,
+    "type_confusion": {
+      "confused_count": 0,
+      "total_count": 25,
+      "type_confusion_rate": 0.0
+    },
+    "wikidata_hit": {
+      "wikidata_valid_count": 69,
+      "llm_valid_count": 11,
+      "llm_invalid_count": 5,
+      "human_review_count": 2,
+      "total_count": 87,
+      "wikidata_hit_rate": 0.7931034482758621
+    }
+  },
+  "news_relevant": {
+    "category": {
+      "precision": 1.0,
+      "recall": 0.875,
+      "f1": 0.9333333333333333,
+      "confusion": {
+        "tp": 7,
+        "fp": 0,
+        "fn": 1,
+        "tn": 5
+      }
+    },
+    "entity": {
+      "precision": 1.0,
+      "recall": 0.9,
+      "f1": 0.9473684210526316,
+      "confusion": {
+        "tp": 9,
+        "fp": 0,
+        "fn": 1,
+        "tn": 2
+      }
+    },
+    "overall": {
+      "precision": 1.0,
+      "recall": 0.8888888888888888,
+      "f1": 0.9411764705882353,
+      "confusion": {
+        "tp": 16,
+        "fp": 0,
+        "fn": 2,
+        "tn": 7
+      }
+    }
+  },
+  "per_case_details": [
+    {
+      "case_id": "cp-attitude-emotion-01",
+      "domain": "attitude_emotion",
+      "predicted_categories": [
+        "television"
+      ],
+      "predicted_entities": [],
+      "gold_categories": [],
+      "gold_entities": [],
+      "category_tp": [],
+      "category_fp": [
+        "television"
+      ],
+      "category_fn": [],
+      "entity_tp": [],
+      "entity_fp": [],
+      "entity_fn": [],
+      "matched_pairs": [],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "cp-attitude-emotion-02",
+      "domain": "attitude_emotion",
+      "predicted_categories": [],
+      "predicted_entities": [
+        "kate"
+      ],
+      "gold_categories": [],
+      "gold_entities": [],
+      "category_tp": [],
+      "category_fp": [],
+      "category_fn": [],
+      "entity_tp": [],
+      "entity_fp": [
+        "kate"
+      ],
+      "entity_fn": [],
+      "matched_pairs": [],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "cp-attitude-emotion-03",
+      "domain": "attitude_emotion",
+      "predicted_categories": [],
+      "predicted_entities": [
+        "dell",
+        "john"
+      ],
+      "gold_categories": [],
+      "gold_entities": [
+        "dell"
+      ],
+      "category_tp": [],
+      "category_fp": [],
+      "category_fn": [],
+      "entity_tp": [
+        "dell"
+      ],
+      "entity_fp": [
+        "john"
+      ],
+      "entity_fn": [],
+      "matched_pairs": [
+        {
+          "predicted": "dell",
+          "gold": "dell",
+          "similarity": 1.0,
+          "keyword_type": "entity",
+          "predicted_is_news_relevant": true,
+          "gold_is_news_relevant": true,
+          "news_relevant_correct": true
+        }
+      ],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "cp-attitude-emotion-04",
+      "domain": "attitude_emotion",
+      "predicted_categories": [],
+      "predicted_entities": [
+        "china"
+      ],
+      "gold_categories": [],
+      "gold_entities": [
+        "china"
+      ],
+      "category_tp": [],
+      "category_fp": [],
+      "category_fn": [],
+      "entity_tp": [
+        "china"
+      ],
+      "entity_fp": [],
+      "entity_fn": [],
+      "matched_pairs": [
+        {
+          "predicted": "china",
+          "gold": "china",
+          "similarity": 1.0,
+          "keyword_type": "entity",
+          "predicted_is_news_relevant": true,
+          "gold_is_news_relevant": true,
+          "news_relevant_correct": true
+        }
+      ],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "cp-culture-education-01",
+      "domain": "culture_education",
+      "predicted_categories": [
+        "language learning"
+      ],
+      "predicted_entities": [],
+      "gold_categories": [
+        "language learning"
+      ],
+      "gold_entities": [],
+      "category_tp": [
+        "language learning"
+      ],
+      "category_fp": [],
+      "category_fn": [],
+      "entity_tp": [],
+      "entity_fp": [],
+      "entity_fn": [],
+      "matched_pairs": [
+        {
+          "predicted": "language learning",
+          "gold": "language learning",
+          "similarity": 1.0,
+          "keyword_type": "category",
+          "predicted_is_news_relevant": false,
+          "gold_is_news_relevant": false,
+          "news_relevant_correct": true
+        }
+      ],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "cp-culture-education-02",
+      "domain": "culture_education",
+      "predicted_categories": [
+        "language learning"
+      ],
+      "predicted_entities": [
+        "olga"
+      ],
+      "gold_categories": [
+        "language learning"
+      ],
+      "gold_entities": [],
+      "category_tp": [
+        "language learning"
+      ],
+      "category_fp": [],
+      "category_fn": [],
+      "entity_tp": [],
+      "entity_fp": [
+        "olga"
+      ],
+      "entity_fn": [],
+      "matched_pairs": [
+        {
+          "predicted": "language learning",
+          "gold": "language learning",
+          "similarity": 1.0,
+          "keyword_type": "category",
+          "predicted_is_news_relevant": false,
+          "gold_is_news_relevant": false,
+          "news_relevant_correct": true
+        }
+      ],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "cp-culture-education-03",
+      "domain": "culture_education",
+      "predicted_categories": [
+        "personal finance"
+      ],
+      "predicted_entities": [
+        "united states",
+        "china"
+      ],
+      "gold_categories": [
+        "personal finance"
+      ],
+      "gold_entities": [],
+      "category_tp": [
+        "personal finance"
+      ],
+      "category_fp": [],
+      "category_fn": [],
+      "entity_tp": [],
+      "entity_fp": [
+        "united states",
+        "china"
+      ],
+      "entity_fn": [],
+      "matched_pairs": [
+        {
+          "predicted": "personal finance",
+          "gold": "personal finance",
+          "similarity": 1.0,
+          "keyword_type": "category",
+          "predicted_is_news_relevant": false,
+          "gold_is_news_relevant": true,
+          "news_relevant_correct": false
+        }
+      ],
+      "news_relevant_errors": [
+        {
+          "predicted": "personal finance",
+          "gold": "personal finance",
+          "similarity": 1.0,
+          "keyword_type": "category",
+          "predicted_is_news_relevant": false,
+          "gold_is_news_relevant": true,
+          "news_relevant_correct": false
+        }
+      ],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "cp-culture-education-04",
+      "domain": "culture_education",
+      "predicted_categories": [
+        "language learning"
+      ],
+      "predicted_entities": [],
+      "gold_categories": [
+        "language learning"
+      ],
+      "gold_entities": [],
+      "category_tp": [
+        "language learning"
+      ],
+      "category_fp": [],
+      "category_fn": [],
+      "entity_tp": [],
+      "entity_fp": [],
+      "entity_fn": [],
+      "matched_pairs": [
+        {
+          "predicted": "language learning",
+          "gold": "language learning",
+          "similarity": 1.0,
+          "keyword_type": "category",
+          "predicted_is_news_relevant": false,
+          "gold_is_news_relevant": false,
+          "news_relevant_correct": true
+        }
+      ],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "cp-finance-01",
+      "domain": "finance",
+      "predicted_categories": [],
+      "predicted_entities": [
+        "iba"
+      ],
+      "gold_categories": [],
+      "gold_entities": [],
+      "category_tp": [],
+      "category_fp": [],
+      "category_fn": [],
+      "entity_tp": [],
+      "entity_fp": [
+        "iba"
+      ],
+      "entity_fn": [],
+      "matched_pairs": [],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "cp-finance-02",
+      "domain": "finance",
+      "predicted_categories": [
+        "personal finance"
+      ],
+      "predicted_entities": [],
+      "gold_categories": [
+        "jewelry"
+      ],
+      "gold_entities": [],
+      "category_tp": [],
+      "category_fp": [
+        "personal finance"
+      ],
+      "category_fn": [
+        "jewelry"
+      ],
+      "entity_tp": [],
+      "entity_fp": [],
+      "entity_fn": [],
+      "matched_pairs": [],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "cp-finance-03",
+      "domain": "finance",
+      "predicted_categories": [],
+      "predicted_entities": [
+        "safety deposit box"
+      ],
+      "gold_categories": [],
+      "gold_entities": [],
+      "category_tp": [],
+      "category_fp": [],
+      "category_fn": [],
+      "entity_tp": [],
+      "entity_fp": [
+        "safety deposit box"
+      ],
+      "entity_fn": [],
+      "matched_pairs": [],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "cp-finance-04",
+      "domain": "finance",
+      "predicted_categories": [],
+      "predicted_entities": [
+        "first national bank"
+      ],
+      "gold_categories": [],
+      "gold_entities": [],
+      "category_tp": [],
+      "category_fp": [],
+      "category_fn": [],
+      "entity_tp": [],
+      "entity_fp": [
+        "first national bank"
+      ],
+      "entity_fn": [],
+      "matched_pairs": [],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "cp-health-01",
+      "domain": "health",
+      "predicted_categories": [],
+      "predicted_entities": [
+        "x-ray"
+      ],
+      "gold_categories": [
+        "healthy living"
+      ],
+      "gold_entities": [],
+      "category_tp": [],
+      "category_fp": [],
+      "category_fn": [
+        "healthy living"
+      ],
+      "entity_tp": [],
+      "entity_fp": [
+        "x-ray"
+      ],
+      "entity_fn": [],
+      "matched_pairs": [],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "cp-health-02",
+      "domain": "health",
+      "predicted_categories": [],
+      "predicted_entities": [],
+      "gold_categories": [],
+      "gold_entities": [],
+      "category_tp": [],
+      "category_fp": [],
+      "category_fn": [],
+      "entity_tp": [],
+      "entity_fp": [],
+      "entity_fn": [],
+      "matched_pairs": [],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "cp-health-03",
+      "domain": "health",
+      "predicted_categories": [],
+      "predicted_entities": [
+        "dr. mustn"
+      ],
+      "gold_categories": [],
+      "gold_entities": [],
+      "category_tp": [],
+      "category_fp": [],
+      "category_fn": [],
+      "entity_tp": [],
+      "entity_fp": [
+        "dr. mustn"
+      ],
+      "entity_fn": [],
+      "matched_pairs": [],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "cp-health-04",
+      "domain": "health",
+      "predicted_categories": [],
+      "predicted_entities": [],
+      "gold_categories": [],
+      "gold_entities": [],
+      "category_tp": [],
+      "category_fp": [],
+      "category_fn": [],
+      "entity_tp": [],
+      "entity_fp": [],
+      "entity_fn": [],
+      "matched_pairs": [],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "cp-ordinary-life-01",
+      "domain": "ordinary_life",
+      "predicted_categories": [
+        "food and drink"
+      ],
+      "predicted_entities": [
+        "dick"
+      ],
+      "gold_categories": [],
+      "gold_entities": [],
+      "category_tp": [],
+      "category_fp": [
+        "food and drink"
+      ],
+      "category_fn": [],
+      "entity_tp": [],
+      "entity_fp": [
+        "dick"
+      ],
+      "entity_fn": [],
+      "matched_pairs": [],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "cp-ordinary-life-02",
+      "domain": "ordinary_life",
+      "predicted_categories": [],
+      "predicted_entities": [
+        "leo"
+      ],
+      "gold_categories": [],
+      "gold_entities": [],
+      "category_tp": [],
+      "category_fp": [],
+      "category_fn": [],
+      "entity_tp": [],
+      "entity_fp": [
+        "leo"
+      ],
+      "entity_fn": [],
+      "matched_pairs": [],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "cp-ordinary-life-03",
+      "domain": "ordinary_life",
+      "predicted_categories": [],
+      "predicted_entities": [],
+      "gold_categories": [],
+      "gold_entities": [],
+      "category_tp": [],
+      "category_fp": [],
+      "category_fn": [],
+      "entity_tp": [],
+      "entity_fp": [],
+      "entity_fn": [],
+      "matched_pairs": [],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "cp-ordinary-life-04",
+      "domain": "ordinary_life",
+      "predicted_categories": [
+        "fitness and exercise"
+      ],
+      "predicted_entities": [],
+      "gold_categories": [],
+      "gold_entities": [],
+      "category_tp": [],
+      "category_fp": [
+        "fitness and exercise"
+      ],
+      "category_fn": [],
+      "entity_tp": [],
+      "entity_fp": [],
+      "entity_fn": [],
+      "matched_pairs": [],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "cp-politics-01",
+      "domain": "politics",
+      "predicted_categories": [
+        "insurance"
+      ],
+      "predicted_entities": [],
+      "gold_categories": [],
+      "gold_entities": [],
+      "category_tp": [],
+      "category_fp": [
+        "insurance"
+      ],
+      "category_fn": [],
+      "entity_tp": [],
+      "entity_fp": [],
+      "entity_fn": [],
+      "matched_pairs": [],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "cp-politics-02",
+      "domain": "politics",
+      "predicted_categories": [
+        "home and garden"
+      ],
+      "predicted_entities": [
+        "ridleys"
+      ],
+      "gold_categories": [],
+      "gold_entities": [],
+      "category_tp": [],
+      "category_fp": [
+        "home and garden"
+      ],
+      "category_fn": [],
+      "entity_tp": [],
+      "entity_fp": [
+        "ridleys"
+      ],
+      "entity_fn": [],
+      "matched_pairs": [],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "cp-politics-03",
+      "domain": "politics",
+      "predicted_categories": [],
+      "predicted_entities": [],
+      "gold_categories": [
+        "war and conflicts",
+        "politics"
+      ],
+      "gold_entities": [],
+      "category_tp": [],
+      "category_fp": [],
+      "category_fn": [
+        "war and conflicts",
+        "politics"
+      ],
+      "entity_tp": [],
+      "entity_fp": [],
+      "entity_fn": [],
+      "matched_pairs": [],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "cp-politics-04",
+      "domain": "politics",
+      "predicted_categories": [],
+      "predicted_entities": [],
+      "gold_categories": [
+        "war and conflicts",
+        "politics"
+      ],
+      "gold_entities": [],
+      "category_tp": [],
+      "category_fp": [],
+      "category_fn": [
+        "war and conflicts",
+        "politics"
+      ],
+      "entity_tp": [],
+      "entity_fp": [],
+      "entity_fn": [],
+      "matched_pairs": [],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "cp-relationship-01",
+      "domain": "relationship",
+      "predicted_categories": [],
+      "predicted_entities": [
+        "america"
+      ],
+      "gold_categories": [],
+      "gold_entities": [],
+      "category_tp": [],
+      "category_fp": [],
+      "category_fn": [],
+      "entity_tp": [],
+      "entity_fp": [
+        "america"
+      ],
+      "entity_fn": [],
+      "matched_pairs": [],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "cp-relationship-02",
+      "domain": "relationship",
+      "predicted_categories": [],
+      "predicted_entities": [
+        "french restaurant"
+      ],
+      "gold_categories": [],
+      "gold_entities": [],
+      "category_tp": [],
+      "category_fp": [],
+      "category_fn": [],
+      "entity_tp": [],
+      "entity_fp": [
+        "french restaurant"
+      ],
+      "entity_fn": [],
+      "matched_pairs": [],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "cp-relationship-03",
+      "domain": "relationship",
+      "predicted_categories": [],
+      "predicted_entities": [],
+      "gold_categories": [],
+      "gold_entities": [],
+      "category_tp": [],
+      "category_fp": [],
+      "category_fn": [],
+      "entity_tp": [],
+      "entity_fp": [],
+      "entity_fn": [],
+      "matched_pairs": [],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "cp-relationship-04",
+      "domain": "relationship",
+      "predicted_categories": [],
+      "predicted_entities": [
+        "reader's digest"
+      ],
+      "gold_categories": [],
+      "gold_entities": [
+        "reader's digest"
+      ],
+      "category_tp": [],
+      "category_fp": [],
+      "category_fn": [],
+      "entity_tp": [
+        "reader's digest"
+      ],
+      "entity_fp": [],
+      "entity_fn": [],
+      "matched_pairs": [
+        {
+          "predicted": "reader's digest",
+          "gold": "reader's digest",
+          "similarity": 1.0,
+          "keyword_type": "entity",
+          "predicted_is_news_relevant": false,
+          "gold_is_news_relevant": false,
+          "news_relevant_correct": true
+        }
+      ],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "cp-school-life-01",
+      "domain": "school_life",
+      "predicted_categories": [
+        "basketball"
+      ],
+      "predicted_entities": [
+        "class two"
+      ],
+      "gold_categories": [
+        "basketball"
+      ],
+      "gold_entities": [],
+      "category_tp": [
+        "basketball"
+      ],
+      "category_fp": [],
+      "category_fn": [],
+      "entity_tp": [],
+      "entity_fp": [
+        "class two"
+      ],
+      "entity_fn": [],
+      "matched_pairs": [
+        {
+          "predicted": "basketball",
+          "gold": "basketball",
+          "similarity": 1.0,
+          "keyword_type": "category",
+          "predicted_is_news_relevant": true,
+          "gold_is_news_relevant": true,
+          "news_relevant_correct": true
+        }
+      ],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "cp-school-life-02",
+      "domain": "school_life",
+      "predicted_categories": [
+        "education"
+      ],
+      "predicted_entities": [],
+      "gold_categories": [],
+      "gold_entities": [],
+      "category_tp": [],
+      "category_fp": [
+        "education"
+      ],
+      "category_fn": [],
+      "entity_tp": [],
+      "entity_fp": [],
+      "entity_fn": [],
+      "matched_pairs": [],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "cp-school-life-03",
+      "domain": "school_life",
+      "predicted_categories": [
+        "language learning"
+      ],
+      "predicted_entities": [],
+      "gold_categories": [],
+      "gold_entities": [],
+      "category_tp": [],
+      "category_fp": [
+        "language learning"
+      ],
+      "category_fn": [],
+      "entity_tp": [],
+      "entity_fp": [],
+      "entity_fn": [],
+      "matched_pairs": [],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "cp-school-life-04",
+      "domain": "school_life",
+      "predicted_categories": [
+        "education"
+      ],
+      "predicted_entities": [],
+      "gold_categories": [],
+      "gold_entities": [],
+      "category_tp": [],
+      "category_fp": [
+        "education"
+      ],
+      "category_fn": [],
+      "entity_tp": [],
+      "entity_fp": [],
+      "entity_fn": [],
+      "matched_pairs": [],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "cp-tourism-01",
+      "domain": "tourism",
+      "predicted_categories": [],
+      "predicted_entities": [
+        "visa"
+      ],
+      "gold_categories": [],
+      "gold_entities": [],
+      "category_tp": [],
+      "category_fp": [],
+      "category_fn": [],
+      "entity_tp": [],
+      "entity_fp": [
+        "visa"
+      ],
+      "entity_fn": [],
+      "matched_pairs": [],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "cp-tourism-02",
+      "domain": "tourism",
+      "predicted_categories": [],
+      "predicted_entities": [
+        "hong kong",
+        "new york city",
+        "american airlines"
+      ],
+      "gold_categories": [],
+      "gold_entities": [],
+      "category_tp": [],
+      "category_fp": [],
+      "category_fn": [],
+      "entity_tp": [],
+      "entity_fp": [
+        "hong kong",
+        "new york city",
+        "american airlines"
+      ],
+      "entity_fn": [],
+      "matched_pairs": [],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "cp-tourism-03",
+      "domain": "tourism",
+      "predicted_categories": [],
+      "predicted_entities": [
+        "li river"
+      ],
+      "gold_categories": [],
+      "gold_entities": [],
+      "category_tp": [],
+      "category_fp": [],
+      "category_fn": [],
+      "entity_tp": [],
+      "entity_fp": [
+        "li river"
+      ],
+      "entity_fn": [],
+      "matched_pairs": [],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "cp-tourism-04",
+      "domain": "tourism",
+      "predicted_categories": [],
+      "predicted_entities": [],
+      "gold_categories": [],
+      "gold_entities": [],
+      "category_tp": [],
+      "category_fp": [],
+      "category_fn": [],
+      "entity_tp": [],
+      "entity_fp": [],
+      "entity_fn": [],
+      "matched_pairs": [],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "cp-work-01",
+      "domain": "work",
+      "predicted_categories": [],
+      "predicted_entities": [
+        "bob"
+      ],
+      "gold_categories": [],
+      "gold_entities": [],
+      "category_tp": [],
+      "category_fp": [],
+      "category_fn": [],
+      "entity_tp": [],
+      "entity_fp": [
+        "bob"
+      ],
+      "entity_fn": [],
+      "matched_pairs": [],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "cp-work-02",
+      "domain": "work",
+      "predicted_categories": [],
+      "predicted_entities": [],
+      "gold_categories": [],
+      "gold_entities": [],
+      "category_tp": [],
+      "category_fp": [],
+      "category_fn": [],
+      "entity_tp": [],
+      "entity_fp": [],
+      "entity_fn": [],
+      "matched_pairs": [],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "cp-work-03",
+      "domain": "work",
+      "predicted_categories": [],
+      "predicted_entities": [
+        "london",
+        "beijing",
+        "cp 645"
+      ],
+      "gold_categories": [],
+      "gold_entities": [],
+      "category_tp": [],
+      "category_fp": [],
+      "category_fn": [],
+      "entity_tp": [],
+      "entity_fp": [
+        "london",
+        "beijing",
+        "cp 645"
+      ],
+      "entity_fn": [],
+      "matched_pairs": [],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "cp-work-04",
+      "domain": "work",
+      "predicted_categories": [],
+      "predicted_entities": [],
+      "gold_categories": [],
+      "gold_entities": [],
+      "category_tp": [],
+      "category_fp": [],
+      "category_fn": [],
+      "entity_tp": [],
+      "entity_fp": [],
+      "entity_fn": [],
+      "matched_pairs": [],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "gen-ambiguous-01",
+      "domain": "ambiguous",
+      "predicted_categories": [],
+      "predicted_entities": [
+        "apple",
+        "m2",
+        "macbook pro",
+        "iphone"
+      ],
+      "gold_categories": [],
+      "gold_entities": [
+        "apple inc."
+      ],
+      "category_tp": [],
+      "category_fp": [],
+      "category_fn": [],
+      "entity_tp": [],
+      "entity_fp": [
+        "apple",
+        "m2",
+        "macbook pro",
+        "iphone"
+      ],
+      "entity_fn": [
+        "apple inc."
+      ],
+      "matched_pairs": [],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "gen-ambiguous-02",
+      "domain": "ambiguous",
+      "predicted_categories": [],
+      "predicted_entities": [
+        "apple"
+      ],
+      "gold_categories": [],
+      "gold_entities": [],
+      "category_tp": [],
+      "category_fp": [],
+      "category_fn": [],
+      "entity_tp": [],
+      "entity_fp": [
+        "apple"
+      ],
+      "entity_fn": [],
+      "matched_pairs": [],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "gen-ambiguous-03",
+      "domain": "ambiguous",
+      "predicted_categories": [
+        "automotive"
+      ],
+      "predicted_entities": [],
+      "gold_categories": [
+        "automotive"
+      ],
+      "gold_entities": [],
+      "category_tp": [
+        "automotive"
+      ],
+      "category_fp": [],
+      "category_fn": [],
+      "entity_tp": [],
+      "entity_fp": [],
+      "entity_fn": [],
+      "matched_pairs": [
+        {
+          "predicted": "automotive",
+          "gold": "automotive",
+          "similarity": 1.0,
+          "keyword_type": "category",
+          "predicted_is_news_relevant": false,
+          "gold_is_news_relevant": false,
+          "news_relevant_correct": true
+        }
+      ],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "gen-edge-case-01",
+      "domain": "edge-case",
+      "predicted_categories": [
+        "sports"
+      ],
+      "predicted_entities": [],
+      "gold_categories": [],
+      "gold_entities": [],
+      "category_tp": [],
+      "category_fp": [
+        "sports"
+      ],
+      "category_fn": [],
+      "entity_tp": [],
+      "entity_fp": [],
+      "entity_fn": [],
+      "matched_pairs": [],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "gen-edge-case-02",
+      "domain": "edge-case",
+      "predicted_categories": [],
+      "predicted_entities": [],
+      "gold_categories": [],
+      "gold_entities": [],
+      "category_tp": [],
+      "category_fp": [],
+      "category_fn": [],
+      "entity_tp": [],
+      "entity_fp": [],
+      "entity_fn": [],
+      "matched_pairs": [],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "gen-edge-case-03",
+      "domain": "edge-case",
+      "predicted_categories": [],
+      "predicted_entities": [],
+      "gold_categories": [],
+      "gold_entities": [],
+      "category_tp": [],
+      "category_fp": [],
+      "category_fn": [],
+      "entity_tp": [],
+      "entity_fp": [],
+      "entity_fn": [],
+      "matched_pairs": [],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "gen-english-learning-01",
+      "domain": "english-learning",
+      "predicted_categories": [],
+      "predicted_entities": [],
+      "gold_categories": [],
+      "gold_entities": [],
+      "category_tp": [],
+      "category_fp": [],
+      "category_fn": [],
+      "entity_tp": [],
+      "entity_fp": [],
+      "entity_fn": [],
+      "matched_pairs": [],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "gen-english-learning-02",
+      "domain": "english-learning",
+      "predicted_categories": [
+        "language learning"
+      ],
+      "predicted_entities": [],
+      "gold_categories": [],
+      "gold_entities": [],
+      "category_tp": [],
+      "category_fp": [
+        "language learning"
+      ],
+      "category_fn": [],
+      "entity_tp": [],
+      "entity_fp": [],
+      "entity_fn": [],
+      "matched_pairs": [],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "gen-multi-topic-01",
+      "domain": "multi-topic",
+      "predicted_categories": [
+        "sports"
+      ],
+      "predicted_entities": [
+        "apple"
+      ],
+      "gold_categories": [
+        "baseball",
+        "personal investing"
+      ],
+      "gold_entities": [],
+      "category_tp": [],
+      "category_fp": [
+        "sports"
+      ],
+      "category_fn": [
+        "baseball",
+        "personal investing"
+      ],
+      "entity_tp": [],
+      "entity_fp": [
+        "apple"
+      ],
+      "entity_fn": [],
+      "matched_pairs": [],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "gen-multi-topic-02",
+      "domain": "multi-topic",
+      "predicted_categories": [
+        "food and drink"
+      ],
+      "predicted_entities": [
+        "tokyo",
+        "shinjuku",
+        "shibuya",
+        "hanoi",
+        "lima"
+      ],
+      "gold_categories": [
+        "travel",
+        "world cuisines"
+      ],
+      "gold_entities": [
+        "tokyo"
+      ],
+      "category_tp": [],
+      "category_fp": [
+        "food and drink"
+      ],
+      "category_fn": [
+        "travel",
+        "world cuisines"
+      ],
+      "entity_tp": [
+        "tokyo"
+      ],
+      "entity_fp": [
+        "shinjuku",
+        "shibuya",
+        "hanoi",
+        "lima"
+      ],
+      "entity_fn": [],
+      "matched_pairs": [
+        {
+          "predicted": "tokyo",
+          "gold": "tokyo",
+          "similarity": 1.0,
+          "keyword_type": "entity",
+          "predicted_is_news_relevant": false,
+          "gold_is_news_relevant": false,
+          "news_relevant_correct": true
+        }
+      ],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "gen-sports-01",
+      "domain": "sports",
+      "predicted_categories": [
+        "tennis"
+      ],
+      "predicted_entities": [
+        "carlos alcaraz"
+      ],
+      "gold_categories": [
+        "tennis"
+      ],
+      "gold_entities": [
+        "carlos alcaraz"
+      ],
+      "category_tp": [
+        "tennis"
+      ],
+      "category_fp": [],
+      "category_fn": [],
+      "entity_tp": [
+        "carlos alcaraz"
+      ],
+      "entity_fp": [],
+      "entity_fn": [],
+      "matched_pairs": [
+        {
+          "predicted": "tennis",
+          "gold": "tennis",
+          "similarity": 1.0,
+          "keyword_type": "category",
+          "predicted_is_news_relevant": true,
+          "gold_is_news_relevant": true,
+          "news_relevant_correct": true
+        },
+        {
+          "predicted": "carlos alcaraz",
+          "gold": "carlos alcaraz",
+          "similarity": 1.0,
+          "keyword_type": "entity",
+          "predicted_is_news_relevant": true,
+          "gold_is_news_relevant": true,
+          "news_relevant_correct": true
+        }
+      ],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "gen-sports-02",
+      "domain": "sports",
+      "predicted_categories": [
+        "basketball"
+      ],
+      "predicted_entities": [
+        "lakers",
+        "lebron james",
+        "anthony davis",
+        "celtics"
+      ],
+      "gold_categories": [
+        "basketball"
+      ],
+      "gold_entities": [
+        "nba"
+      ],
+      "category_tp": [
+        "basketball"
+      ],
+      "category_fp": [],
+      "category_fn": [],
+      "entity_tp": [],
+      "entity_fp": [
+        "lakers",
+        "lebron james",
+        "anthony davis",
+        "celtics"
+      ],
+      "entity_fn": [
+        "nba"
+      ],
+      "matched_pairs": [
+        {
+          "predicted": "basketball",
+          "gold": "basketball",
+          "similarity": 1.0,
+          "keyword_type": "category",
+          "predicted_is_news_relevant": true,
+          "gold_is_news_relevant": true,
+          "news_relevant_correct": true
+        }
+      ],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "gen-sports-03",
+      "domain": "sports",
+      "predicted_categories": [
+        "sports"
+      ],
+      "predicted_entities": [
+        "max verstappen",
+        "red bull",
+        "f1"
+      ],
+      "gold_categories": [
+        "f1"
+      ],
+      "gold_entities": [
+        "max verstappen"
+      ],
+      "category_tp": [],
+      "category_fp": [
+        "sports"
+      ],
+      "category_fn": [
+        "f1"
+      ],
+      "entity_tp": [
+        "max verstappen"
+      ],
+      "entity_fp": [
+        "red bull",
+        "f1"
+      ],
+      "entity_fn": [],
+      "matched_pairs": [
+        {
+          "predicted": "max verstappen",
+          "gold": "max verstappen",
+          "similarity": 1.0,
+          "keyword_type": "entity",
+          "predicted_is_news_relevant": true,
+          "gold_is_news_relevant": true,
+          "news_relevant_correct": true
+        }
+      ],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "gen-sports-04",
+      "domain": "sports",
+      "predicted_categories": [
+        "sports"
+      ],
+      "predicted_entities": [
+        "premier league",
+        "united"
+      ],
+      "gold_categories": [
+        "soccer"
+      ],
+      "gold_entities": [
+        "premier league"
+      ],
+      "category_tp": [],
+      "category_fp": [
+        "sports"
+      ],
+      "category_fn": [
+        "soccer"
+      ],
+      "entity_tp": [
+        "premier league"
+      ],
+      "entity_fp": [
+        "united"
+      ],
+      "entity_fn": [],
+      "matched_pairs": [
+        {
+          "predicted": "premier league",
+          "gold": "premier league",
+          "similarity": 1.0,
+          "keyword_type": "entity",
+          "predicted_is_news_relevant": true,
+          "gold_is_news_relevant": true,
+          "news_relevant_correct": true
+        }
+      ],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "gen-sports-05",
+      "domain": "sports",
+      "predicted_categories": [
+        "sports"
+      ],
+      "predicted_entities": [
+        "olympics"
+      ],
+      "gold_categories": [],
+      "gold_entities": [
+        "olympic games"
+      ],
+      "category_tp": [],
+      "category_fp": [
+        "sports"
+      ],
+      "category_fn": [],
+      "entity_tp": [
+        "olympics"
+      ],
+      "entity_fp": [],
+      "entity_fn": [],
+      "matched_pairs": [
+        {
+          "predicted": "olympics",
+          "gold": "olympic games",
+          "similarity": 0.8852,
+          "keyword_type": "entity",
+          "predicted_is_news_relevant": true,
+          "gold_is_news_relevant": true,
+          "news_relevant_correct": true
+        }
+      ],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "gen-sports-06",
+      "domain": "sports",
+      "predicted_categories": [
+        "fitness and exercise"
+      ],
+      "predicted_entities": [],
+      "gold_categories": [
+        "fitness and exercise"
+      ],
+      "gold_entities": [],
+      "category_tp": [
+        "fitness and exercise"
+      ],
+      "category_fp": [],
+      "category_fn": [],
+      "entity_tp": [],
+      "entity_fp": [],
+      "entity_fn": [],
+      "matched_pairs": [
+        {
+          "predicted": "fitness and exercise",
+          "gold": "fitness and exercise",
+          "similarity": 1.0,
+          "keyword_type": "category",
+          "predicted_is_news_relevant": false,
+          "gold_is_news_relevant": false,
+          "news_relevant_correct": true
+        }
+      ],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "gen-sports-07",
+      "domain": "sports",
+      "predicted_categories": [
+        "sports"
+      ],
+      "predicted_entities": [
+        "champions league",
+        "nba playoffs"
+      ],
+      "gold_categories": [
+        "sports"
+      ],
+      "gold_entities": [],
+      "category_tp": [
+        "sports"
+      ],
+      "category_fp": [],
+      "category_fn": [],
+      "entity_tp": [],
+      "entity_fp": [
+        "champions league",
+        "nba playoffs"
+      ],
+      "entity_fn": [],
+      "matched_pairs": [
+        {
+          "predicted": "sports",
+          "gold": "sports",
+          "similarity": 1.0,
+          "keyword_type": "category",
+          "predicted_is_news_relevant": true,
+          "gold_is_news_relevant": true,
+          "news_relevant_correct": true
+        }
+      ],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "gen-tech-ai-01",
+      "domain": "tech-ai",
+      "predicted_categories": [],
+      "predicted_entities": [
+        "chatgpt",
+        "openai",
+        "gpt-4"
+      ],
+      "gold_categories": [
+        "artificial intelligence"
+      ],
+      "gold_entities": [
+        "openai"
+      ],
+      "category_tp": [],
+      "category_fp": [],
+      "category_fn": [
+        "artificial intelligence"
+      ],
+      "entity_tp": [
+        "openai"
+      ],
+      "entity_fp": [
+        "chatgpt",
+        "gpt-4"
+      ],
+      "entity_fn": [],
+      "matched_pairs": [
+        {
+          "predicted": "openai",
+          "gold": "openai",
+          "similarity": 1.0,
+          "keyword_type": "entity",
+          "predicted_is_news_relevant": true,
+          "gold_is_news_relevant": true,
+          "news_relevant_correct": true
+        }
+      ],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "gen-tech-ai-02",
+      "domain": "tech-ai",
+      "predicted_categories": [],
+      "predicted_entities": [
+        "python",
+        "flask",
+        "django",
+        "youtube"
+      ],
+      "gold_categories": [],
+      "gold_entities": [
+        "python"
+      ],
+      "category_tp": [],
+      "category_fp": [],
+      "category_fn": [],
+      "entity_tp": [
+        "python"
+      ],
+      "entity_fp": [
+        "flask",
+        "django",
+        "youtube"
+      ],
+      "entity_fn": [],
+      "matched_pairs": [
+        {
+          "predicted": "python",
+          "gold": "python",
+          "similarity": 1.0,
+          "keyword_type": "entity",
+          "predicted_is_news_relevant": true,
+          "gold_is_news_relevant": true,
+          "news_relevant_correct": true
+        }
+      ],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "gen-tech-ai-03",
+      "domain": "tech-ai",
+      "predicted_categories": [],
+      "predicted_entities": [
+        "aws",
+        "lambda"
+      ],
+      "gold_categories": [],
+      "gold_entities": [
+        "aws"
+      ],
+      "category_tp": [],
+      "category_fp": [],
+      "category_fn": [],
+      "entity_tp": [
+        "aws"
+      ],
+      "entity_fp": [
+        "lambda"
+      ],
+      "entity_fn": [],
+      "matched_pairs": [
+        {
+          "predicted": "aws",
+          "gold": "aws",
+          "similarity": 1.0,
+          "keyword_type": "entity",
+          "predicted_is_news_relevant": true,
+          "gold_is_news_relevant": true,
+          "news_relevant_correct": true
+        }
+      ],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "gen-tech-ai-04",
+      "domain": "tech-ai",
+      "predicted_categories": [
+        "video games"
+      ],
+      "predicted_entities": [
+        "tears of the kingdom",
+        "breath of the wild",
+        "zelda",
+        "nintendo"
+      ],
+      "gold_categories": [
+        "video gaming"
+      ],
+      "gold_entities": [
+        "nintendo"
+      ],
+      "category_tp": [],
+      "category_fp": [
+        "video games"
+      ],
+      "category_fn": [
+        "video gaming"
+      ],
+      "entity_tp": [
+        "nintendo"
+      ],
+      "entity_fp": [
+        "tears of the kingdom",
+        "breath of the wild",
+        "zelda"
+      ],
+      "entity_fn": [],
+      "matched_pairs": [
+        {
+          "predicted": "nintendo",
+          "gold": "nintendo",
+          "similarity": 1.0,
+          "keyword_type": "entity",
+          "predicted_is_news_relevant": false,
+          "gold_is_news_relevant": true,
+          "news_relevant_correct": false
+        }
+      ],
+      "news_relevant_errors": [
+        {
+          "predicted": "nintendo",
+          "gold": "nintendo",
+          "similarity": 1.0,
+          "keyword_type": "entity",
+          "predicted_is_news_relevant": false,
+          "gold_is_news_relevant": true,
+          "news_relevant_correct": false
+        }
+      ],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "rec-tech-ai-01",
+      "domain": "tech-ai",
+      "predicted_categories": [],
+      "predicted_entities": [
+        "xiaomi",
+        "openai",
+        "anthropic",
+        "claude",
+        "chatgpt"
+      ],
+      "gold_categories": [
+        "artificial intelligence"
+      ],
+      "gold_entities": [],
+      "category_tp": [],
+      "category_fp": [],
+      "category_fn": [
+        "artificial intelligence"
+      ],
+      "entity_tp": [],
+      "entity_fp": [
+        "xiaomi",
+        "openai",
+        "anthropic",
+        "claude",
+        "chatgpt"
+      ],
+      "entity_fn": [],
+      "matched_pairs": [],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "rec-tech-ai-02",
+      "domain": "tech-ai",
+      "predicted_categories": [],
+      "predicted_entities": [],
+      "gold_categories": [
+        "artificial intelligence"
+      ],
+      "gold_entities": [],
+      "category_tp": [],
+      "category_fp": [],
+      "category_fn": [
+        "artificial intelligence"
+      ],
+      "entity_tp": [],
+      "entity_fp": [],
+      "entity_fn": [],
+      "matched_pairs": [],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "rec-tech-ai-03",
+      "domain": "tech-ai",
+      "predicted_categories": [
+        "artificial intelligence"
+      ],
+      "predicted_entities": [
+        "openai",
+        "amazon",
+        "google"
+      ],
+      "gold_categories": [
+        "artificial intelligence"
+      ],
+      "gold_entities": [],
+      "category_tp": [
+        "artificial intelligence"
+      ],
+      "category_fp": [],
+      "category_fn": [],
+      "entity_tp": [],
+      "entity_fp": [
+        "openai",
+        "amazon",
+        "google"
+      ],
+      "entity_fn": [],
+      "matched_pairs": [
+        {
+          "predicted": "artificial intelligence",
+          "gold": "artificial intelligence",
+          "similarity": 1.0,
+          "keyword_type": "category",
+          "predicted_is_news_relevant": true,
+          "gold_is_news_relevant": true,
+          "news_relevant_correct": true
+        }
+      ],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "rec-tech-ai-04",
+      "domain": "tech-ai",
+      "predicted_categories": [],
+      "predicted_entities": [
+        "techcrunch",
+        "anthropic",
+        "claude"
+      ],
+      "gold_categories": [
+        "artificial intelligence"
+      ],
+      "gold_entities": [],
+      "category_tp": [],
+      "category_fp": [],
+      "category_fn": [
+        "artificial intelligence"
+      ],
+      "entity_tp": [],
+      "entity_fp": [
+        "techcrunch",
+        "anthropic",
+        "claude"
+      ],
+      "entity_fn": [],
+      "matched_pairs": [],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "rec-tech-ai-05",
+      "domain": "tech-ai",
+      "predicted_categories": [
+        "artificial intelligence",
+        "law"
+      ],
+      "predicted_entities": [
+        "mistral",
+        "openai",
+        "gpt",
+        "white house"
+      ],
+      "gold_categories": [
+        "artificial intelligence"
+      ],
+      "gold_entities": [],
+      "category_tp": [
+        "artificial intelligence"
+      ],
+      "category_fp": [
+        "law"
+      ],
+      "category_fn": [],
+      "entity_tp": [],
+      "entity_fp": [
+        "mistral",
+        "openai",
+        "gpt",
+        "white house"
+      ],
+      "entity_fn": [],
+      "matched_pairs": [
+        {
+          "predicted": "artificial intelligence",
+          "gold": "artificial intelligence",
+          "similarity": 1.0,
+          "keyword_type": "category",
+          "predicted_is_news_relevant": true,
+          "gold_is_news_relevant": true,
+          "news_relevant_correct": true
+        }
+      ],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "rec-tech-ai-06",
+      "domain": "tech-ai",
+      "predicted_categories": [],
+      "predicted_entities": [
+        "microsoft copilot"
+      ],
+      "gold_categories": [
+        "artificial intelligence"
+      ],
+      "gold_entities": [],
+      "category_tp": [],
+      "category_fp": [],
+      "category_fn": [
+        "artificial intelligence"
+      ],
+      "entity_tp": [],
+      "entity_fp": [
+        "microsoft copilot"
+      ],
+      "entity_fn": [],
+      "matched_pairs": [],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "rec-tech-ai-07",
+      "domain": "tech-ai",
+      "predicted_categories": [],
+      "predicted_entities": [
+        "sora"
+      ],
+      "gold_categories": [
+        "artificial intelligence"
+      ],
+      "gold_entities": [],
+      "category_tp": [],
+      "category_fp": [],
+      "category_fn": [
+        "artificial intelligence"
+      ],
+      "entity_tp": [],
+      "entity_fp": [
+        "sora"
+      ],
+      "entity_fn": [],
+      "matched_pairs": [],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "rec-tech-ai-08",
+      "domain": "tech-ai",
+      "predicted_categories": [],
+      "predicted_entities": [
+        "google",
+        "softbank",
+        "amazon"
+      ],
+      "gold_categories": [
+        "artificial intelligence"
+      ],
+      "gold_entities": [],
+      "category_tp": [],
+      "category_fp": [],
+      "category_fn": [
+        "artificial intelligence"
+      ],
+      "entity_tp": [],
+      "entity_fp": [
+        "google",
+        "softbank",
+        "amazon"
+      ],
+      "entity_fn": [],
+      "matched_pairs": [],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "rec-tech-ai-09",
+      "domain": "tech-ai",
+      "predicted_categories": [
+        "education",
+        "artificial intelligence"
+      ],
+      "predicted_entities": [],
+      "gold_categories": [
+        "artificial intelligence"
+      ],
+      "gold_entities": [],
+      "category_tp": [
+        "artificial intelligence"
+      ],
+      "category_fp": [
+        "education"
+      ],
+      "category_fn": [],
+      "entity_tp": [],
+      "entity_fp": [],
+      "entity_fn": [],
+      "matched_pairs": [
+        {
+          "predicted": "artificial intelligence",
+          "gold": "artificial intelligence",
+          "similarity": 1.0,
+          "keyword_type": "category",
+          "predicted_is_news_relevant": true,
+          "gold_is_news_relevant": true,
+          "news_relevant_correct": true
+        }
+      ],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    },
+    {
+      "case_id": "rec-tech-ai-10",
+      "domain": "tech-ai",
+      "predicted_categories": [],
+      "predicted_entities": [
+        "meta",
+        "amazon"
+      ],
+      "gold_categories": [
+        "artificial intelligence"
+      ],
+      "gold_entities": [],
+      "category_tp": [],
+      "category_fp": [],
+      "category_fn": [
+        "artificial intelligence"
+      ],
+      "entity_tp": [],
+      "entity_fp": [
+        "meta",
+        "amazon"
+      ],
+      "entity_fn": [],
+      "matched_pairs": [],
+      "news_relevant_errors": [],
+      "niche_keywords": [],
+      "type_confused_keywords": []
+    }
+  ]
+}

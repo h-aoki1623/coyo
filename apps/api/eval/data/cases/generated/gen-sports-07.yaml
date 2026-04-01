@@ -1,0 +1,34 @@
+id: gen-sports-07
+source: generated
+domain: sports
+transcript:
+- role: user
+  text: I've been watching a lot of sports on TV lately. There's just so much to choose
+    from, you know?
+- role: ai
+  text: Oh nice! What sports have you been following? I love how there's always something
+    on these days.
+- role: user
+  text: Yeah, exactly! Last night I watched some soccer - there was a Champions League
+    match. And um, this morning I caught the end of a tennis tournament. Oh, and basketball
+    too - the NBA playoffs are getting pretty intense.
+- role: ai
+  text: Wow, you really do watch a variety! Do you have a favorite among those, or
+    do you just enjoy watching whatever's on?
+- role: user
+  text: Hmm, that's hard to say... I mean, they're all exciting in different ways.
+    Soccer has those amazing goals, basketball is so fast-paced, and tennis - I love
+    the one-on-one competition. I guess I just like sports in general!
+- role: ai
+  text: That's great that you appreciate each sport for what makes it unique. Being
+    a general sports fan means you're never bored - there's always something interesting
+    to watch!
+gold_labels:
+  categories:
+  - keyword: sports
+    is_news_relevant: true
+    keyword_type: category
+    iab_category_id: '23'
+  entities: []
+notes: Tests broad category extraction when user expresses general interest across
+  multiple sports.

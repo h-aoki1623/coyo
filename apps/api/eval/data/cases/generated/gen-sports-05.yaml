@@ -1,0 +1,34 @@
+id: gen-sports-05
+source: generated
+domain: sports
+transcript:
+- role: user
+  text: Have you been watching the Olympics? I've been, um, pretty much glued to my
+    TV lately!
+- role: ai
+  text: Oh yes, I love the Olympics! Which events have caught your attention so far?
+- role: user
+  text: Oh man, so many! I watched the swimming finals yesterday - those races are
+    so intense! And then I switched to watch some athletics... the high jump was crazy.
+    Oh, and gymnastics too - those flips are just insane!
+- role: ai
+  text: It sounds like you're really getting the full Olympic experience! The variety
+    is what makes it so special, isn't it? One moment you're watching swimmers breaking
+    records, and the next you're holding your breath watching gymnasts on the balance
+    beam.
+- role: user
+  text: Exactly! That's what I love about it. Like, I don't usually watch these sports
+    normally, but during the Olympics? I'm suddenly an expert in, uh... what's it
+    called... shot put? And I get so emotional when athletes win their first medal!
+- role: ai
+  text: I know what you mean! There's something magical about the Olympics that makes
+    every sport compelling. Those personal stories and seeing athletes achieve their
+    dreams really pulls you in. Do you have any favorite moments so far?
+gold_labels:
+  categories: []
+  entities:
+  - keyword: olympic games
+    is_news_relevant: true
+    keyword_type: entity
+notes: Tests broad category extraction when user expresses general interest across
+  multiple sports.

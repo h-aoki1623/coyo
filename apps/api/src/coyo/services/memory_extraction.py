@@ -44,9 +44,7 @@ _BATCH_INTERVAL = 5
 class MemoryItem(BaseModel):
     """A single extracted user profile attribute."""
 
-    key: Literal[
-        "english_goal", "job_industry", "hometown_or_location", "family_status"
-    ]
+    key: Literal["english_goal", "job_industry", "hometown_or_location", "family_status"]
     value: str | None = Field(default=None, max_length=200)
     confidence: float = Field(ge=0.0, le=1.0)
     is_negation: bool = False
@@ -78,7 +76,7 @@ class MemoryExtractionResult(BaseModel):
 
     @model_validator(mode="before")
     @classmethod
-    def normalize_raw_categories_and_entities(cls, data: dict) -> dict:
+    def normalize_raw_categories_and_entities(cls, data: dict[str, object]) -> dict[str, object]:
         """Normalize plain strings in categories/entities to dicts before validation.
 
         LLMs sometimes return plain keyword strings instead of full objects.
@@ -89,8 +87,7 @@ class MemoryExtractionResult(BaseModel):
                 items = data.get(field, [])
                 if isinstance(items, list):
                     data[field] = [
-                        {"keyword": item} if isinstance(item, str) else item
-                        for item in items
+                        {"keyword": item} if isinstance(item, str) else item for item in items
                     ]
         return data
 
@@ -247,7 +244,6 @@ def _keyword_matches(keyword: str, text: str) -> bool:
     return bool(re.search(pattern, text.lower()))
 
 
-
 def trim_to_word_boundary(text: str, *, max_chars: int = _MAX_SUMMARY_LENGTH) -> str:
     """Trim text to max_chars at a word boundary."""
     if len(text) <= max_chars:
@@ -280,9 +276,7 @@ class MemoryExtractionService:
         try:
             session_factory = get_session_factory()
             async with session_factory() as session:
-                await MemoryExtractionService._extract(
-                    session, conversation_id, user_id
-                )
+                await MemoryExtractionService._extract(session, conversation_id, user_id)
                 await session.commit()
         except Exception:
             logger.exception(
@@ -299,9 +293,7 @@ class MemoryExtractionService:
         """Run memory extraction. Raises on failure for Cloud Tasks retry."""
         session_factory = get_session_factory()
         async with session_factory() as session:
-            await MemoryExtractionService._extract(
-                session, conversation_id, user_id
-            )
+            await MemoryExtractionService._extract(session, conversation_id, user_id)
             await session.commit()
 
     @staticmethod
@@ -352,9 +344,7 @@ class MemoryExtractionService:
         current_conv_idx = row[0]
 
         # 3. Build transcript (all turns for full context)
-        transcript = await MemoryExtractionService._build_transcript(
-            session, conversation_id
-        )
+        transcript = await MemoryExtractionService._build_transcript(session, conversation_id)
         if not transcript.strip():
             logger.info(
                 "memory_extraction_empty_transcript",
@@ -374,9 +364,7 @@ class MemoryExtractionService:
         )
 
         # 6. Process memories (profile attributes)
-        await MemoryExtractionService._process_memories(
-            session, user_id, extraction.memories
-        )
+        await MemoryExtractionService._process_memories(session, user_id, extraction.memories)
 
         # 7. Upsert interests (categories + entities) via post-processing pipeline
         seen_keywords = await MemoryExtractionService._upsert_interests(
@@ -385,9 +373,7 @@ class MemoryExtractionService:
 
         # 8. Batch regeneration every N conversations
         if current_conv_idx % _BATCH_INTERVAL == 0:
-            await MemoryExtractionService._regenerate_interest_summaries(
-                session, user_id
-            )
+            await MemoryExtractionService._regenerate_interest_summaries(session, user_id)
             await MemoryExtractionService._regenerate_profile_summary(
                 session, user_id, current_conv_idx
             )
@@ -423,6 +409,15 @@ class MemoryExtractionService:
         return "\n".join(lines)
 
     @staticmethod
+    async def extract_from_transcript(transcript: str) -> MemoryExtractionResult:
+        """Extract memories, categories, and entities from a transcript.
+
+        Public API for evaluation and testing. Uses the production prompt and
+        model configuration to call the LLM.
+        """
+        return await MemoryExtractionService._call_llm(transcript)
+
+    @staticmethod
     async def _call_llm(transcript: str) -> MemoryExtractionResult:
         """Call LLM to extract memories, categories, and entities from transcript."""
         settings = get_settings()
@@ -452,9 +447,7 @@ class MemoryExtractionService:
         source_keyword: str | None = None
 
         if conversation.topic_suggestion_id is not None:
-            suggestion = await session.get(
-                TopicSuggestion, conversation.topic_suggestion_id
-            )
+            suggestion = await session.get(TopicSuggestion, conversation.topic_suggestion_id)
             if suggestion is not None:
                 topic_title = suggestion.title
                 source_keyword = suggestion.source_keyword
@@ -484,7 +477,7 @@ class MemoryExtractionService:
             if mem.is_negation and existing:
                 await repo.delete(user_id, mem.key)
             elif not existing:
-                if mem.confidence >= _CONFIDENCE_THRESHOLD:
+                if mem.value is not None and mem.confidence >= _CONFIDENCE_THRESHOLD:
                     await repo.upsert(
                         user_id=user_id,
                         key=mem.key,
@@ -582,9 +575,7 @@ class MemoryExtractionService:
         if not interests:
             return
 
-        recent_summaries = await conv_summary_repo.get_latest_for_user(
-            user_id, limit=10
-        )
+        recent_summaries = await conv_summary_repo.get_latest_for_user(user_id, limit=10)
 
         llm = OpenAIClient(model=settings.llm_interest_model)
 
@@ -595,9 +586,7 @@ class MemoryExtractionService:
                 if _keyword_matches(interest.keyword, s.summary)
                 or (s.source_keyword and _keyword_matches(interest.keyword, s.source_keyword))
             ]
-            related_text = "\n".join(
-                f"- {s.topic_title}: {s.summary}" for s in related
-            )
+            related_text = "\n".join(f"- {s.topic_title}: {s.summary}" for s in related)
             if not related_text:
                 related_text = "(no related conversations found)"
 
@@ -624,9 +613,7 @@ class MemoryExtractionService:
                 )
                 if response.summary:
                     trimmed = trim_to_word_boundary(response.summary)
-                    await interest_repo.update_summary(
-                        user_id, interest.keyword, trimmed
-                    )
+                    await interest_repo.update_summary(user_id, interest.keyword, trimmed)
             except Exception:
                 logger.exception(
                     "interest_summary_regeneration_failed",
@@ -649,14 +636,10 @@ class MemoryExtractionService:
 
         # Gather data
         attributes = await attr_repo.get_all_for_user(user_id)
-        top_interests = await interest_repo.get_top_interests(
-            user_id, current_conv_idx, limit=10
-        )
+        top_interests = await interest_repo.get_top_interests(user_id, current_conv_idx, limit=10)
         recent_convs = await conv_summary_repo.get_latest_for_user(user_id, limit=5)
 
-        attrs_text = "\n".join(
-            f"- {a.key}: {a.value}" for a in attributes
-        )
+        attrs_text = "\n".join(f"- {a.key}: {a.value}" for a in attributes)
         if not attrs_text:
             attrs_text = "(no attributes yet)"
 
@@ -666,9 +649,7 @@ class MemoryExtractionService:
         if not interests_text:
             interests_text = "(no interests yet)"
 
-        convs_text = "\n".join(
-            f"- {c.topic_title}: {c.summary}" for c in recent_convs
-        )
+        convs_text = "\n".join(f"- {c.topic_title}: {c.summary}" for c in recent_convs)
         if not convs_text:
             convs_text = "(no recent conversations)"
 

@@ -1,0 +1,29 @@
+id: cp-health-04
+source: corpus
+domain: health
+transcript:
+- role: user
+  text: What's the matter with me , Doctor ? I feel so tired these days .
+- role: ai
+  text: It's your blood pressure , I'm afraid . It's far too high .
+- role: user
+  text: And what's the cause of that ?
+- role: ai
+  text: Overwork-amongst other things . You can't work 24 hours a day . You ' Ve got
+    to slow down .
+- role: user
+  text: But I can't just slow down .
+- role: ai
+  text: You've got to , I'm afraid . And look at this . You weigh 200 stones . That's
+    too much for a man of your size .
+- role: user
+  text: You mean I've got to lose weight ?
+- role: ai
+  text: Yes . You've got to cut down on bread and potatoes and take more exercise
+    .
+gold_labels:
+  categories: []
+  entities: []
+notes: This is a medical consultation about general health issues (tiredness, blood
+  pressure, weight). No specific interests, hobbies, or entities are expressed. Medical
+  terms and general health topics are not extractable categories per the guidelines.

@@ -1,0 +1,32 @@
+id: cp-school-life-04
+source: corpus
+domain: school_life
+transcript:
+- role: user
+  text: Hi . Are you new in this class ?
+- role: ai
+  text: Yes , I am . I really don ’ t know anyone .
+- role: user
+  text: Did you just arrive in this country ? You look a little nervous .
+- role: ai
+  text: No . I was here last semester , but I didn ’ t find out about this class in
+    time . So I ’ m taking it this semester .
+- role: user
+  text: I took this course last semester too . Now I am taking it again !
+- role: ai
+  text: How is it ? Did you learn anything here ? Why are you taking it again ?
+- role: user
+  text: Wow , you have a lot of questions ! I learned a lot . In fact , that ’ s why
+    I am taking it again . I get lots of practice in speaking , and also in writing
+    . I ’ m sure you ’ ll be glad you took this course . I ’ ll even help you study
+    if you ’ d like .
+- role: ai
+  text: That ’ s just what I need . Thanks so much . You ’ Ve been a big help already
+    .
+gold_labels:
+  categories: []
+  entities: []
+notes: This is a generic conversation about taking a class. No specific subjects,
+  interests, or real-world entities are mentioned. The discussion is about general
+  educational experiences without naming any particular course, institution, or field
+  of study.

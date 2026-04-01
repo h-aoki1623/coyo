@@ -1,0 +1,27 @@
+id: cp-attitude-emotion-01
+source: corpus
+domain: attitude_emotion
+transcript:
+- role: user
+  text: Stop running around in front of the TV , will you ? Why don't you just sit
+    and watch ?
+- role: ai
+  text: I've tried , but I can't stand the bald man talking so loudly in the program
+    .
+- role: user
+  text: Then stay away . No one is keeping you from doing that .
+- role: ai
+  text: Don't be so irritable . I just don't understand the program , that's all .
+- role: user
+  text: All right , I will explain it to you later on . Now scram .
+- role: ai
+  text: Ok . I will wait until you have had your fun , if that's what you want .
+- role: user
+  text: That's exactly what I want , thank you .
+gold_labels:
+  categories: []
+  entities: []
+notes: This conversation is about a domestic disagreement over TV watching. No specific
+  interests, categories, or entities are mentioned. The 'bald man' is too vague to
+  identify as a specific entity, and TV watching in general doesn't indicate a particular
+  content category.

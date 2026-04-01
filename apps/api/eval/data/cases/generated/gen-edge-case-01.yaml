@@ -1,0 +1,12 @@
+id: gen-edge-case-01
+source: generated
+domain: edge-case
+transcript:
+- role: ai
+  text: Do you enjoy playing sports or any physical activities?
+- role: user
+  text: Yes, I like it.
+gold_labels:
+  categories: []
+  entities: []
+notes: Minimal conversation — no extractable keywords.

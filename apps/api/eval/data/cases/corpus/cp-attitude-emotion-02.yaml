@@ -1,0 +1,28 @@
+id: cp-attitude-emotion-02
+source: corpus
+domain: attitude_emotion
+transcript:
+- role: user
+  text: I was just about to go to bed when the telephone rang last night .
+- role: ai
+  text: Who was it ?
+- role: user
+  text: Kate . She said she was too excited to go to sleep .
+- role: ai
+  text: She never cares about others .
+- role: user
+  text: It ’ s true . Guess what we were talking about last night .
+- role: ai
+  text: Her new boyfriend , right ?
+- role: user
+  text: Yeah , how do you know about that ?
+- role: ai
+  text: I was also interrupted by her last week because of such a thing .
+gold_labels:
+  categories: []
+  entities: []
+notes: This conversation is about a personal phone call and interpersonal relationships.
+  While 'Kate' is mentioned as a person, she appears to be a personal acquaintance
+  rather than a public figure or entity with real-world identity that would be searchable.
+  The discussion focuses on personal annoyances and relationships, with no clear expression
+  of interest in any broader topics or categories.

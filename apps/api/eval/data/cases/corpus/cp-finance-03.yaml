@@ -1,0 +1,36 @@
+id: cp-finance-03
+source: corpus
+domain: finance
+transcript:
+- role: ai
+  text: Good morning and welcome . How can I help you ?
+- role: user
+  text: Could you tell me something about safety deposit box rental , please ? I need
+    somewhere safe to keep some insurance documents ; I just simply don't feel comfortable
+    keeping them at home or in the office .
+- role: ai
+  text: We have 3 different types of boxes . We usually rent for 1 year and the fee
+    depends on the size and location of the box .
+- role: user
+  text: I think I'll go for the smallest , as it's just for documents . Will I be
+    the only key holder ? I'd perhaps feel a little nervous if I knew someone else
+    could have access to it at any time .
+- role: ai
+  text: You can have more than 1 key if you'd like , but we must have signature cards
+    for each box .
+- role: user
+  text: That's great ; I can give an extra key to my wife . I feel perfectly comfortable
+    with her having a key . Thanks for your help .
+- role: ai
+  text: If you have your ID and are willing to pay a year in advance , we can do that
+    for you today , there is no need to wait .
+- role: user
+  text: OK , I'll take a small , for 1 year , in this branch , please .
+gold_labels:
+  categories: []
+  entities: []
+notes: This is a transactional conversation about renting a safety deposit box. While
+  'insurance documents' are mentioned, this is just context for the rental service,
+  not an expression of interest in insurance as a topic. No proper nouns or specific
+  entities are mentioned. The conversation is purely functional with no genuine interests
+  expressed.

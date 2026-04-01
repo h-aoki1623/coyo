@@ -1,0 +1,31 @@
+id: cp-finance-01
+source: corpus
+domain: finance
+transcript:
+- role: user
+  text: Hello , welcome to IBA . What can I do for you ?
+- role: ai
+  text: Do you offer a safety deposit box rental service here ?
+- role: user
+  text: We certainly do . May I ask you the purpose of the rental ?
+- role: ai
+  text: I'd like to put some valuables inside , you know , documents and jewellery
+    , things like that .
+- role: user
+  text: I see . We have various rental periods . How long would you like to rent it
+    for ?
+- role: ai
+  text: What rental do you offer ?
+- role: user
+  text: You can choose a short-term or yearly rental .
+- role: ai
+  text: I'll have to ask my wife how long she'll need it for as it is mainly for her
+    belongings . I'll come back after we have discussed it . Thanks for your help
+    .
+gold_labels:
+  categories: []
+  entities: []
+notes: IBA appears to be a bank or financial institution offering safety deposit services.
+  No genuine interest categories expressed - the conversation is purely transactional
+  about a banking service. The discussion of valuables, documents, and jewelry are
+  practical matters, not interests.

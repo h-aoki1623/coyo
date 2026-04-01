@@ -1,0 +1,38 @@
+id: cp-culture-education-04
+source: corpus
+domain: culture_education
+transcript:
+- role: user
+  text: How long will it take to learn English ? Will I be able to take other courses
+    next semester or will English take up all of my time ?
+- role: ai
+  text: It ’ s hard to say . Language isn ’ t like other studies .
+- role: user
+  text: You mean I could finish this course and still not know English ? You ’ Ve
+    got to be kidding !
+- role: ai
+  text: I ’ m not kidding . Learning a language is a question of forming language
+    habits and that takes time .
+- role: user
+  text: So do we have to stay in this English class forever ?
+- role: ai
+  text: No . You just have to stay here long enough to get some orientation . Then
+    you go on practicing and learning outside . A lot of learning depends on your
+    personal motivation .
+- role: user
+  text: So it ’ s really the same story . Practice , practice , practice and more
+    practice is the only way to learn a language .
+- role: ai
+  text: You said it .
+gold_labels:
+  categories:
+  - keyword: language learning
+    is_news_relevant: false
+    keyword_type: category
+    iab_category_id: '5.7'
+  entities: []
+notes: No extractable keywords. The conversation is about English language learning
+  in general terms. 'English' as a language subject is too generic/educational to
+  extract as a category. No specific organizations, people, or real-world entities
+  are mentioned. The discussion focuses on language learning methodology rather than
+  expressing interest in specific topics.

@@ -1,0 +1,28 @@
+id: cp-tourism-04
+source: corpus
+domain: tourism
+transcript:
+- role: user
+  text: Do you have a room available for this weekend ?
+- role: ai
+  text: Yes , we have several rooms available . Would you like two twin beds or one
+    queen size bed ?
+- role: user
+  text: I'd like two twin beds , please .
+- role: ai
+  text: The check in time is 2 p . m . If you get here before that time the room won't
+    be ready .
+- role: user
+  text: That's fine . Do you have any specials for your guests ?
+- role: ai
+  text: We offer a complementary breakfast buffet and free parking .
+- role: user
+  text: Good . Let me give you my credit card number to reserve a room .
+- role: ai
+  text: Thank you . Your confirmation number is 611273 .
+gold_labels:
+  categories: []
+  entities: []
+notes: This is a standard hotel booking conversation. No personal interests or hobbies
+  are expressed. The conversation only contains transactional dialogue about room
+  availability and booking details. No entities with real-world identity are mentioned.

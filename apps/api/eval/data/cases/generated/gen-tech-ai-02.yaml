@@ -1,0 +1,41 @@
+id: gen-tech-ai-02
+source: generated
+domain: tech-ai
+transcript:
+- role: user
+  text: So I've been learning Python for a few months now, and I'm really enjoying
+    it! I just started building my first web app.
+- role: ai
+  text: That's fantastic! Python is such a great language to start with. What kind
+    of web app are you working on?
+- role: user
+  text: It's like a personal journal app where I can track my daily habits and mood.
+    I'm using Flask for the backend... still figuring out how all the pieces fit together
+    though.
+- role: ai
+  text: A habit tracker sounds really useful! Flask is a good choice for beginners.
+    Are you finding the documentation helpful, or are there parts that are confusing
+    you?
+- role: user
+  text: The documentation is okay, but sometimes I get stuck on things like... um,
+    routing and templates? I spend hours googling simple things, but I guess that's
+    part of learning, right?
+- role: ai
+  text: Absolutely, that's totally normal! Everyone googles things, even experienced
+    developers. Routing and templates can be tricky at first. Have you tried any tutorials
+    or video courses alongside the documentation?
+- role: user
+  text: Yeah, I've been following some YouTube tutorials. They help a lot with seeing
+    how everything connects. I'm thinking about maybe trying Django later, but Flask
+    seems simpler for now.
+- role: ai
+  text: That's a smart approach - starting with Flask and then moving to Django later.
+    You'll have a solid foundation by then. Keep at it, and don't hesitate to ask
+    questions in programming communities when you're stuck!
+gold_labels:
+  categories: []
+  entities:
+  - keyword: python
+    is_news_relevant: true
+    keyword_type: entity
+notes: Tests that programming frameworks are not extracted as entities.
