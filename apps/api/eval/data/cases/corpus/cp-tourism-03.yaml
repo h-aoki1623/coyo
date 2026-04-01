@@ -1,0 +1,29 @@
+id: cp-tourism-03
+source: corpus
+domain: tourism
+transcript:
+- role: user
+  text: It's very kind of you to show me around .
+- role: ai
+  text: Not at all . What would you like to see first ?
+- role: user
+  text: I really don't know .
+- role: ai
+  text: Let's walk around the lake first , shall we ?
+- role: user
+  text: Yes , that would be lovely .
+- role: ai
+  text: Have you been here before ?
+- role: user
+  text: No , it's the first time I've been here .
+- role: ai
+  text: I will take you to Li River after walking around here .
+- role: user
+  text: That's wonderful ! I have heard the scene of Li River is beautiful !
+- role: ai
+  text: Yes , you'll be in a different world there .
+gold_labels:
+  categories: []
+  entities: []
+notes: No categories extracted as this is basic tourist conversation without expressing deep interests
+  in topics like travel, tourism, or geography.

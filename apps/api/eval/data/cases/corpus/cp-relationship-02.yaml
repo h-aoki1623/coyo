@@ -1,0 +1,25 @@
+id: cp-relationship-02
+source: corpus
+domain: relationship
+transcript:
+- role: ai
+  text: What do you say to eating out , Maggie ?
+- role: user
+  text: Yeah , why not ? We haven't been out for dinner for quite a long time . A
+    new French restaurant has just opened in our neighborhood . We can go there .
+- role: ai
+  text: Do we need to book a table in advance ?
+- role: user
+  text: No need for that . It's not usually busy on weekdays .
+- role: ai
+  text: What time shall we go ?
+- role: user
+  text: Why not now ? I'm hungry .
+gold_labels:
+  categories: []
+  entities: []
+notes: This is a casual conversation about going out to eat. While a French restaurant
+  is mentioned, it's just a dining option rather than an expression of interest in
+  French cuisine or culture. No proper nouns with real-world identity are mentioned
+  (Maggie appears to be the AI's name in this roleplay scenario). The conversation
+  is about immediate plans rather than expressing interests in specific topics.

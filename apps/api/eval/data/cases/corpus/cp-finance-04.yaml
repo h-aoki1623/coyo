@@ -1,0 +1,18 @@
+id: cp-finance-04
+source: corpus
+domain: finance
+transcript:
+- role: ai
+  text: First National Bank .
+- role: user
+  text: Hi , I have a checking account with you .
+- role: ai
+  text: How can I help you ?
+- role: user
+  text: I need to see if check number 212 has cleared yet .
+- role: ai
+  text: What's your name and account number ?
+gold_labels:
+  categories: []
+  entities: []
+notes: This is a banking customer service conversation. 

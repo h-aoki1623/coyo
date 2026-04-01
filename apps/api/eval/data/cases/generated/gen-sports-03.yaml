@@ -1,0 +1,43 @@
+id: gen-sports-03
+source: generated
+domain: sports
+transcript:
+- role: user
+  text: Hey, did you catch the F1 race last weekend? Max Verstappen was absolutely
+    incredible!
+- role: ai
+  text: I did! That was quite a performance. What did you think of his overtaking
+    moves?
+- role: user
+  text: Oh man, that pass on turn 7 was just... perfect. I've been following Max since
+    he joined F1, and he just keeps getting better. Even when Red Bull doesn't have
+    the fastest car, he somehow makes it work.
+- role: ai
+  text: He really does maximize every opportunity. Do you have a favorite Verstappen
+    moment from this season?
+- role: user
+  text: Hmm, probably his win in the rain at Brazil. The way he controlled the car
+    in those conditions... it's like he's on another level compared to other drivers.
+    I mean, I respect all the drivers, but Max is special, you know?
+- role: ai
+  text: The Brazil race was masterful! His car control in wet conditions is exceptional.
+    Have you been following F1 for a long time?
+- role: user
+  text: Yeah, about five or six years now. But honestly, I became a real fan when
+    I started watching Max race. There's just something about his aggressive style
+    and his focus... he never gives up, even from P10 or P15.
+- role: ai
+  text: That determination is what makes him such a compelling driver to watch. His
+    racecraft has really evolved over the years too.
+gold_labels:
+  categories:
+  - keyword: f1
+    is_news_relevant: true
+    keyword_type: category
+    iab_category_id: null
+  entities:
+  - keyword: max verstappen
+    is_news_relevant: true
+    keyword_type: entity
+notes: 'Tests IAB normalization: ''F1'' or ''auto racing''. Also tests entity extraction
+  for drivers.'

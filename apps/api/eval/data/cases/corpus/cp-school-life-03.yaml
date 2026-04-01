@@ -1,0 +1,32 @@
+id: cp-school-life-03
+source: corpus
+domain: school_life
+transcript:
+- role: user
+  text: Can I ask you a question ?
+- role: ai
+  text: Sure , go ahead .
+- role: user
+  text: How do you get along with the American students in your classes ?
+- role: ai
+  text: I don ’ t have much contact with them .
+- role: user
+  text: Really ? Why not ? Don ’ t you go up and talk to them ?
+- role: ai
+  text: No , I don ’ t . I ’ m too afraid of making mistakes in English . I don ’
+    t want to be laughed at .
+- role: user
+  text: You won ’ t get anywhere that way . You ’ re the one who needs to practice
+    English , so you should make the first move . Besides , most American students
+    are really friendly and outgoing . They will be glad to talk to you .
+- role: ai
+  text: Thanks for the advice . I guess you ’ re right . It ’ s just hard to overcome
+    my shyness . I really will try from now on . I promise .
+gold_labels:
+  categories: []
+  entities: []
+notes: No extractable keywords. The conversation is about language learning anxiety
+  and social interaction in an educational setting. Terms like 'American students'
+  are descriptive rather than expressing interest in American culture/news. The focus
+  is on interpersonal communication and overcoming shyness, which are personal development
+  topics rather than categorical interests.

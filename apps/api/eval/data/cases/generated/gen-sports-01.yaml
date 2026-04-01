@@ -1,0 +1,46 @@
+id: gen-sports-01
+source: generated
+domain: sports
+transcript:
+- role: user
+  text: Oh my god, I just watched the most incredible tennis match! It was Carlos
+    Alcaraz playing and... wow, he's just amazing to watch!
+- role: ai
+  text: Oh, you're an Alcaraz fan too? He's really something special! Which match
+    did you watch?
+- role: user
+  text: It was his quarterfinal match, and the way he moves on the court is just...
+    I mean, I've been following him since he won his first grand slam, and he keeps
+    getting better! His drop shots are insane!
+- role: ai
+  text: His athleticism is incredible, isn't it? Those sliding shots he makes on hard
+    courts are unbelievable. Did it go to multiple sets?
+- role: user
+  text: Yeah, it went to four sets! And there was this crazy moment where his opponent
+    used the challenge system on this really close baseline shot... everyone was holding
+    their breath waiting for the hawk-eye to show if it was in or out. It was literally
+    by like 2 millimeters!
+- role: ai
+  text: Those hawk-eye replays always add so much drama! I love how the crowd goes
+    silent waiting for the result. Did the call go in Alcaraz's favor?
+- role: user
+  text: No, actually it was out! But Carlos just smiled and got ready for the next
+    point - that's what I love about him. He's so mentally strong, especially for
+    someone so young. I really think he could win all four grand slams one day, you
+    know?
+- role: ai
+  text: Absolutely! He's already proven he can compete on all surfaces. His mental
+    game combined with that explosive style... he's definitely got what it takes to
+    complete the career grand slam!
+gold_labels:
+  categories:
+  - keyword: tennis
+    is_news_relevant: true
+    keyword_type: category
+    iab_category_id: '23.46'
+  entities:
+  - keyword: carlos alcaraz
+    is_news_relevant: true
+    keyword_type: entity
+notes: Tests that 'challenge system', 'hawk-eye', and 'video review' are NOT extracted.
+  These are sub-elements of tennis, not standalone interests.

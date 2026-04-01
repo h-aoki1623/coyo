@@ -1,0 +1,23 @@
+id: cp-health-02
+source: corpus
+domain: health
+transcript:
+- role: user
+  text: I have the chills and an upset stomach .
+- role: ai
+  text: How long have you felt like this ?
+- role: user
+  text: For most of the week .
+- role: ai
+  text: It sounds as if you have a virus .
+- role: user
+  text: What do you think I should do ?
+- role: ai
+  text: I'll give you something . I want you to take it easy and come back in a couple
+    of days .
+gold_labels:
+  categories: []
+  entities: []
+notes: This is a medical consultation about common illness symptoms. No specific interests,
+  hobbies, or named entities are mentioned. Health symptoms and medical advice don't
+  constitute extractable categories in this context.

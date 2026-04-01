@@ -1,0 +1,23 @@
+id: gen-edge-case-03
+source: generated
+domain: edge-case
+transcript:
+- role: user
+  text: Yes.
+- role: ai
+  text: Oh, great! So what brings you here today? Are you working on anything interesting?
+- role: user
+  text: Maybe.
+- role: ai
+  text: I see you're keeping it mysterious! That's fine. Would you like to talk about
+    your hobbies or what you do for fun?
+- role: user
+  text: Sure.
+- role: ai
+  text: Wonderful! So tell me, what kind of activities do you enjoy in your free time?
+- role: user
+  text: I see.
+gold_labels:
+  categories: []
+  entities: []
+notes: Extremely brief responses — no interests expressed.

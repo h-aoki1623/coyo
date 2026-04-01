@@ -1,0 +1,16 @@
+id: gen-edge-case-02
+source: generated
+domain: edge-case
+transcript:
+- role: user
+  text: Hi! How are you?
+- role: ai
+  text: Hello! I'm doing well, thank you. How are you doing?
+- role: user
+  text: I'm fine, thank you.
+- role: ai
+  text: That's great to hear! Have a wonderful day!
+gold_labels:
+  categories: []
+  entities: []
+notes: No topic discussed — extraction should return empty.

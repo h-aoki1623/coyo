@@ -1,0 +1,36 @@
+id: gen-ambiguous-01
+source: generated
+domain: ambiguous
+transcript:
+- role: user
+  text: I've been using Apple products for years now, and honestly, I can't imagine
+    switching to anything else. My MacBook Pro is just... amazing for my work.
+- role: ai
+  text: Oh, I hear that a lot from Apple users! What do you love most about your MacBook?
+    Is it the performance or something specific about the design?
+- role: user
+  text: Well, it's many things actually. The battery life is incredible - I can work
+    all day without charging. And the M2 chip is so fast! Plus, um, the way everything
+    syncs with my iPhone is really convenient.
+- role: ai
+  text: The ecosystem is definitely one of Apple's strongest points. How do you use
+    that sync feature in your daily life?
+- role: user
+  text: Oh, it's super helpful! Like, I can start writing an email on my iPhone during
+    lunch break, then continue on my MacBook when I'm back at desk. And AirDrop...
+    I use it constantly to transfer photos and files. No cables needed!
+- role: ai
+  text: That does sound seamless! Have you tried any of the newer features like Universal
+    Control or the Focus modes?
+- role: user
+  text: Yes! Focus mode is a lifesaver. I have different settings for work and personal
+    time. During work hours, only important notifications come through. It really
+    helps me, you know, stay productive without getting distracted by social media
+    or random messages.
+gold_labels:
+  categories: []
+  entities:
+  - keyword: apple inc.
+    is_news_relevant: true
+    keyword_type: entity
+notes: Tests entity disambiguation — Apple as company, not fruit.

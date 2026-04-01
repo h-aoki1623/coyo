@@ -1,0 +1,27 @@
+id: cp-politics-01
+source: corpus
+domain: politics
+transcript:
+- role: ai
+  text: Will you tell me the situation ?
+- role: user
+  text: I was in my friend's room , talking for an hour or so .
+- role: ai
+  text: And then ?
+- role: user
+  text: I came back to my room and found my suitcase was open and my camera and five
+    hundred dollars in cash inside the wallet were gone .
+- role: ai
+  text: I'm afraid you must give up the cash . Are you insured ?
+- role: user
+  text: Yes , this is my overseas travel accident insurance card .
+- role: ai
+  text: I'll make a report for you and please claim this to the insurance company
+    with this report .
+gold_labels:
+  categories: []
+  entities: []
+notes: This conversation is about reporting a theft incident. While it mentions travel
+  and insurance, these are not expressions of user interest but rather procedural
+  topics related to the theft report. No genuine interests or specific entities are
+  discussed.

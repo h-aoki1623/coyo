@@ -1,0 +1,29 @@
+id: gen-sports-06
+source: generated
+domain: sports
+transcript:
+- role: user
+  text: Hey! How's your day going so far?
+- role: ai
+  text: Hi there! It's been pretty good, thanks for asking. How about yours?
+- role: user
+  text: Not bad! I went to the gym this morning and did some yoga... first time in
+    like two weeks, haha. Then I grabbed coffee and now I'm just working from home.
+- role: ai
+  text: Nice! Sounds like a productive morning. Working from home must be convenient
+    after the gym - no need to rush around.
+- role: user
+  text: Yeah, exactly! I usually just throw on whatever's clean and jump on my laptop.
+    What about you - do you have like a morning routine?
+- role: ai
+  text: I try to keep it simple - usually just coffee and some reading before diving
+    into work. Though I admire people who fit in exercise before starting their day!
+gold_labels:
+  categories:
+  - keyword: fitness and exercise
+    is_news_relevant: false
+    keyword_type: category
+    iab_category_id: '10.2'
+  entities: []
+notes: 'Tests granularity: ''yoga'' should NOT be extracted as a separate category
+  since the user''s interest scope is general fitness, not yoga specifically.'

@@ -1,0 +1,18 @@
+id: cp-relationship-01
+source: corpus
+domain: relationship
+transcript:
+- role: ai
+  text: Bob , what are you thinking about ?
+- role: user
+  text: I'm looking forward to going to America .
+- role: ai
+  text: When do you go ?
+- role: user
+  text: Next week .
+gold_labels:
+  categories: []
+  entities: []
+notes: The conversation mentions 'America' but this is a generic geographical reference
+  in the context of travel plans, not an expression of interest in American culture,
+  politics, or news. No specific interests or entities are discussed.

@@ -1,0 +1,74 @@
+id: rec-tech-ai-10
+source: recorded
+domain: tech-ai
+transcript:
+- role: user
+  text: Let's have an English conversation. Can you look up the latest AI news and
+    give me a few topic ideas?
+- role: ai
+  text: 'Great, let’s start with a few fresh AI conversation topics. One major story
+    is that BMG sued Anthropic over alleged use of copyrighted song lyrics in AI training,
+    so we could discuss whether training AI on creative work is fair or harmful to
+    artists. Another is OpenAI’s reported deal to provide AI tools to U.S. government
+    agencies through AWS, which could lead to an interesting discussion about AI in
+    defense, security, and public services. A third topic is AI in the real world:
+    Skild AI and Nvidia are deploying a general-purpose “robot brain” on assembly
+    lines, while Meta is reportedly weighing major layoffs as AI costs reshape tech
+    companies. Which topic would you like to discuss first: copyright, government
+    use, robots at work, or AI and jobs?'
+- role: user
+  text: I'm interested in Meta's layoffs. Can you share me more details about it?
+- role: ai
+  text: 'Here’s the latest: Reuters reported on March 14, 2026 that Meta is planning
+    broad layoffs that could affect 20% or more of its workforce, which would be roughly
+    15,000–16,000 jobs based on its nearly 79,000 employees at the end of 2025; however,
+    the plan was still being discussed internally and Meta publicly called the reports
+    speculative. The main reason seems to be cost pressure from Meta’s huge AI push.
+    Reuters says the company is spending tens of billions on AI, and investors are
+    watching costs closely as Meta ramps up infrastructure spending while its new
+    AI model reportedly underperformed expectations. Analysts quoted by Reuters say
+    this is not just about cutting staff for the sake of cutting staff, but about
+    restructuring around AI-driven efficiency, with leadership flattening teams and
+    expecting some work that once needed large groups to be done by far fewer people.
+    If it happens at that scale, it would be Meta’s biggest reduction since the 2022–2023
+    rounds, when the company cut about 21,000 jobs in total. What’s your opinion:
+    is this a smart business move, or a worrying sign for workers in the AI era?'
+- role: user
+  text: It seems that meta intends to shift their cost from human resources to AI
+    infrastructure. When it comes to cost, planning costs on resources will be a comparison
+    between human labor costs and AI infrastructure costs in the AI era. Because AI
+    works low-cost based on how long it works, as well as human. AI needs chips and
+    electric powers, and especially as for electricity power, it costs depends on
+    how much energy it useses.
+- role: ai
+  text: That is a very thoughtful point, and I agree that companies will increasingly
+    compare labor costs with computing, chip, and electricity costs. AI can work continuously
+    at low marginal cost once the system is built, but the upfront investment in data
+    centers, GPUs, and power is enormous. Human workers are more expensive per hour
+    in many cases, yet they still offer judgment, creativity, and flexibility that
+    AI cannot fully replace. So in the AI era, cost planning may become a balance
+    between replacing routine work with AI and keeping people for higher-value decisions.
+    Do you think companies will overestimate AI’s cost advantage at first?
+- role: user
+  text: I don't think so. I think companies will carefully evaluate AI's productivity
+    and reliability, but some company might overestimate. For example, I heard that
+    Amazon laid off their software engineers because of coding agent. but by the result
+    of relying on coding agent to match, their system had a big instant. It's apparently
+    overestimated on the productivity of AI coding agent.
+- role: ai
+  text: That makes sense, and I agree that some companies may be cautious while others
+    may overestimate AI’s real ability. A coding agent can speed up development, but
+    if teams rely on it too much, small mistakes can spread quickly and cause serious
+    problems in production. So the real issue is not only productivity, but also supervision,
+    testing, and accountability. In that sense, AI may reduce some labor costs while
+    increasing the need for skilled people who can manage risk. Do you think AI will
+    replace software engineers, or mainly change their role?
+- role: user
+  text: Let's wrap it up. Can you review our conversation?
+gold_labels:
+  categories:
+  - keyword: artificial intelligence
+    is_news_relevant: true
+    keyword_type: category
+    iab_category_id: '25.1'
+  entities: []

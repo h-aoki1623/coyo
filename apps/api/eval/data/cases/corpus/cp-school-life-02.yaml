@@ -1,0 +1,29 @@
+id: cp-school-life-02
+source: corpus
+domain: school_life
+transcript:
+- role: user
+  text: What do you think of the test ?
+- role: ai
+  text: Rather difficult . How about you ?
+- role: user
+  text: It wasn't too bad . Were you nervous ?
+- role: ai
+  text: Rather . I'm afraid I didn't do very well .
+- role: user
+  text: Oh , I wouldn't worry about it .
+- role: ai
+  text: That's because you did well .
+- role: user
+  text: No , I wouldn't worry about you .
+- role: ai
+  text: Why ?
+- role: user
+  text: It seems to me that you always do better than you say .
+gold_labels:
+  categories: []
+  entities: []
+notes: This conversation is about a test/exam experience between two people. While
+  'education' might seem relevant, the discussion is too generic and focused on test
+  anxiety rather than expressing genuine interest in educational topics. No specific
+  subjects, institutions, or notable entities are mentioned.

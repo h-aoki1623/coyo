@@ -1,0 +1,35 @@
+id: cp-culture-education-03
+source: corpus
+domain: culture_education
+transcript:
+- role: user
+  text: I used to think that Americans had so much money they didn ’ t know what to
+    do with it .
+- role: ai
+  text: You did ?
+- role: user
+  text: Yes . But now I ’ Ve learned differently . Now I have a more realistic opinion
+    .
+- role: ai
+  text: What do you think now ?
+- role: user
+  text: There are lots of jobs , and almost everybody works . There is a high standard
+    of living . People earn a lot , but they spend a lot to live . So there isn ’
+    t so much money after all .
+- role: ai
+  text: But I still say Americans spend a lot more money on useless things than we
+    Chinese do .
+- role: user
+  text: That ’ s true . But Americans work hard for their money like we do . I don
+    ’ t know why our spending habits are so different .
+gold_labels:
+  categories:
+  - keyword: personal finance
+    is_news_relevant: true
+    keyword_type: category
+    iab_category_id: '16'
+  entities: []
+notes: Extracted 'economy' and 'personal finance' as the user shows genuine engagement
+  discussing economic conditions, living standards, and spending habits between countries.
+  No specific entities mentioned - only general references to Americans and Chinese
+  people.

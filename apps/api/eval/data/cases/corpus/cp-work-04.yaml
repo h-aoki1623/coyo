@@ -1,0 +1,19 @@
+id: cp-work-04
+source: corpus
+domain: work
+transcript:
+- role: user
+  text: Look , Bob hasn't made any progress on that project .
+- role: ai
+  text: I see what you mean .
+- role: user
+  text: We should have a word with him .
+- role: ai
+  text: Let me handle it .
+gold_labels:
+  categories: []
+  entities: []
+notes: This is a workplace conversation about project management and a colleague named
+  Bob. No genuine interests or hobbies are expressed. 'Bob' is just a first name without
+  enough context to identify a specific real-world person, and workplace discussions
+  don't indicate personal interests.

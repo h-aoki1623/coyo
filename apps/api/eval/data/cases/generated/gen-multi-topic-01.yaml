@@ -1,0 +1,39 @@
+id: gen-multi-topic-01
+source: generated
+domain: multi-topic
+transcript:
+- role: user
+  text: Hey! I went to see a baseball game last weekend. It was amazing - the home
+    team won in extra innings!
+- role: ai
+  text: Oh wow, extra innings! Those games can be so intense. What was the final score?
+- role: user
+  text: It was 7-6. The winning run came from a sacrifice fly... I think that's what
+    they call it? Anyway, I was checking my phone between innings and noticed my stocks
+    were doing pretty well too!
+- role: ai
+  text: Nice! A good day at the ballpark AND in the market - that's a perfect combination.
+    What stocks have been performing well for you?
+- role: user
+  text: Yeah, my tech stocks especially. I bought some Apple shares a few months ago
+    and they're up like 15%. But um... I'm still learning about P/E ratios and all
+    that stuff.
+- role: ai
+  text: That's a solid gain! Learning about investing takes time, but it sounds like
+    you're on the right track. Do you follow the market as closely as you follow baseball?
+- role: user
+  text: Actually, I check my portfolio almost every morning! It's become kind of a
+    habit, like checking baseball scores. Though I probably shouldn't look at it so
+    often, right?
+gold_labels:
+  categories:
+  - keyword: baseball
+    is_news_relevant: true
+    keyword_type: category
+    iab_category_id: '23.5'
+  - keyword: personal investing
+    is_news_relevant: true
+    keyword_type: category
+    iab_category_id: '16.7'
+  entities: []
+notes: Tests multiple categories from one conversation (max 3 rule).

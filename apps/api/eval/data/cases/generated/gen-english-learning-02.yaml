@@ -1,0 +1,30 @@
+id: gen-english-learning-02
+source: generated
+domain: english-learning
+transcript:
+- role: user
+  text: Hi! I've been having trouble with some English sounds... especially the 'th'
+    sound. It's really hard for me.
+- role: ai
+  text: I'd be happy to help you practice! The 'th' sound can be tricky. Which words
+    give you the most trouble?
+- role: user
+  text: Well, words like 'think' and 'this'... I always say 'sink' or 'dis' instead.
+    My tongue doesn't know what to do!
+- role: ai
+  text: That's totally normal! Try this - put your tongue between your teeth and blow
+    air gently. Let's practice with 'think' - can you try it slowly?
+- role: user
+  text: Okay... th-think? Oh wait, I think I said 'fink' that time!
+- role: ai
+  text: You're getting closer! The 'f' sound means your tongue isn't quite forward
+    enough. Stick it out a tiny bit more between your teeth. Try again!
+- role: user
+  text: Think... think... oh! I think I got it that time! It feels so weird though.
+- role: ai
+  text: That's perfect! Yes, it does feel strange at first, but you did it! With practice,
+    it'll become natural. Want to try a few more words?
+gold_labels:
+  categories: []
+  entities: []
+notes: Tests that pronunciation practice is not extracted as an interest.

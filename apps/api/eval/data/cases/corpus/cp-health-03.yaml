@@ -1,0 +1,31 @@
+id: cp-health-03
+source: corpus
+domain: health
+transcript:
+- role: ai
+  text: Good morning . This is Dr . Mustn ’ s Office . Can I help you ?
+- role: user
+  text: Yes . This is Janet Smith . I ’ d like to make an appointment with Dr . Mustn
+    as soon as possible .
+- role: ai
+  text: Is it urgent ( an emergency ) ?
+- role: user
+  text: Yes . I ’ Ve got an infected wound .
+- role: ai
+  text: How about this afternoon at 2:00 ?
+- role: user
+  text: That ’ s fine .
+- role: ai
+  text: Don ’ t forget to bring your health card with you .
+- role: user
+  text: I ’ ll bring the card . Thank you very much .
+- role: ai
+  text: You ’ re welcome .
+gold_labels:
+  categories: []
+  entities: []
+notes: This is a medical appointment booking conversation. While 'Dr. Mustn' is mentioned,
+  it appears to be a fictional name in a practice dialogue. The conversation focuses
+  on practical healthcare matters (appointment scheduling, health card) rather than
+  expressing interest in medical topics as a subject. No genuine interests or real-world
+  entities are discussed.

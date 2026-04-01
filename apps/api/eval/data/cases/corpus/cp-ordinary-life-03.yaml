@@ -1,0 +1,19 @@
+id: cp-ordinary-life-03
+source: corpus
+domain: ordinary_life
+transcript:
+- role: user
+  text: Would you mind waiting a while ?
+- role: ai
+  text: Well , how long will it be ?
+- role: user
+  text: I'm not sure . But I'll get a table ready as fast as I can .
+- role: ai
+  text: OK . We'll wait .
+gold_labels:
+  categories: []
+  entities: []
+notes: This is a simple service interaction about waiting for a table. No specific
+  interests, topics, or entities are discussed. The conversation contains only generic
+  dialogue about waiting and doesn't reveal any user interests or mention any proper
+  nouns.
