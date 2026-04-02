@@ -27,13 +27,18 @@ transcript:
 - role: user
   text: That's a good idea !
 gold_labels:
-  categories: []
+  categories:
+  - keyword: health and wellness
+    is_news_relevant: false
+    keyword_type: category
+    mention_type: implicit
   entities:
   - keyword: china
     is_news_relevant: true
     keyword_type: entity
-notes: No categories extracted as the conversation focuses on personal routine and
-  exercise habits, not genuine interests. Extracted 'china' as an entity since the
-  user mentions needing to keep up with events there for business purposes, indicating
-  it's a specific geographic region of professional relevance. The mention is news-relevant
-  as China news would return fresh articles regularly.
+    mention_type: explicit
+notes: Extracted 'health and wellness' as the user is discussing exercise, weight, and 
+  health-related issues, indicating an implicit interest in this topic. Extracted 'china' 
+  as an entity since the user mentions needing to keep up with events there for business 
+  purposes, indicating it's a specific geographic region of professional relevance. The 
+  mention is news-relevant as China news would return fresh articles regularly.

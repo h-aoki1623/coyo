@@ -15,4 +15,6 @@ transcript:
 gold_labels:
   categories: []
   entities: []
-notes: This is a banking customer service conversation. 
+notes: No categories extracted as the conversation is a routine banking inquiry 
+  without any expression of interest in financial topics. No specific entities 
+  mentioned - the user only provides generic references to their account and check number.

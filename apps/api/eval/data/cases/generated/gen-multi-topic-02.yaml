@@ -34,12 +34,15 @@ gold_labels:
     is_news_relevant: false
     keyword_type: category
     iab_category_id: '27'
+    mention_type: explicit
   - keyword: world cuisines
     is_news_relevant: false
     keyword_type: category
     iab_category_id: '9.12'
+    mention_type: implicit
   entities:
   - keyword: tokyo
     is_news_relevant: false
     keyword_type: entity
+    mention_type: explicit
 notes: Tests multiple categories plus entity extraction from travel context.

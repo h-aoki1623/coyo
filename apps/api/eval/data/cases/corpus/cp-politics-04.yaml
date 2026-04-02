@@ -37,10 +37,12 @@ gold_labels:
     is_news_relevant: true
     keyword_type: category
     iab_category_id: '15.9'
+    mention_type: explicit
   - keyword: politics
     is_news_relevant: true
     keyword_type: category
     iab_category_id: '15.8'
+    mention_type: implicit
 notes: Extracted war and conflicts and politics as the user shows sustained engagement
   discussing causes of war, civil wars, and peace solutions. Topics like poverty and resources
   were mentioned only as causes/context, not as independent interests.

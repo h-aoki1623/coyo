@@ -34,8 +34,14 @@ gold_labels:
     is_news_relevant: true
     keyword_type: category
     iab_category_id: '25.1'
+    mention_type: explicit
   entities:
   - keyword: openai
     is_news_relevant: true
     keyword_type: entity
+    mention_type: explicit
+  - keyword: chatgpt
+    is_news_relevant: true
+    keyword_type: entity
+    mention_type: explicit
 notes: 'Tests IAB normalization: ''AI'' should map to ''artificial intelligence''.'

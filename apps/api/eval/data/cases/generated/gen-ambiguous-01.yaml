@@ -33,4 +33,9 @@ gold_labels:
   - keyword: apple inc.
     is_news_relevant: true
     keyword_type: entity
+    mention_type: explicit
+  - keyword: macbook pro
+    is_news_relevant: true
+    keyword_type: entity
+    mention_type: explicit
 notes: Tests entity disambiguation — Apple as company, not fruit.

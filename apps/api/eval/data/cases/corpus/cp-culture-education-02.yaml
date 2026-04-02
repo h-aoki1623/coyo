@@ -27,9 +27,8 @@ gold_labels:
     is_news_relevant: false
     keyword_type: category
     iab_category_id: '5.7'
+    mention_type: explicit
   entities: []
-notes: This conversation is about language learning and pen pals. While 'German' is
-  mentioned, it's in the context of language education rather than genuine interest
-  in Germany as a topic. 'Olga' is mentioned but only as a pen pal's name without
-  any real-world identity or significance. No clear interests or newsworthy topics
-  are expressed.
+notes: Extracted 'language learning' as the user explicitly discusses having a German 
+  pen friend to practice writing in German, indicating a clear interest in language 
+  learning. No specific entities mentioned.

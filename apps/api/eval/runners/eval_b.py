@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import asyncio
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import structlog
 from anthropic import AsyncAnthropic
@@ -37,6 +37,7 @@ from eval.models import (
 from eval.runners.eval_a import (
     _build_case_details,
     _build_gold_kw_dicts,
+    _compute_recall_breakdown,
 )
 from eval.validators.entity_validator import EntityValidator
 from eval.validators.llm_judge import LLMJudge
@@ -266,6 +267,8 @@ async def _aggregate_results(
     all_gold_cats: list[str] = []
     all_pred_ents: list[str] = []
     all_gold_ents: list[str] = []
+    all_gold_cat_mention_types: list[Literal["explicit", "implicit"]] = []
+    all_gold_ent_mention_types: list[Literal["explicit", "implicit"]] = []
     all_pred_kw_dicts: list[dict[str, object]] = []
     all_gold_kw_dicts: list[dict[str, object]] = []
     all_processed_kw_dicts: list[dict[str, object]] = []
@@ -277,6 +280,8 @@ async def _aggregate_results(
         all_pred_ents.extend(cr["predicted_entities"])
         all_gold_cats.extend(gk.keyword for gk in case.gold_labels.categories)
         all_gold_ents.extend(gk.keyword for gk in case.gold_labels.entities)
+        all_gold_cat_mention_types.extend(gk.mention_type for gk in case.gold_labels.categories)
+        all_gold_ent_mention_types.extend(gk.mention_type for gk in case.gold_labels.entities)
         all_pred_kw_dicts.extend(cr["predicted_kw_dicts"])
         all_gold_kw_dicts.extend(_build_gold_kw_dicts(case))
         all_processed_kw_dicts.extend(cr["processed_kw_dicts"])
@@ -350,6 +355,16 @@ async def _aggregate_results(
         config=config,
     )
 
+    # -- Recall breakdown by mention type (explicit vs implicit) ----------------
+    cat_recall_breakdown = _compute_recall_breakdown(
+        all_gold_cat_mention_types,
+        cat_result.fn_gold_indices,
+    )
+    ent_recall_breakdown = _compute_recall_breakdown(
+        all_gold_ent_mention_types,
+        ent_result.fn_gold_indices,
+    )
+
     settings = get_settings()
 
     return EvalBResult(
@@ -365,6 +380,7 @@ async def _aggregate_results(
             fn_count=cat_metrics.fn_count,
             iab_match=iab_match,
             normalization_accuracy=norm_accuracy,
+            recall_breakdown=cat_recall_breakdown,
         ),
         entity_metrics=EntityMetrics(
             precision=ent_metrics.precision,
@@ -375,6 +391,7 @@ async def _aggregate_results(
             fn_count=ent_metrics.fn_count,
             type_confusion=type_confusion,
             wikidata_hit=wikidata_hit,
+            recall_breakdown=ent_recall_breakdown,
         ),
         news_relevant=news_relevant,
         per_case_details=per_case_details,

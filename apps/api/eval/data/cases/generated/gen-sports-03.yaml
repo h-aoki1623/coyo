@@ -35,9 +35,11 @@ gold_labels:
     is_news_relevant: true
     keyword_type: category
     iab_category_id: null
+    mention_type: explicit
   entities:
   - keyword: max verstappen
     is_news_relevant: true
     keyword_type: entity
+    mention_type: explicit
 notes: 'Tests IAB normalization: ''F1'' or ''auto racing''. Also tests entity extraction
   for drivers.'

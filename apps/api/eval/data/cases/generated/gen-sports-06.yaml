@@ -24,6 +24,7 @@ gold_labels:
     is_news_relevant: false
     keyword_type: category
     iab_category_id: '10.2'
+    mention_type: implicit
   entities: []
 notes: 'Tests granularity: ''yoga'' should NOT be extracted as a separate category
   since the user''s interest scope is general fitness, not yoga specifically.'

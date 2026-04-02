@@ -30,6 +30,7 @@ gold_labels:
     is_news_relevant: false
     keyword_type: category
     iab_category_id: '5.7'
+    mention_type: explicit
   entities: []
 notes: No extractable keywords. The conversation is about English language learning
   in general terms. 'English' as a language subject is too generic/educational to

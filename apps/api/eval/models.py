@@ -25,6 +25,7 @@ class GoldKeyword(BaseModel):
     is_news_relevant: bool
     keyword_type: Literal["category", "entity"]
     iab_category_id: str | None = None
+    mention_type: Literal["explicit", "implicit"] = "explicit"
 
 
 class GoldLabels(BaseModel):
@@ -69,6 +70,18 @@ class DedupPairSet(BaseModel):
 # ---------------------------------------------------------------------------
 
 
+class RecallBreakdown(BaseModel):
+    """Recall split by mention type (explicit vs implicit)."""
+
+    total: float
+    explicit: float
+    implicit: float
+    explicit_tp: int = 0
+    explicit_total: int = 0
+    implicit_tp: int = 0
+    implicit_total: int = 0
+
+
 class KeywordMetrics(BaseModel):
     """Precision, Recall, F1 for a keyword type."""
 
@@ -78,6 +91,7 @@ class KeywordMetrics(BaseModel):
     tp_count: int = 0
     fp_count: int = 0
     fn_count: int = 0
+    recall_breakdown: RecallBreakdown | None = None
 
 
 class ConfusionMatrix(BaseModel):

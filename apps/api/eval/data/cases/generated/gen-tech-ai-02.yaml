@@ -33,9 +33,15 @@ transcript:
     You'll have a solid foundation by then. Keep at it, and don't hesitate to ask
     questions in programming communities when you're stuck!
 gold_labels:
-  categories: []
+  categories:
+  - keyword: technology
+    is_news_relevant: true
+    keyword_type: category
+    iab_category_id: '27'
+    mention_type: implicit
   entities:
   - keyword: python
     is_news_relevant: true
     keyword_type: entity
+    mention_type: explicit
 notes: Tests that programming frameworks are not extracted as entities.

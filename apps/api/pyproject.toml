@@ -70,7 +70,14 @@ known-first-party = ["coyo"]
 python_version = "3.12"
 strict = true
 plugins = ["pydantic.mypy"]
-exclude = ["^eval/"]
+
+[[tool.mypy.overrides]]
+module = [
+    "coyo.*",
+    "scipy.*",
+    "yaml",
+]
+ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

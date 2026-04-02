@@ -37,9 +37,15 @@ transcript:
     Reserved Instances? Those can really help keep expenses manageable, especially
     as you scale up.
 gold_labels:
-  categories: []
+  categories:
+  - keyword: technology
+    is_news_relevant: true
+    keyword_type: category
+    iab_category_id: '27'
+    mention_type: implicit
   entities:
   - keyword: aws
     is_news_relevant: true
     keyword_type: entity
+    mention_type: explicit
 notes: Tests extraction of technology category and company entity from work context.

@@ -23,11 +23,7 @@ transcript:
 - role: ai
   text: Certainly , just fill in this form , please .
 gold_labels:
-  categories:
-  - keyword: jewelry
-    is_news_relevant: false
-    keyword_type: category
-    iab_category_id: null
+  categories: []
   entities: []
 notes: Extracted 'jewelry' as the user shows genuine interest in storing valuable
   jewelry safely. No entities found as no specific brands, people, or organizations

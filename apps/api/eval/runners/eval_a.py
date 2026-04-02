@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import asyncio
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import structlog
 from anthropic import AsyncAnthropic
@@ -29,6 +29,7 @@ from eval.models import (
     EntityMetrics,
     EvalAResult,
     MatchedPairDetail,
+    RecallBreakdown,
     TestCase,
 )
 from eval.validators.entity_validator import EntityValidator
@@ -194,6 +195,47 @@ def _build_gold_kw_dicts(case: TestCase) -> list[dict[str, object]]:
     return gold_dicts
 
 
+def _compute_recall_breakdown(
+    mention_types: list[Literal["explicit", "implicit"]],
+    fn_gold_indices: list[int],
+) -> RecallBreakdown:
+    """Compute recall split by mention type using match results.
+
+    Uses positional indices from bipartite matching to correctly attribute
+    TP/FN to explicit vs implicit gold keywords, even with duplicates.
+    """
+    explicit_total = 0
+    implicit_total = 0
+    explicit_tp = 0
+    implicit_tp = 0
+
+    fn_set = set(fn_gold_indices)
+    for i, mt in enumerate(mention_types):
+        if mt == "explicit":
+            explicit_total += 1
+            if i not in fn_set:
+                explicit_tp += 1
+        else:
+            implicit_total += 1
+            if i not in fn_set:
+                implicit_tp += 1
+
+    total = explicit_total + implicit_total
+    total_recall = (explicit_tp + implicit_tp) / total if total > 0 else 1.0
+    explicit_recall = explicit_tp / explicit_total if explicit_total > 0 else 1.0
+    implicit_recall = implicit_tp / implicit_total if implicit_total > 0 else 1.0
+
+    return RecallBreakdown(
+        total=total_recall,
+        explicit=explicit_recall,
+        implicit=implicit_recall,
+        explicit_tp=explicit_tp,
+        explicit_total=explicit_total,
+        implicit_tp=implicit_tp,
+        implicit_total=implicit_total,
+    )
+
+
 async def _aggregate_results(
     cases: list[TestCase],
     case_results: list[dict[str, Any]],
@@ -208,6 +250,8 @@ async def _aggregate_results(
     all_gold_cats: list[str] = []
     all_pred_ents: list[str] = []
     all_gold_ents: list[str] = []
+    all_gold_cat_mention_types: list[Literal["explicit", "implicit"]] = []
+    all_gold_ent_mention_types: list[Literal["explicit", "implicit"]] = []
     all_pred_kw_dicts: list[dict[str, object]] = []
     all_gold_kw_dicts: list[dict[str, object]] = []
     all_transcripts: list[str] = []
@@ -217,6 +261,8 @@ async def _aggregate_results(
         all_pred_ents.extend(cr["predicted_entities"])
         all_gold_cats.extend(gk.keyword for gk in case.gold_labels.categories)
         all_gold_ents.extend(gk.keyword for gk in case.gold_labels.entities)
+        all_gold_cat_mention_types.extend(gk.mention_type for gk in case.gold_labels.categories)
+        all_gold_ent_mention_types.extend(gk.mention_type for gk in case.gold_labels.entities)
         all_pred_kw_dicts.extend(cr["predicted_kw_dicts"])
         all_gold_kw_dicts.extend(_build_gold_kw_dicts(case))
         all_transcripts.append(build_transcript_text(case))
@@ -287,6 +333,16 @@ async def _aggregate_results(
         config=config,
     )
 
+    # -- Recall breakdown by mention type (explicit vs implicit) ----------------
+    cat_recall_breakdown = _compute_recall_breakdown(
+        all_gold_cat_mention_types,
+        cat_result.fn_gold_indices,
+    )
+    ent_recall_breakdown = _compute_recall_breakdown(
+        all_gold_ent_mention_types,
+        ent_result.fn_gold_indices,
+    )
+
     settings = get_settings()
 
     return EvalAResult(
@@ -301,6 +357,7 @@ async def _aggregate_results(
             fp_count=cat_metrics.fp_count,
             fn_count=cat_metrics.fn_count,
             niche_rate=niche_result,
+            recall_breakdown=cat_recall_breakdown,
         ),
         entity_metrics=EntityMetrics(
             precision=ent_metrics.precision,
@@ -311,6 +368,7 @@ async def _aggregate_results(
             fn_count=ent_metrics.fn_count,
             type_confusion=type_confusion,
             wikidata_hit=wikidata_hit,
+            recall_breakdown=ent_recall_breakdown,
         ),
         news_relevant=news_relevant,
         per_case_details=per_case_details,

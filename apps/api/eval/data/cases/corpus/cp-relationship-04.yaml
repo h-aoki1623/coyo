@@ -27,6 +27,7 @@ gold_labels:
   - keyword: reader's digest
     is_news_relevant: false
     keyword_type: entity
+    mention_type: explicit
 notes: Extracted 'reader's digest' as a specific magazine/publication entity. No categories
   extracted as this is a general conversation about a magazine's format and popularity
   rather than expressing interest in specific topics. Reader's Digest is not news-relevant

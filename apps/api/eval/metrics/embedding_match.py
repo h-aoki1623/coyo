@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
 import structlog
@@ -35,6 +35,7 @@ class MatchResult:
     fp_keywords: list[str]
     fn_keywords: list[str]
     matched_pairs: list[MatchDetail]
+    fn_gold_indices: list[int] = field(default_factory=list)
 
 
 def _compute_prf(tp: int, fp: int, fn: int) -> tuple[float, float, float]:
@@ -58,7 +59,7 @@ async def compute_keyword_metrics(
     # --- Edge cases -----------------------------------------------------------
     if not predicted and not gold:
         metrics = KeywordMetrics(precision=1.0, recall=1.0, f1=1.0)
-        return MatchResult(metrics, [], [], [], [])
+        return MatchResult(metrics, [], [], [], [], fn_gold_indices=[])
 
     if not predicted:
         precision, recall, f1 = _compute_prf(tp=0, fp=0, fn=len(gold))
@@ -68,7 +69,14 @@ async def compute_keyword_metrics(
             f1=f1,
             fn_count=len(gold),
         )
-        return MatchResult(metrics, [], [], list(gold), [])
+        return MatchResult(
+            metrics,
+            [],
+            [],
+            list(gold),
+            [],
+            fn_gold_indices=list(range(len(gold))),
+        )
 
     if not gold:
         precision, recall, f1 = _compute_prf(tp=0, fp=len(predicted), fn=0)
@@ -78,7 +86,7 @@ async def compute_keyword_metrics(
             f1=f1,
             fp_count=len(predicted),
         )
-        return MatchResult(metrics, [], list(predicted), [], [])
+        return MatchResult(metrics, [], list(predicted), [], [], fn_gold_indices=[])
 
     # --- Embed all keywords in one batch call ---------------------------------
     all_texts = list(predicted) + list(gold)
@@ -122,7 +130,8 @@ async def compute_keyword_metrics(
             )
 
     fp_keywords = [predicted[i] for i in range(n_pred) if i not in matched_pred]
-    fn_keywords = [gold[j] for j in range(n_gold) if j not in matched_gold]
+    fn_indices = [j for j in range(n_gold) if j not in matched_gold]
+    fn_keywords = [gold[j] for j in fn_indices]
 
     tp = len(tp_keywords)
     fp = len(fp_keywords)
@@ -148,4 +157,11 @@ async def compute_keyword_metrics(
         fp_count=fp,
         fn_count=fn,
     )
-    return MatchResult(metrics, tp_keywords, fp_keywords, fn_keywords, matched_pairs)
+    return MatchResult(
+        metrics,
+        tp_keywords,
+        fp_keywords,
+        fn_keywords,
+        matched_pairs,
+        fn_gold_indices=fn_indices,
+    )
