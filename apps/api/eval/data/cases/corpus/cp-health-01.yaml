@@ -26,6 +26,7 @@ gold_labels:
     is_news_relevant: false
     keyword_type: category
     iab_category_id: '10'
+    mention_type: implicit
   entities: []
 notes: The conversation focuses on smoking cessation and health concerns. 'healthy
   living' is extracted as the user shows genuine engagement with their health condition.

@@ -28,8 +28,9 @@ gold_labels:
     is_news_relevant: true
     keyword_type: category
     iab_category_id: '16'
+    mention_type: implicit
   entities: []
-notes: Extracted 'economy' and 'personal finance' as the user shows genuine engagement
+notes: Extracted 'personal finance' as the user shows genuine engagement
   discussing economic conditions, living standards, and spending habits between countries.
   No specific entities mentioned - only general references to Americans and Chinese
   people.

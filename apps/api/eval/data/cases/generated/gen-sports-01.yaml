@@ -38,9 +38,11 @@ gold_labels:
     is_news_relevant: true
     keyword_type: category
     iab_category_id: '23.46'
+    mention_type: explicit
   entities:
   - keyword: carlos alcaraz
     is_news_relevant: true
     keyword_type: entity
+    mention_type: explicit
 notes: Tests that 'challenge system', 'hawk-eye', and 'video review' are NOT extracted.
   These are sub-elements of tennis, not standalone interests.

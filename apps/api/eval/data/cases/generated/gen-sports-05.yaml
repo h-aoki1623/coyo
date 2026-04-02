@@ -30,5 +30,6 @@ gold_labels:
   - keyword: olympic games
     is_news_relevant: true
     keyword_type: entity
+    mention_type: explicit
 notes: Tests broad category extraction when user expresses general interest across
   multiple sports.

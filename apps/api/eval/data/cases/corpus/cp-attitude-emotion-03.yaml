@@ -21,12 +21,8 @@ transcript:
   text: Sounds good .
 gold_labels:
   categories: []
-  entities:
-  - keyword: dell
-    is_news_relevant: true
-    keyword_type: entity
-notes: Extracted 'dell' as it's a specific tech company mentioned in context of job
-  offer, making it news-relevant. No categories extracted as the conversation is about
+  entities: []
+notes: No categories extracted as the conversation is about
   personal job news rather than expressing interest in technology or business topics.
   Other terms like 'John' and generic job/celebration mentions don't meet extraction
   criteria.

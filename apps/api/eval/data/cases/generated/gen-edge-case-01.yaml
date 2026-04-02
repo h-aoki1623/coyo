@@ -3,9 +3,9 @@ source: generated
 domain: edge-case
 transcript:
 - role: ai
-  text: Do you enjoy playing sports or any physical activities?
+  text: Do you know what I'm talking about?
 - role: user
-  text: Yes, I like it.
+  text: No.
 gold_labels:
   categories: []
   entities: []

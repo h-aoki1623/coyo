@@ -25,7 +25,11 @@ transcript:
 - role: user
   text: Come on . You ’ ll feel better after we hit the showers .
 gold_labels:
-  categories: []
+  categories:
+  - keyword: fitness and exercise
+    is_news_relevant: false
+    keyword_type: category
+    mention_type: implicit
   entities: []
 notes: This conversation is about a fitness class experience. While fitness/exercise
   is discussed, the user's comments focus on the instructor's appearance and the social

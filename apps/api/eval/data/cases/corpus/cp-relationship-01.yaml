@@ -11,7 +11,12 @@ transcript:
 - role: user
   text: Next week .
 gold_labels:
-  categories: []
+  categories:
+  - keyword: travel
+    is_news_relevant: false
+    keyword_type: category
+    iab_category_id: null
+    mention_type: implicit
   entities: []
 notes: The conversation mentions 'America' but this is a generic geographical reference
   in the context of travel plans, not an expression of interest in American culture,

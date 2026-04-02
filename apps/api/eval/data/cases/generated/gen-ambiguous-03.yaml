@@ -29,6 +29,7 @@ gold_labels:
     is_news_relevant: false
     keyword_type: category
     iab_category_id: '1'
+    mention_type: implicit
   entities: []
 notes: Tests that generic car talk extracts a category but no entity without a specific
   brand.

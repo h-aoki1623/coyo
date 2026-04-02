@@ -31,8 +31,10 @@ gold_labels:
     is_news_relevant: true
     keyword_type: category
     iab_category_id: '23.6'
+    mention_type: implicit
   entities:
   - keyword: nba
     is_news_relevant: true
     keyword_type: entity
+    mention_type: implicit
 notes: Tests that 'pick and roll' and 'fast break' are NOT extracted as keywords.

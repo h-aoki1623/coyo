@@ -20,6 +20,7 @@ gold_labels:
     is_news_relevant: true
     keyword_type: category
     iab_category_id: '23.6'
+    mention_type: explicit
   entities: []
 notes: Basketball is extracted as a sports category with news relevance. No entities
   extracted - 'Class Two' is a generic classroom designation without real-world identity,

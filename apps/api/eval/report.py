@@ -11,7 +11,7 @@ import structlog
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from eval.models import EvalAResult, EvalBResult, EvalCResult
+    from eval.models import EvalAResult, EvalBResult, EvalCResult, KeywordMetrics
 
 logger = structlog.get_logger()
 
@@ -148,6 +148,23 @@ def _fmt(value: float) -> str:
     return f"{value:.2f}"
 
 
+def _print_recall_breakdown(metrics: KeywordMetrics) -> None:
+    """Print recall as total/explicit/implicit if breakdown is available."""
+    rb = metrics.recall_breakdown
+    if rb is not None:
+        tp = rb.explicit_tp + rb.implicit_tp
+        total = rb.explicit_total + rb.implicit_total
+        print(f"| Recall (total) | {_fmt(rb.total)} ({tp}/{total}) |")
+        print(
+            f"| Recall (explicit) | {_fmt(rb.explicit)} ({rb.explicit_tp}/{rb.explicit_total}) |"
+        )
+        print(
+            f"| Recall (implicit) | {_fmt(rb.implicit)} ({rb.implicit_tp}/{rb.implicit_total}) |"
+        )
+    else:
+        print(f"| Recall | {_fmt(metrics.recall)} |")
+
+
 def _print_category_metrics(result: EvalAResult | EvalBResult) -> None:
     """Print the Category Metrics table."""
     cat = result.category_metrics
@@ -156,7 +173,7 @@ def _print_category_metrics(result: EvalAResult | EvalBResult) -> None:
     print("| Metric | Value |")
     print("|--------|-------|")
     print(f"| Precision | {_fmt(cat.precision)} |")
-    print(f"| Recall | {_fmt(cat.recall)} |")
+    _print_recall_breakdown(cat)
     print(f"| F1 | {_fmt(cat.f1)} |")
     niche = getattr(cat, "niche_rate", None)
     if niche is not None and niche.total_count > 0:
@@ -171,7 +188,7 @@ def _print_entity_metrics(result: EvalAResult | EvalBResult) -> None:
     print("| Metric | Value |")
     print("|--------|-------|")
     print(f"| Precision | {_fmt(ent.precision)} |")
-    print(f"| Recall | {_fmt(ent.recall)} |")
+    _print_recall_breakdown(ent)
     print(f"| F1 | {_fmt(ent.f1)} |")
     print(f"| Type Confusion | {_pct(ent.type_confusion.type_confusion_rate)} |")
     print(f"| Wikidata Hit Rate | {_pct(ent.wikidata_hit.wikidata_hit_rate)} |")

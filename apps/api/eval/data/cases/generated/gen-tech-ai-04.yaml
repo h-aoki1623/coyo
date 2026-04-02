@@ -29,8 +29,22 @@ gold_labels:
     is_news_relevant: true
     keyword_type: category
     iab_category_id: null
+    mention_type: explicit
   entities:
   - keyword: nintendo
     is_news_relevant: true
     keyword_type: entity
+    mention_type: explicit
+  - keyword: zelda
+    is_news_relevant: true
+    keyword_type: entity
+    mention_type: implicit
+  - keyword: tears of the kingdom
+    is_news_relevant: true
+    keyword_type: entity
+    mention_type: explicit
+  - keyword: breath of the wild
+    is_news_relevant: true
+    keyword_type: entity
+    mention_type: explicit
 notes: Tests gaming category and company entity extraction.

@@ -23,7 +23,12 @@ transcript:
 - role: ai
   text: Yes , you'll be in a different world there .
 gold_labels:
-  categories: []
+  categories:
+  - keyword: travel
+    is_news_relevant: false
+    keyword_type: category
+    iab_category_id: null
+    mention_type: implicit
   entities: []
 notes: No categories extracted as this is basic tourist conversation without expressing deep interests
   in topics like travel, tourism, or geography.

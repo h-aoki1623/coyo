@@ -33,10 +33,12 @@ gold_labels:
     is_news_relevant: true
     keyword_type: category
     iab_category_id: '15.9'
+    mention_type: explicit
   - keyword: politics
     is_news_relevant: true
     keyword_type: category
     iab_category_id: '15.8'
+    mention_type: explicit
   entities: []
 notes: User shows clear engagement with war/conflict news and political aspects. No
   specific entities mentioned - only generic references to 'both sides', 'European

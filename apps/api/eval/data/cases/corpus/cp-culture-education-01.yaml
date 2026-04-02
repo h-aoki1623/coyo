@@ -26,8 +26,8 @@ gold_labels:
     is_news_relevant: false
     keyword_type: category
     iab_category_id: '5.7'
+    mention_type: explicit
   entities: []
-notes: This conversation is purely about English language learning methods and techniques.
-  No specific interests, hobbies, or real-world entities are mentioned. The discussion
-  focuses only on educational approaches and practice strategies, which are not extractable
-  keywords according to the rules.
+notes: Extracted 'language learning' as the user explicitly asks about the AI's 
+  experience and methods for learning English, indicating a clear interest in this 
+  topic. No specific entities mentioned.
