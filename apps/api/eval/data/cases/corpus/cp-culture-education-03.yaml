@@ -27,7 +27,7 @@ gold_labels:
   - keyword: personal finance
     is_news_relevant: true
     keyword_type: category
-    iab_category_id: '16'
+    iab_category_id: '391'
     mention_type: implicit
   entities: []
 notes: Extracted 'personal finance' as the user shows genuine engagement

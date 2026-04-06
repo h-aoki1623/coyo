@@ -11,13 +11,6 @@ transcript:
 - role: user
   text: Next week .
 gold_labels:
-  categories:
-  - keyword: travel
-    is_news_relevant: false
-    keyword_type: category
-    iab_category_id: null
-    mention_type: implicit
+  categories: []
   entities: []
-notes: The conversation mentions 'America' but this is a generic geographical reference
-  in the context of travel plans, not an expression of interest in American culture,
-  politics, or news. No specific interests or entities are discussed.
+notes: The conversation is about Bob looking forward to going to America next week. However, there are no specific interests, categories, or entities mentioned in the conversation that can be extracted according to the guidelines. The discussion is general and does not indicate a particular interest or entity related to relationships or any other category.

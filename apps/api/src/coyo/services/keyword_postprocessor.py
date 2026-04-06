@@ -8,12 +8,16 @@ Applies three stages between LLM extraction and DB upsert:
 
 from __future__ import annotations
 
+import asyncio
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 import structlog
+from pydantic import BaseModel
 
 from coyo.config import get_settings
+from coyo.services.llm.base import ChatMessage, ChatOptions
+from coyo.services.llm.openai_client import OpenAIClient
 from coyo.services.similarity import find_best_match, find_duplicates
 
 if TYPE_CHECKING:
@@ -21,6 +25,44 @@ if TYPE_CHECKING:
     from coyo.services.iab_taxonomy import IABTaxonomyService
 
 logger = structlog.get_logger()
+
+
+# ---------------------------------------------------------------------------
+# Pydantic model for LLM-based IAB classification (Process B)
+# ---------------------------------------------------------------------------
+
+
+class IABClassification(BaseModel):
+    """LLM response model for classifying a keyword against IAB taxonomy."""
+
+    action: Literal["normalize", "valid", "delete"]
+    iab_category_id: str | None = None
+    iab_name: str | None = None
+
+
+_IAB_CLASSIFICATION_SYSTEM_PROMPT = """\
+You are classifying interest keywords against the IAB Content Taxonomy.
+
+{taxonomy_table}
+
+For the given keyword, decide:
+- NORMALIZE: keyword is essentially synonymous with an IAB category. \
+Replace with the IAB name. (e.g., "war" -> "War and Conflicts", "food" -> "Food & Drink")
+- VALID: keyword relates to an IAB category but is more specific or precise. \
+Keep the original keyword, but link to the closest IAB category ID. \
+(e.g., "F1" is related to "Auto Racing" but F1 is more specific, \
+so keep "f1" with IAB ID for Auto Racing)
+- DELETE: keyword is not a meaningful interest category or doesn't relate \
+to any IAB category. Discard it. \
+(e.g., "challenge system", "video review", "news")
+
+Return JSON: {{"action": "normalize"|"valid"|"delete", \
+"iab_category_id": "1.2" or null, "iab_name": "Category Name" or null}}
+
+Rules:
+- For NORMALIZE: iab_category_id and iab_name MUST be set
+- For VALID: iab_category_id MUST be set, iab_name MUST be set
+- For DELETE: iab_category_id and iab_name should be null"""
 
 
 @dataclass(frozen=True)
@@ -92,7 +134,7 @@ class KeywordPostprocessor:
 
         # Process B: IAB validation for categories
         await self._iab.ensure_embeddings(self._embedding)
-        validated_keywords, validated_embeddings = self._process_b(
+        validated_keywords, validated_embeddings = await self._process_b(
             deduped_keywords, deduped_embeddings
         )
 
@@ -189,26 +231,37 @@ class KeywordPostprocessor:
             [embeddings[i] for i in keep_indices],
         )
 
-    def _process_b(
+    async def _process_b(
         self,
         keywords: list[RawKeyword],
         embeddings: list[list[float]],
     ) -> tuple[list[ProcessedKeyword], list[list[float]]]:
         """Process B: IAB validation for categories, pass-through for entities.
 
-        Categories are matched against IAB taxonomy:
+        Categories are classified by LLM against IAB taxonomy:
         - normalize: replace keyword with IAB name (lowercased), set iab_category_id
-        - valid: keep original keyword, iab_category_id=None
-        - invalid: discard
+        - valid: keep original keyword, set iab_category_id to closest match
+        - delete: discard
 
+        Falls back to embedding-based matching if LLM call fails.
         Entities skip IAB validation entirely.
         """
         result_keywords: list[ProcessedKeyword] = []
         result_embeddings: list[list[float]] = []
 
-        for kw, emb in zip(keywords, embeddings, strict=True):
+        # Build LLM system prompt once for all categories (prompt cache optimization)
+        settings = get_settings()
+        taxonomy_table = self._iab.format_for_prompt()
+        system_content = _IAB_CLASSIFICATION_SYSTEM_PROMPT.format(
+            taxonomy_table=taxonomy_table,
+        )
+        system_message = ChatMessage(role="system", content=system_content)
+        llm = OpenAIClient(model=settings.llm_interest_model)
+
+        # Collect category indices for parallel LLM classification
+        category_indices: list[int] = []
+        for i, kw in enumerate(keywords):
             if kw.keyword_type == "entity":
-                # Entities pass through without IAB validation
                 result_keywords.append(
                     ProcessedKeyword(
                         keyword=kw.keyword,
@@ -219,25 +272,65 @@ class KeywordPostprocessor:
                         merge_target=None,
                     )
                 )
-                result_embeddings.append(emb)
-                continue
+                result_embeddings.append(embeddings[i])
+            else:
+                category_indices.append(i)
 
-            # Category: validate against IAB taxonomy
-            match_result = self._iab.match(emb)
+        if not category_indices:
+            return result_keywords, result_embeddings
 
-            if match_result.action == "normalize" and match_result.iab_name is not None:
+        # Safeguard: exact IAB name match skips LLM (always NORMALIZE)
+        llm_needed_indices: list[int] = []
+        exact_match_results: dict[int, IABClassification] = {}
+        for i in category_indices:
+            iab_cat = self._iab.find_by_name(keywords[i].keyword)
+            if iab_cat is not None:
+                exact_match_results[i] = IABClassification(
+                    action="normalize",
+                    iab_category_id=iab_cat.id,
+                    iab_name=iab_cat.name,
+                )
+            else:
+                llm_needed_indices.append(i)
+
+        # Classify remaining categories in parallel via LLM
+        llm_results: dict[int, IABClassification] = {}
+        if llm_needed_indices:
+            classification_tasks = [
+                self._classify_category_llm(
+                    llm, system_message, keywords[i].keyword, embeddings[i]
+                )
+                for i in llm_needed_indices
+            ]
+            llm_classifications = await asyncio.gather(*classification_tasks)
+            for idx, classification in zip(
+                llm_needed_indices, llm_classifications, strict=True
+            ):
+                llm_results[idx] = classification
+
+        # Merge results in original order
+        classifications = [
+            exact_match_results.get(i) or llm_results[i]
+            for i in category_indices
+        ]
+
+        for idx, classification in zip(category_indices, classifications, strict=True):
+            kw = keywords[idx]
+            emb = embeddings[idx]
+
+            if classification.action == "normalize" and classification.iab_name is not None:
                 result_keywords.append(
                     ProcessedKeyword(
-                        keyword=match_result.iab_name.lower(),
+                        keyword=classification.iab_name.lower(),
                         keyword_type=kw.keyword_type,
                         is_news_relevant=kw.is_news_relevant,
                         summary=kw.summary,
-                        iab_category_id=match_result.iab_id,
+                        iab_category_id=classification.iab_category_id,
                         merge_target=None,
                     )
                 )
                 result_embeddings.append(emb)
-            elif match_result.action == "valid":
+            elif classification.action == "valid":
                 result_keywords.append(
                     ProcessedKeyword(
                         keyword=kw.keyword,
@@ -250,14 +343,62 @@ class KeywordPostprocessor:
                 )
                 result_embeddings.append(emb)
             else:
-                # invalid: discard
+                # delete: discard
                 logger.debug(
                     "postprocessor_category_rejected",
                     keyword=kw.keyword,
-                    best_iab_similarity=match_result.similarity,
+                    action="delete",
                 )
 
         return result_keywords, result_embeddings
+
+    async def _classify_category_llm(
+        self,
+        llm: OpenAIClient,
+        system_message: ChatMessage,
+        keyword: str,
+        embedding: list[float],
+    ) -> IABClassification:
+        """Classify a single category keyword via LLM, with embedding fallback."""
+        try:
+            messages = [
+                system_message,
+                ChatMessage(role="user", content=f'Classify: "{keyword}"'),
+            ]
+            return await llm.structured(
+                messages,
+                response_model=IABClassification,
+                options=ChatOptions(temperature=0.0, max_tokens=128),
+            )
+        except Exception:
+            logger.warning(
+                "postprocessor_llm_fallback",
+                keyword=keyword,
+                exc_info=True,
+            )
+            return self._classify_category_embedding(embedding)
+
+    def _classify_category_embedding(
+        self,
+        embedding: list[float],
+    ) -> IABClassification:
+        """Fallback: classify a category keyword using embedding similarity."""
+        match_result = self._iab.match(embedding)
+
+        if match_result.action == "normalize":
+            return IABClassification(
+                action="normalize",
+                iab_category_id=match_result.iab_id,
+                iab_name=match_result.iab_name,
+            )
+        elif match_result.action == "valid":
+            return IABClassification(
+                action="valid",
+                iab_category_id=match_result.iab_id,
+                iab_name=match_result.iab_name,
+            )
+        else:
+            return IABClassification(action="delete")
 
     def _process_c(
         self,

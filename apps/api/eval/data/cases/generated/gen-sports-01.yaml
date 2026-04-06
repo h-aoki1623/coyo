@@ -37,7 +37,7 @@ gold_labels:
   - keyword: tennis
     is_news_relevant: true
     keyword_type: category
-    iab_category_id: '23.46'
+    iab_category_id: '539'
     mention_type: explicit
   entities:
   - keyword: carlos alcaraz

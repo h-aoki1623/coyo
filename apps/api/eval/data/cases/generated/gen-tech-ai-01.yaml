@@ -33,7 +33,7 @@ gold_labels:
   - keyword: artificial intelligence
     is_news_relevant: true
     keyword_type: category
-    iab_category_id: '25.1'
+    iab_category_id: '597'
     mention_type: explicit
   entities:
   - keyword: openai

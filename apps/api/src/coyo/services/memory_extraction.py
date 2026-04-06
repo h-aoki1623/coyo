@@ -29,7 +29,7 @@ if TYPE_CHECKING:
 logger = structlog.get_logger()
 
 MAX_CATEGORIES = 3
-MAX_ENTITIES = 5
+MAX_ENTITIES = 3
 _MAX_KEYWORD_LENGTH = 100
 _MAX_SUMMARY_LENGTH = 200
 _CONFIDENCE_THRESHOLD = 0.5
@@ -123,23 +123,82 @@ Rules:
 - Do NOT extract passwords, financial details, health conditions
 - If no relevant facts, return "memories": []
 
-=== VALIDITY RULES FOR KEYWORDS ===
+=== INTERESTS (CATEGORIES & ENTITIES) ===
 
-All keywords must pass this test:
-  "I'm interested in ___" sounds natural in English. If not, skip it.
+--- STEP 1: SIGNAL DETECTION ---
+Extract a category or entity ONLY when at least one signal is present.
+Merely MENTIONING a topic is NOT a signal — the user must show engagement,
+enthusiasm, or ongoing involvement.
+
+[Explicit Signals — high confidence]
+- User directly states interest: "I love X", "I'm really into X", "I'm a fan of X"
+- User describes ongoing engagement: "I've been following X", "I practice X every day"
+- User shows sustained enthusiasm across multiple turns about the same topic
+- User asks curiosity-driven follow-up questions about a topic
+
+[Implicit Signals — medium confidence]
+- User demonstrates specialized knowledge that indicates deep familiarity
+  (e.g., discusses specific political details → politics)
+- Interest in a specific entity implies the parent category
+  (e.g., fan of Max Verstappen → F1)
+- Multiple casual references to sub-categories of the same parent → extract parent
+  (e.g., mentions watching tennis, soccer, and baseball occasionally → "sports")
+- User describes habitual behavior tied to a topic
+  (e.g., "I check my portfolio every morning" → personal investing)
+- User shows repeated engagement with or positive sentiment toward
+  a specific category or entity across the conversation
+
+[No Signal = No Extraction]
+If no explicit or implicit signal is present, return empty lists.
+
+--- STEP 2: EXCLUSION FILTER ---
+Even if a signal seems present, DO NOT extract if ANY of these apply:
+
+1. TRANSACTIONAL CONTEXT: Topic appears only because the user is conducting business
+   (hotel check-in ≠ travel; bank visit ≠ finance; doctor visit ≠ health)
+2. NON-CELEBRITY NAMES: Personal names from dialogue that are not public figures
+   (Dick, Leo, Bob, Kate, Olga → skip. Elon Musk, Carlos Alcaraz → extract)
+3. AI-SIDE INTEREST: Topic is introduced/discussed primarily by the AI, not the user
+4. DAILY ROUTINE: Eating, drinking coffee, smoking, commuting — unless user shows genuine
+   passion beyond routine (e.g., "I love trying different coffee beans from around the world"
+   = interest; "let's get coffee" = routine)
+5. CONVERSATION-SCOPED: User's interest is limited to this conversation's context only
+   ("I'm curious about that" in response to AI introducing a topic → skip)
+6. AMBIGUOUS CONTEXT: Multiple plausible explanations exist and none clearly indicates interest
+   (being in a hotel lobby could be work travel, tourism, or just a meeting location)
+7. CASUAL MENTION: Topic touched on in passing without follow-up, enthusiasm, or depth
+   (user mentions "America" once in passing ≠ interest in America)
+8. GENERIC LOCATIONS: Countries/cities mentioned as contextual background, not as places the
+   user is genuinely interested in (e.g., "I work in London" ≠ interest in London)
+9. LANGUAGE LEARNING ACTIVITY: This app is for English conversation practice, so
+   language learning topics (grammar, pronunciation, vocabulary, language learning itself)
+   are the app's purpose, not user interests. Do NOT extract them.
+
+--- STEP 3: FORMATTING RULES ---
 
 [For categories]
 - categories: broad interest subjects (max 3, English, lowercase)
 - Must correspond to an IAB Content Taxonomy category (Tier 1 through Tier 4)
-  e.g., "sports", "technology"                            ← Tier 1
-        "tennis", "cooking", "generative AI"              ← Tier 2
-        "running and jogging", "barbecues and grilling"   ← Tier 3
+  e.g., "sports", "technology & computing"                ← Tier 1
+        "tennis", "artificial intelligence"               ← Tier 2
+        "running and jogging"                             ← Tier 3
         "herbs and supplements"                           ← Tier 4
+- Common IAB label hints (use the exact IAB label):
+  → saving/budgeting/investing talk → "personal finance" (NOT "financial services", "economics")
+  → wars/military conflicts → "war and conflicts" (NOT "war")
 
 [For entities]
-- entities: specific proper nouns (max 5, English, lowercase)
-- Must be a proper noun with a unique real-world identity
-  (person, event, organization, product — Knowledge Graph level)
+- entities: specific proper nouns (max 3, English, lowercase)
+- Must be a NOTABLE proper noun — a person, organization, product, or event that has
+  a Wikipedia article or equivalent public presence
+- DO NOT extract:
+  → Personal names from conversation (Dick, Bob, Kate, Leo, Dr. Mustn)
+  → Generic institutions without specific identity ("a bank", "the hospital")
+  → Common nouns disguised as entities ("doctor", "player", "team")
+  → Sub-components when the parent entity captures the interest
+    (M2 chip → Apple is the interest; Focus mode → Apple; Flask → skip)
+  → Entities mentioned only once with no positive reaction from the user
+    (opponent teams, comparison targets, passing references)
 
 [Granularity — applies to both categories and entities]
 - Choose the tier that best reflects the SCOPE OF INTEREST the user expressed,
@@ -163,15 +222,44 @@ All keywords must pass this test:
   e.g., "the player", "a famous chef", "my favorite team" → skip
 
 [Deduplication — semantic, not exact match]
-- If two keywords refer to the same concept, keep only the shorter/broader one.
+- If two keywords refer to the same concept, keep only one.
   e.g., "grand slam" + "grand slam tournaments" → keep "grand slam" only
+        "EV" + "electric vehicles" → keep "electric vehicles" (IAB term)
 
 [is_news_relevant]
 - true:  keyword generates regular news (sports, politics, economy, tech, etc.)
          Ask: does "{keyword} news" return fresh articles regularly?
 - false: evergreen categories (food, daily life, grammar, hobbies)
 
-=== INTEREST SUMMARIES ===
+--- EXAMPLES ---
+
+Example 1 (transactional → extract nothing):
+User: "I have a reservation for a double."
+AI: "What's your last name?"
+User: "It's Smith. Here is my driver's license."
+→ categories: [], entities: []
+Reason: Hotel check-in is transactional, not an expression of interest.
+
+Example 2 (casual daily routine → extract nothing):
+User: "So Dick, how about getting some coffee for tonight?"
+AI: "I don't honestly like that kind of stuff."
+User: "Come on, you can at least try."
+→ categories: [], entities: []
+Reason: Coffee is daily routine; Dick is a personal name, not a notable entity.
+
+Example 3 (genuine interest — explicit + implicit signals):
+User: "I went to the baseball game last weekend. It was amazing — a walk-off homer!"
+User: "My tech stocks are up 15%. I check my portfolio almost every morning!"
+→ categories: ["baseball", "personal investing"], entities: []
+Reason: Baseball = explicit enthusiasm. Personal investing = habitual behavior (implicit signal).
+
+Example 4 (entity interest implies parent category):
+User: "I watched Carlos Alcaraz play last night!"
+User: "I've been following him since his first grand slam."
+→ categories: ["tennis"], entities: ["carlos alcaraz"]
+Reason: Ongoing engagement with a specific athlete. Tennis implied by entity.
+
+--- INTEREST SUMMARIES ---
 For each category/entity, generate summary if conversation has specific info about it.
 - Third person ("User is...", "User started...")
 - Hard limit: 200 characters

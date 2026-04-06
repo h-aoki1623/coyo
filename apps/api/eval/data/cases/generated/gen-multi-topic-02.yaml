@@ -33,13 +33,13 @@ gold_labels:
   - keyword: travel
     is_news_relevant: false
     keyword_type: category
-    iab_category_id: '27'
+    iab_category_id: '653'
     mention_type: explicit
-  - keyword: world cuisines
+  - keyword: food & drink
     is_news_relevant: false
     keyword_type: category
-    iab_category_id: '9.12'
     mention_type: implicit
+    iab_category_id: '210'
   entities:
   - keyword: tokyo
     is_news_relevant: false

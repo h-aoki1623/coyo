@@ -1,476 +1,4220 @@
 [
-  {"id": "1", "name": "Automotive", "parent_id": null, "tier": 1},
-  {"id": "1.1", "name": "Auto Body Styles", "parent_id": "1", "tier": 2},
-  {"id": "1.2", "name": "Auto Type", "parent_id": "1", "tier": 2},
-  {"id": "1.3", "name": "Auto Buying and Selling", "parent_id": "1", "tier": 2},
-  {"id": "1.4", "name": "Auto Insurance", "parent_id": "1", "tier": 2},
-  {"id": "1.5", "name": "Auto Parts", "parent_id": "1", "tier": 2},
-  {"id": "1.6", "name": "Auto Recalls", "parent_id": "1", "tier": 2},
-  {"id": "1.7", "name": "Auto Repair", "parent_id": "1", "tier": 2},
-  {"id": "1.8", "name": "Auto Safety", "parent_id": "1", "tier": 2},
-  {"id": "1.9", "name": "Auto Shows", "parent_id": "1", "tier": 2},
-  {"id": "1.10", "name": "Auto Technology", "parent_id": "1", "tier": 2},
-  {"id": "1.11", "name": "Budget Cars", "parent_id": "1", "tier": 2},
-  {"id": "1.12", "name": "Car Culture", "parent_id": "1", "tier": 2},
-  {"id": "1.13", "name": "Certified Pre-Owned", "parent_id": "1", "tier": 2},
-  {"id": "1.14", "name": "Convertible", "parent_id": "1", "tier": 2},
-  {"id": "1.15", "name": "Coupe", "parent_id": "1", "tier": 2},
-  {"id": "1.16", "name": "Crossover", "parent_id": "1", "tier": 2},
-  {"id": "1.17", "name": "Diesel", "parent_id": "1", "tier": 2},
-  {"id": "1.18", "name": "Electric Vehicle", "parent_id": "1", "tier": 2},
-  {"id": "1.19", "name": "Hatchback", "parent_id": "1", "tier": 2},
-  {"id": "1.20", "name": "Hybrid", "parent_id": "1", "tier": 2},
-  {"id": "1.21", "name": "Luxury", "parent_id": "1", "tier": 2},
-  {"id": "1.22", "name": "Minivan", "parent_id": "1", "tier": 2},
-  {"id": "1.23", "name": "Motorcycles", "parent_id": "1", "tier": 2},
-  {"id": "1.24", "name": "Off-Road Vehicles", "parent_id": "1", "tier": 2},
-  {"id": "1.25", "name": "Performance Vehicles", "parent_id": "1", "tier": 2},
-  {"id": "1.26", "name": "Pickup Trucks", "parent_id": "1", "tier": 2},
-  {"id": "1.27", "name": "Sedan", "parent_id": "1", "tier": 2},
-  {"id": "1.28", "name": "SUV", "parent_id": "1", "tier": 2},
-  {"id": "1.29", "name": "Van", "parent_id": "1", "tier": 2},
-  {"id": "1.30", "name": "Wagon", "parent_id": "1", "tier": 2},
-
-  {"id": "2", "name": "Books and Literature", "parent_id": null, "tier": 1},
-  {"id": "2.1", "name": "Art and Photography Books", "parent_id": "2", "tier": 2},
-  {"id": "2.2", "name": "Biographies", "parent_id": "2", "tier": 2},
-  {"id": "2.3", "name": "Children's Literature", "parent_id": "2", "tier": 2},
-  {"id": "2.4", "name": "Comics and Graphic Novels", "parent_id": "2", "tier": 2},
-  {"id": "2.5", "name": "Cookbooks", "parent_id": "2", "tier": 2},
-  {"id": "2.6", "name": "Fiction", "parent_id": "2", "tier": 2},
-  {"id": "2.7", "name": "Poetry", "parent_id": "2", "tier": 2},
-  {"id": "2.8", "name": "Travel Books", "parent_id": "2", "tier": 2},
-
-  {"id": "3", "name": "Business and Finance", "parent_id": null, "tier": 1},
-  {"id": "3.1", "name": "Business", "parent_id": "3", "tier": 2},
-  {"id": "3.2", "name": "Business Accounting & Finance", "parent_id": "3", "tier": 2},
-  {"id": "3.3", "name": "Business Administration", "parent_id": "3", "tier": 2},
-  {"id": "3.4", "name": "Business Banking & Finance", "parent_id": "3", "tier": 2},
-  {"id": "3.5", "name": "Business I.T.", "parent_id": "3", "tier": 2},
-  {"id": "3.6", "name": "Business Law", "parent_id": "3", "tier": 2},
-  {"id": "3.7", "name": "Business Supplies and Equipment", "parent_id": "3", "tier": 2},
-  {"id": "3.8", "name": "Business Utilities", "parent_id": "3", "tier": 2},
-  {"id": "3.9", "name": "Consumer Issues", "parent_id": "3", "tier": 2},
-  {"id": "3.10", "name": "Economy", "parent_id": "3", "tier": 2},
-  {"id": "3.11", "name": "Environmental, Social and Governance (ESG)", "parent_id": "3", "tier": 2},
-  {"id": "3.12", "name": "Executive Leadership & Management", "parent_id": "3", "tier": 2},
-  {"id": "3.13", "name": "Government Business", "parent_id": "3", "tier": 2},
-  {"id": "3.14", "name": "Green Solutions", "parent_id": "3", "tier": 2},
-  {"id": "3.15", "name": "Human Resources", "parent_id": "3", "tier": 2},
-  {"id": "3.16", "name": "Industries", "parent_id": "3", "tier": 2},
-  {"id": "3.17", "name": "Large Enterprise", "parent_id": "3", "tier": 2},
-  {"id": "3.18", "name": "Logistics", "parent_id": "3", "tier": 2},
-  {"id": "3.19", "name": "Marketing and Advertising", "parent_id": "3", "tier": 2},
-  {"id": "3.20", "name": "Mergers and Acquisitions", "parent_id": "3", "tier": 2},
-  {"id": "3.21", "name": "Small and Medium-sized Business", "parent_id": "3", "tier": 2},
-  {"id": "3.22", "name": "Startups", "parent_id": "3", "tier": 2},
-
-  {"id": "4", "name": "Careers", "parent_id": null, "tier": 1},
-  {"id": "4.1", "name": "Apprenticeships", "parent_id": "4", "tier": 2},
-  {"id": "4.2", "name": "Career Advice", "parent_id": "4", "tier": 2},
-  {"id": "4.3", "name": "Career Planning", "parent_id": "4", "tier": 2},
-  {"id": "4.4", "name": "Job Fairs", "parent_id": "4", "tier": 2},
-  {"id": "4.5", "name": "Job Search", "parent_id": "4", "tier": 2},
-  {"id": "4.6", "name": "Remote Working", "parent_id": "4", "tier": 2},
-  {"id": "4.7", "name": "Resume Writing and Advice", "parent_id": "4", "tier": 2},
-  {"id": "4.8", "name": "Vocational Training", "parent_id": "4", "tier": 2},
-
-  {"id": "5", "name": "Education", "parent_id": null, "tier": 1},
-  {"id": "5.1", "name": "Adult Education", "parent_id": "5", "tier": 2},
-  {"id": "5.2", "name": "College Education", "parent_id": "5", "tier": 2},
-  {"id": "5.3", "name": "Educational Assessment", "parent_id": "5", "tier": 2},
-  {"id": "5.4", "name": "Graduate School", "parent_id": "5", "tier": 2},
-  {"id": "5.5", "name": "Homeschooling", "parent_id": "5", "tier": 2},
-  {"id": "5.6", "name": "Homework and Study Tips", "parent_id": "5", "tier": 2},
-  {"id": "5.7", "name": "Language Learning", "parent_id": "5", "tier": 2},
-  {"id": "5.8", "name": "Online Education", "parent_id": "5", "tier": 2},
-  {"id": "5.9", "name": "Primary Education", "parent_id": "5", "tier": 2},
-  {"id": "5.10", "name": "Secondary Education", "parent_id": "5", "tier": 2},
-  {"id": "5.11", "name": "Special Education", "parent_id": "5", "tier": 2},
-
-  {"id": "6", "name": "Events and Attractions", "parent_id": null, "tier": 1},
-  {"id": "6.1", "name": "Amusement and Theme Parks", "parent_id": "6", "tier": 2},
-  {"id": "6.2", "name": "Awards Shows", "parent_id": "6", "tier": 2},
-  {"id": "6.3", "name": "Bachelor Parties", "parent_id": "6", "tier": 2},
-  {"id": "6.4", "name": "Birthday", "parent_id": "6", "tier": 2},
-  {"id": "6.5", "name": "Business Expos & Conferences", "parent_id": "6", "tier": 2},
-  {"id": "6.6", "name": "Cinemas and Events", "parent_id": "6", "tier": 2},
-  {"id": "6.7", "name": "Clubs and Nightlife", "parent_id": "6", "tier": 2},
-  {"id": "6.8", "name": "Concerts and Music Events", "parent_id": "6", "tier": 2},
-  {"id": "6.9", "name": "Fan Conventions", "parent_id": "6", "tier": 2},
-  {"id": "6.10", "name": "Fashion Events", "parent_id": "6", "tier": 2},
-  {"id": "6.11", "name": "Film Festivals", "parent_id": "6", "tier": 2},
-  {"id": "6.12", "name": "Food and Beverage Events", "parent_id": "6", "tier": 2},
-  {"id": "6.13", "name": "Funerals", "parent_id": "6", "tier": 2},
-  {"id": "6.14", "name": "Halloween", "parent_id": "6", "tier": 2},
-  {"id": "6.15", "name": "Historic Site and Landmark Tours", "parent_id": "6", "tier": 2},
-  {"id": "6.16", "name": "Holiday Travel", "parent_id": "6", "tier": 2},
-  {"id": "6.17", "name": "Live Sporting Events", "parent_id": "6", "tier": 2},
-  {"id": "6.18", "name": "Museums and Galleries", "parent_id": "6", "tier": 2},
-  {"id": "6.19", "name": "Music Festivals", "parent_id": "6", "tier": 2},
-  {"id": "6.20", "name": "National and Civic Holidays", "parent_id": "6", "tier": 2},
-  {"id": "6.21", "name": "Outdoor Activities", "parent_id": "6", "tier": 2},
-  {"id": "6.22", "name": "Parks and Nature", "parent_id": "6", "tier": 2},
-  {"id": "6.23", "name": "Performing Arts", "parent_id": "6", "tier": 2},
-  {"id": "6.24", "name": "Personal Celebrations and Life Events", "parent_id": "6", "tier": 2},
-  {"id": "6.25", "name": "Political Event", "parent_id": "6", "tier": 2},
-  {"id": "6.26", "name": "Prom", "parent_id": "6", "tier": 2},
-  {"id": "6.27", "name": "Religious Events", "parent_id": "6", "tier": 2},
-  {"id": "6.28", "name": "Reunions", "parent_id": "6", "tier": 2},
-  {"id": "6.29", "name": "Weddings", "parent_id": "6", "tier": 2},
-  {"id": "6.30", "name": "Zoos and Aquariums", "parent_id": "6", "tier": 2},
-
-  {"id": "7", "name": "Family and Relationships", "parent_id": null, "tier": 1},
-  {"id": "7.1", "name": "Bereavement", "parent_id": "7", "tier": 2},
-  {"id": "7.2", "name": "Dating", "parent_id": "7", "tier": 2},
-  {"id": "7.3", "name": "Divorce", "parent_id": "7", "tier": 2},
-  {"id": "7.4", "name": "Eldercare", "parent_id": "7", "tier": 2},
-  {"id": "7.5", "name": "Marriage and Civil Unions", "parent_id": "7", "tier": 2},
-  {"id": "7.6", "name": "Parenting", "parent_id": "7", "tier": 2},
-  {"id": "7.7", "name": "Single Life", "parent_id": "7", "tier": 2},
-
-  {"id": "8", "name": "Fine Art", "parent_id": null, "tier": 1},
-  {"id": "8.1", "name": "Costume", "parent_id": "8", "tier": 2},
-  {"id": "8.2", "name": "Dance", "parent_id": "8", "tier": 2},
-  {"id": "8.3", "name": "Design", "parent_id": "8", "tier": 2},
-  {"id": "8.4", "name": "Digital Arts", "parent_id": "8", "tier": 2},
-  {"id": "8.5", "name": "Fine Art Photography", "parent_id": "8", "tier": 2},
-  {"id": "8.6", "name": "Modern Art", "parent_id": "8", "tier": 2},
-  {"id": "8.7", "name": "Opera", "parent_id": "8", "tier": 2},
-  {"id": "8.8", "name": "Painting", "parent_id": "8", "tier": 2},
-  {"id": "8.9", "name": "Sculpture", "parent_id": "8", "tier": 2},
-  {"id": "8.10", "name": "Theater", "parent_id": "8", "tier": 2},
-
-  {"id": "9", "name": "Food & Drink", "parent_id": null, "tier": 1},
-  {"id": "9.1", "name": "Alcoholic Beverages", "parent_id": "9", "tier": 2},
-  {"id": "9.2", "name": "Barbecues and Grilling", "parent_id": "9", "tier": 2},
-  {"id": "9.3", "name": "Cooking", "parent_id": "9", "tier": 2},
-  {"id": "9.4", "name": "Desserts and Baking", "parent_id": "9", "tier": 2},
-  {"id": "9.5", "name": "Dining Out", "parent_id": "9", "tier": 2},
-  {"id": "9.6", "name": "Food Allergies", "parent_id": "9", "tier": 2},
-  {"id": "9.7", "name": "Food Movements", "parent_id": "9", "tier": 2},
-  {"id": "9.8", "name": "Healthy Cooking and Eating", "parent_id": "9", "tier": 2},
-  {"id": "9.9", "name": "Non-Alcoholic Beverages", "parent_id": "9", "tier": 2},
-  {"id": "9.10", "name": "Vegan Diets", "parent_id": "9", "tier": 2},
-  {"id": "9.11", "name": "Vegetarian Diets", "parent_id": "9", "tier": 2},
-  {"id": "9.12", "name": "World Cuisines", "parent_id": "9", "tier": 2},
-
-  {"id": "10", "name": "Healthy Living", "parent_id": null, "tier": 1},
-  {"id": "10.1", "name": "Children's Health", "parent_id": "10", "tier": 2},
-  {"id": "10.2", "name": "Fitness and Exercise", "parent_id": "10", "tier": 2},
-  {"id": "10.3", "name": "Men's Health", "parent_id": "10", "tier": 2},
-  {"id": "10.4", "name": "Nutrition", "parent_id": "10", "tier": 2},
-  {"id": "10.5", "name": "Senior Health", "parent_id": "10", "tier": 2},
-  {"id": "10.6", "name": "Wellness and Spa", "parent_id": "10", "tier": 2},
-  {"id": "10.7", "name": "Women's Health", "parent_id": "10", "tier": 2},
-
-  {"id": "11", "name": "Home & Garden", "parent_id": null, "tier": 1},
-  {"id": "11.1", "name": "Gardening", "parent_id": "11", "tier": 2},
-  {"id": "11.2", "name": "Home Appliances", "parent_id": "11", "tier": 2},
-  {"id": "11.3", "name": "Home Entertaining", "parent_id": "11", "tier": 2},
-  {"id": "11.4", "name": "Home Improvement", "parent_id": "11", "tier": 2},
-  {"id": "11.5", "name": "Home Security", "parent_id": "11", "tier": 2},
-  {"id": "11.6", "name": "Indoor Environmental Quality", "parent_id": "11", "tier": 2},
-  {"id": "11.7", "name": "Interior Decorating", "parent_id": "11", "tier": 2},
-  {"id": "11.8", "name": "Landscaping", "parent_id": "11", "tier": 2},
-  {"id": "11.9", "name": "Outdoor Decorating", "parent_id": "11", "tier": 2},
-  {"id": "11.10", "name": "Smart Home", "parent_id": "11", "tier": 2},
-
-  {"id": "12", "name": "Medical Health", "parent_id": null, "tier": 1},
-  {"id": "12.1", "name": "Allergies", "parent_id": "12", "tier": 2},
-  {"id": "12.2", "name": "Brain and Nervous System Disorders", "parent_id": "12", "tier": 2},
-  {"id": "12.3", "name": "Cancer", "parent_id": "12", "tier": 2},
-  {"id": "12.4", "name": "Cold and Flu", "parent_id": "12", "tier": 2},
-  {"id": "12.5", "name": "Dental Health", "parent_id": "12", "tier": 2},
-  {"id": "12.6", "name": "Dermatology", "parent_id": "12", "tier": 2},
-  {"id": "12.7", "name": "Diabetes", "parent_id": "12", "tier": 2},
-  {"id": "12.8", "name": "Digestive Disorders", "parent_id": "12", "tier": 2},
-  {"id": "12.9", "name": "Drugs and Medications", "parent_id": "12", "tier": 2},
-  {"id": "12.10", "name": "Ear, Nose and Throat Conditions", "parent_id": "12", "tier": 2},
-  {"id": "12.11", "name": "Endocrine and Metabolic Diseases", "parent_id": "12", "tier": 2},
-  {"id": "12.12", "name": "Eye and Vision Conditions", "parent_id": "12", "tier": 2},
-  {"id": "12.13", "name": "First Aid", "parent_id": "12", "tier": 2},
-  {"id": "12.14", "name": "Foot Health", "parent_id": "12", "tier": 2},
-  {"id": "12.15", "name": "Heart and Cardiovascular Diseases", "parent_id": "12", "tier": 2},
-  {"id": "12.16", "name": "Infectious Diseases", "parent_id": "12", "tier": 2},
-  {"id": "12.17", "name": "Injuries", "parent_id": "12", "tier": 2},
-  {"id": "12.18", "name": "Lung and Respiratory Health", "parent_id": "12", "tier": 2},
-  {"id": "12.19", "name": "Medical Tests", "parent_id": "12", "tier": 2},
-  {"id": "12.20", "name": "Mental Health", "parent_id": "12", "tier": 2},
-  {"id": "12.21", "name": "Musculoskeletal Disorders", "parent_id": "12", "tier": 2},
-  {"id": "12.22", "name": "Pharmaceutical Industry", "parent_id": "12", "tier": 2},
-  {"id": "12.23", "name": "Reproductive Health", "parent_id": "12", "tier": 2},
-  {"id": "12.24", "name": "Sexual Health", "parent_id": "12", "tier": 2},
-  {"id": "12.25", "name": "Sleep Disorders", "parent_id": "12", "tier": 2},
-  {"id": "12.26", "name": "Substance Abuse", "parent_id": "12", "tier": 2},
-  {"id": "12.27", "name": "Surgery", "parent_id": "12", "tier": 2},
-  {"id": "12.28", "name": "Vaccines", "parent_id": "12", "tier": 2},
-
-  {"id": "13", "name": "Movies", "parent_id": null, "tier": 1},
-  {"id": "13.1", "name": "Action and Adventure Movies", "parent_id": "13", "tier": 2},
-  {"id": "13.2", "name": "Animation Movies", "parent_id": "13", "tier": 2},
-  {"id": "13.3", "name": "Bollywood", "parent_id": "13", "tier": 2},
-  {"id": "13.4", "name": "Comedy Movies", "parent_id": "13", "tier": 2},
-  {"id": "13.5", "name": "Crime and Mystery Movies", "parent_id": "13", "tier": 2},
-  {"id": "13.6", "name": "Documentary Movies", "parent_id": "13", "tier": 2},
-  {"id": "13.7", "name": "Drama Movies", "parent_id": "13", "tier": 2},
-  {"id": "13.8", "name": "Family Movies", "parent_id": "13", "tier": 2},
-  {"id": "13.9", "name": "Fantasy Movies", "parent_id": "13", "tier": 2},
-  {"id": "13.10", "name": "Horror Movies", "parent_id": "13", "tier": 2},
-  {"id": "13.11", "name": "Independent Movies", "parent_id": "13", "tier": 2},
-  {"id": "13.12", "name": "Movie Industry", "parent_id": "13", "tier": 2},
-  {"id": "13.13", "name": "Musical Movies", "parent_id": "13", "tier": 2},
-  {"id": "13.14", "name": "Romance Movies", "parent_id": "13", "tier": 2},
-  {"id": "13.15", "name": "Science Fiction Movies", "parent_id": "13", "tier": 2},
-  {"id": "13.16", "name": "Special Interest Movies", "parent_id": "13", "tier": 2},
-  {"id": "13.17", "name": "Superhero Movies", "parent_id": "13", "tier": 2},
-  {"id": "13.18", "name": "World Cinema", "parent_id": "13", "tier": 2},
-
-  {"id": "14", "name": "Music and Audio", "parent_id": null, "tier": 1},
-  {"id": "14.1", "name": "Adult Album Alternative", "parent_id": "14", "tier": 2},
-  {"id": "14.2", "name": "Adult Contemporary Music", "parent_id": "14", "tier": 2},
-  {"id": "14.3", "name": "Alternative Music", "parent_id": "14", "tier": 2},
-  {"id": "14.4", "name": "Blues", "parent_id": "14", "tier": 2},
-  {"id": "14.5", "name": "Children's Music", "parent_id": "14", "tier": 2},
-  {"id": "14.6", "name": "Christian and Gospel Music", "parent_id": "14", "tier": 2},
-  {"id": "14.7", "name": "Classic Hits", "parent_id": "14", "tier": 2},
-  {"id": "14.8", "name": "Classical Music", "parent_id": "14", "tier": 2},
-  {"id": "14.9", "name": "Country Music", "parent_id": "14", "tier": 2},
-  {"id": "14.10", "name": "Dance and Electronic Music", "parent_id": "14", "tier": 2},
-  {"id": "14.11", "name": "DJs and Remixing", "parent_id": "14", "tier": 2},
-  {"id": "14.12", "name": "Folk Music", "parent_id": "14", "tier": 2},
-  {"id": "14.13", "name": "Hip Hop Music", "parent_id": "14", "tier": 2},
-  {"id": "14.14", "name": "Indie Spotlight", "parent_id": "14", "tier": 2},
-  {"id": "14.15", "name": "Jazz", "parent_id": "14", "tier": 2},
-  {"id": "14.16", "name": "Latin Music", "parent_id": "14", "tier": 2},
-  {"id": "14.17", "name": "Metal", "parent_id": "14", "tier": 2},
-  {"id": "14.18", "name": "Music Industry", "parent_id": "14", "tier": 2},
-  {"id": "14.19", "name": "Musical Instruments and Equipment", "parent_id": "14", "tier": 2},
-  {"id": "14.20", "name": "Oldies", "parent_id": "14", "tier": 2},
-  {"id": "14.21", "name": "Podcasts", "parent_id": "14", "tier": 2},
-  {"id": "14.22", "name": "Pop Music", "parent_id": "14", "tier": 2},
-  {"id": "14.23", "name": "R&B/Soul Music", "parent_id": "14", "tier": 2},
-  {"id": "14.24", "name": "Reggae", "parent_id": "14", "tier": 2},
-  {"id": "14.25", "name": "Rock Music", "parent_id": "14", "tier": 2},
-  {"id": "14.26", "name": "Songwriting", "parent_id": "14", "tier": 2},
-  {"id": "14.27", "name": "Talk Radio", "parent_id": "14", "tier": 2},
-  {"id": "14.28", "name": "Urban Contemporary Music", "parent_id": "14", "tier": 2},
-  {"id": "14.29", "name": "World/International Music", "parent_id": "14", "tier": 2},
-
-  {"id": "15", "name": "News and Politics", "parent_id": null, "tier": 1},
-  {"id": "15.1", "name": "Crime", "parent_id": "15", "tier": 2},
-  {"id": "15.2", "name": "Disasters", "parent_id": "15", "tier": 2},
-  {"id": "15.3", "name": "International News", "parent_id": "15", "tier": 2},
-  {"id": "15.4", "name": "Law", "parent_id": "15", "tier": 2},
-  {"id": "15.5", "name": "Local News", "parent_id": "15", "tier": 2},
-  {"id": "15.6", "name": "National News", "parent_id": "15", "tier": 2},
-  {"id": "15.7", "name": "Political Issues", "parent_id": "15", "tier": 2},
-  {"id": "15.8", "name": "Politics", "parent_id": "15", "tier": 2},
-  {"id": "15.9", "name": "War and Conflicts", "parent_id": "15", "tier": 2},
-  {"id": "15.10", "name": "Weather", "parent_id": "15", "tier": 2},
-
-  {"id": "16", "name": "Personal Finance", "parent_id": null, "tier": 1},
-  {"id": "16.1", "name": "Consumer Banking", "parent_id": "16", "tier": 2},
-  {"id": "16.2", "name": "Financial Assistance", "parent_id": "16", "tier": 2},
-  {"id": "16.3", "name": "Financial Planning", "parent_id": "16", "tier": 2},
-  {"id": "16.4", "name": "Frugal Living", "parent_id": "16", "tier": 2},
-  {"id": "16.5", "name": "Insurance", "parent_id": "16", "tier": 2},
-  {"id": "16.6", "name": "Personal Debt", "parent_id": "16", "tier": 2},
-  {"id": "16.7", "name": "Personal Investing", "parent_id": "16", "tier": 2},
-  {"id": "16.8", "name": "Personal Taxes", "parent_id": "16", "tier": 2},
-  {"id": "16.9", "name": "Retirement Planning", "parent_id": "16", "tier": 2},
-
-  {"id": "17", "name": "Pets", "parent_id": null, "tier": 1},
-  {"id": "17.1", "name": "Birds", "parent_id": "17", "tier": 2},
-  {"id": "17.2", "name": "Cats", "parent_id": "17", "tier": 2},
-  {"id": "17.3", "name": "Dogs", "parent_id": "17", "tier": 2},
-  {"id": "17.4", "name": "Fish and Aquariums", "parent_id": "17", "tier": 2},
-  {"id": "17.5", "name": "Large Animals", "parent_id": "17", "tier": 2},
-  {"id": "17.6", "name": "Pet Supplies", "parent_id": "17", "tier": 2},
-  {"id": "17.7", "name": "Reptiles", "parent_id": "17", "tier": 2},
-  {"id": "17.8", "name": "Small Pets", "parent_id": "17", "tier": 2},
-  {"id": "17.9", "name": "Veterinary Medicine", "parent_id": "17", "tier": 2},
-
-  {"id": "18", "name": "Pop Culture", "parent_id": null, "tier": 1},
-  {"id": "18.1", "name": "Celebrity Fan/Gossip", "parent_id": "18", "tier": 2},
-  {"id": "18.2", "name": "Celebrity Homes", "parent_id": "18", "tier": 2},
-  {"id": "18.3", "name": "Celebrity Relationships", "parent_id": "18", "tier": 2},
-  {"id": "18.4", "name": "Celebrity Style", "parent_id": "18", "tier": 2},
-  {"id": "18.5", "name": "Humor and Satire", "parent_id": "18", "tier": 2},
-
-  {"id": "19", "name": "Real Estate", "parent_id": null, "tier": 1},
-  {"id": "19.1", "name": "Apartments", "parent_id": "19", "tier": 2},
-  {"id": "19.2", "name": "Architects", "parent_id": "19", "tier": 2},
-  {"id": "19.3", "name": "Buying and Selling Homes", "parent_id": "19", "tier": 2},
-  {"id": "19.4", "name": "Commercial Real Estate", "parent_id": "19", "tier": 2},
-  {"id": "19.5", "name": "Vacation Properties", "parent_id": "19", "tier": 2},
-
-  {"id": "20", "name": "Religion & Spirituality", "parent_id": null, "tier": 1},
-  {"id": "20.1", "name": "Agnosticism", "parent_id": "20", "tier": 2},
-  {"id": "20.2", "name": "Astrology", "parent_id": "20", "tier": 2},
-  {"id": "20.3", "name": "Atheism", "parent_id": "20", "tier": 2},
-  {"id": "20.4", "name": "Buddhism", "parent_id": "20", "tier": 2},
-  {"id": "20.5", "name": "Christianity", "parent_id": "20", "tier": 2},
-  {"id": "20.6", "name": "Hinduism", "parent_id": "20", "tier": 2},
-  {"id": "20.7", "name": "Islam", "parent_id": "20", "tier": 2},
-  {"id": "20.8", "name": "Judaism", "parent_id": "20", "tier": 2},
-  {"id": "20.9", "name": "Sikhism", "parent_id": "20", "tier": 2},
-  {"id": "20.10", "name": "Spirituality", "parent_id": "20", "tier": 2},
-
-  {"id": "21", "name": "Science", "parent_id": null, "tier": 1},
-  {"id": "21.1", "name": "Biological Sciences", "parent_id": "21", "tier": 2},
-  {"id": "21.2", "name": "Chemistry", "parent_id": "21", "tier": 2},
-  {"id": "21.3", "name": "Environment", "parent_id": "21", "tier": 2},
-  {"id": "21.4", "name": "Genetics", "parent_id": "21", "tier": 2},
-  {"id": "21.5", "name": "Geography", "parent_id": "21", "tier": 2},
-  {"id": "21.6", "name": "Geology", "parent_id": "21", "tier": 2},
-  {"id": "21.7", "name": "Physics", "parent_id": "21", "tier": 2},
-  {"id": "21.8", "name": "Space and Astronomy", "parent_id": "21", "tier": 2},
-
-  {"id": "22", "name": "Shopping", "parent_id": null, "tier": 1},
-  {"id": "22.1", "name": "Coupons and Discounts", "parent_id": "22", "tier": 2},
-  {"id": "22.2", "name": "Customer Reviews", "parent_id": "22", "tier": 2},
-  {"id": "22.3", "name": "Designer Brands", "parent_id": "22", "tier": 2},
-  {"id": "22.4", "name": "Flower Shopping", "parent_id": "22", "tier": 2},
-  {"id": "22.5", "name": "Gift Cards", "parent_id": "22", "tier": 2},
-  {"id": "22.6", "name": "Gift Giving", "parent_id": "22", "tier": 2},
-  {"id": "22.7", "name": "Holiday Shopping", "parent_id": "22", "tier": 2},
-  {"id": "22.8", "name": "Loyalty Programs", "parent_id": "22", "tier": 2},
-  {"id": "22.9", "name": "Merchandising", "parent_id": "22", "tier": 2},
-  {"id": "22.10", "name": "Sales and Promotions", "parent_id": "22", "tier": 2},
-
-  {"id": "23", "name": "Sports", "parent_id": null, "tier": 1},
-  {"id": "23.1", "name": "American Football", "parent_id": "23", "tier": 2},
-  {"id": "23.2", "name": "Australian Rules Football", "parent_id": "23", "tier": 2},
-  {"id": "23.3", "name": "Auto Racing", "parent_id": "23", "tier": 2},
-  {"id": "23.4", "name": "Badminton", "parent_id": "23", "tier": 2},
-  {"id": "23.5", "name": "Baseball", "parent_id": "23", "tier": 2},
-  {"id": "23.6", "name": "Basketball", "parent_id": "23", "tier": 2},
-  {"id": "23.7", "name": "Beach Volleyball", "parent_id": "23", "tier": 2},
-  {"id": "23.8", "name": "Bodybuilding", "parent_id": "23", "tier": 2},
-  {"id": "23.9", "name": "Bowling", "parent_id": "23", "tier": 2},
-  {"id": "23.10", "name": "Boxing", "parent_id": "23", "tier": 2},
-  {"id": "23.11", "name": "Cheerleading", "parent_id": "23", "tier": 2},
-  {"id": "23.12", "name": "College Sports", "parent_id": "23", "tier": 2},
-  {"id": "23.13", "name": "Cricket", "parent_id": "23", "tier": 2},
-  {"id": "23.14", "name": "Cycling", "parent_id": "23", "tier": 2},
-  {"id": "23.15", "name": "Darts", "parent_id": "23", "tier": 2},
-  {"id": "23.16", "name": "Disabled Sports", "parent_id": "23", "tier": 2},
-  {"id": "23.17", "name": "Diving", "parent_id": "23", "tier": 2},
-  {"id": "23.18", "name": "Equine Sports", "parent_id": "23", "tier": 2},
-  {"id": "23.19", "name": "Extreme Sports", "parent_id": "23", "tier": 2},
-  {"id": "23.20", "name": "Fantasy Sports", "parent_id": "23", "tier": 2},
-  {"id": "23.21", "name": "Fencing", "parent_id": "23", "tier": 2},
-  {"id": "23.22", "name": "Field Hockey", "parent_id": "23", "tier": 2},
-  {"id": "23.23", "name": "Figure Skating", "parent_id": "23", "tier": 2},
-  {"id": "23.24", "name": "Fishing Sports", "parent_id": "23", "tier": 2},
-  {"id": "23.25", "name": "Golf", "parent_id": "23", "tier": 2},
-  {"id": "23.26", "name": "Gymnastics", "parent_id": "23", "tier": 2},
-  {"id": "23.27", "name": "Handball", "parent_id": "23", "tier": 2},
-  {"id": "23.28", "name": "Hockey", "parent_id": "23", "tier": 2},
-  {"id": "23.29", "name": "Hunting and Shooting", "parent_id": "23", "tier": 2},
-  {"id": "23.30", "name": "Lacrosse", "parent_id": "23", "tier": 2},
-  {"id": "23.31", "name": "Martial Arts", "parent_id": "23", "tier": 2},
-  {"id": "23.32", "name": "Olympic Sports", "parent_id": "23", "tier": 2},
-  {"id": "23.33", "name": "Poker and Professional Gambling", "parent_id": "23", "tier": 2},
-  {"id": "23.34", "name": "Rodeo", "parent_id": "23", "tier": 2},
-  {"id": "23.35", "name": "Rowing", "parent_id": "23", "tier": 2},
-  {"id": "23.36", "name": "Rugby", "parent_id": "23", "tier": 2},
-  {"id": "23.37", "name": "Sailing", "parent_id": "23", "tier": 2},
-  {"id": "23.38", "name": "Skiing", "parent_id": "23", "tier": 2},
-  {"id": "23.39", "name": "Snooker/Pool/Billiards", "parent_id": "23", "tier": 2},
-  {"id": "23.40", "name": "Soccer", "parent_id": "23", "tier": 2},
-  {"id": "23.41", "name": "Softball", "parent_id": "23", "tier": 2},
-  {"id": "23.42", "name": "Sports Equipment", "parent_id": "23", "tier": 2},
-  {"id": "23.43", "name": "Surfing and Bodyboarding", "parent_id": "23", "tier": 2},
-  {"id": "23.44", "name": "Swimming", "parent_id": "23", "tier": 2},
-  {"id": "23.45", "name": "Table Tennis", "parent_id": "23", "tier": 2},
-  {"id": "23.46", "name": "Tennis", "parent_id": "23", "tier": 2},
-  {"id": "23.47", "name": "Track and Field", "parent_id": "23", "tier": 2},
-  {"id": "23.48", "name": "Volleyball", "parent_id": "23", "tier": 2},
-  {"id": "23.49", "name": "Walking", "parent_id": "23", "tier": 2},
-  {"id": "23.50", "name": "Water Polo", "parent_id": "23", "tier": 2},
-  {"id": "23.51", "name": "Weightlifting", "parent_id": "23", "tier": 2},
-  {"id": "23.52", "name": "Wrestling", "parent_id": "23", "tier": 2},
-
-  {"id": "24", "name": "Style & Fashion", "parent_id": null, "tier": 1},
-  {"id": "24.1", "name": "Beauty", "parent_id": "24", "tier": 2},
-  {"id": "24.2", "name": "Body Art", "parent_id": "24", "tier": 2},
-  {"id": "24.3", "name": "Children's Clothing", "parent_id": "24", "tier": 2},
-  {"id": "24.4", "name": "Designer Clothing", "parent_id": "24", "tier": 2},
-  {"id": "24.5", "name": "Fashion Trends", "parent_id": "24", "tier": 2},
-  {"id": "24.6", "name": "High Fashion", "parent_id": "24", "tier": 2},
-  {"id": "24.7", "name": "Men's Fashion", "parent_id": "24", "tier": 2},
-  {"id": "24.8", "name": "Personal Care", "parent_id": "24", "tier": 2},
-  {"id": "24.9", "name": "Street Style", "parent_id": "24", "tier": 2},
-  {"id": "24.10", "name": "Women's Fashion", "parent_id": "24", "tier": 2},
-
-  {"id": "25", "name": "Technology & Computing", "parent_id": null, "tier": 1},
-  {"id": "25.1", "name": "Artificial Intelligence", "parent_id": "25", "tier": 2},
-  {"id": "25.2", "name": "Augmented Reality", "parent_id": "25", "tier": 2},
-  {"id": "25.3", "name": "Computing", "parent_id": "25", "tier": 2},
-  {"id": "25.4", "name": "Consumer Electronics", "parent_id": "25", "tier": 2},
-  {"id": "25.5", "name": "Cybersecurity", "parent_id": "25", "tier": 2},
-  {"id": "25.6", "name": "Data Storage", "parent_id": "25", "tier": 2},
-  {"id": "25.7", "name": "Internet of Things", "parent_id": "25", "tier": 2},
-  {"id": "25.8", "name": "IT and Internet Support", "parent_id": "25", "tier": 2},
-  {"id": "25.9", "name": "Network Security", "parent_id": "25", "tier": 2},
-  {"id": "25.10", "name": "Networking", "parent_id": "25", "tier": 2},
-  {"id": "25.11", "name": "Programming Languages", "parent_id": "25", "tier": 2},
-  {"id": "25.12", "name": "Robotics", "parent_id": "25", "tier": 2},
-  {"id": "25.13", "name": "Smartphones", "parent_id": "25", "tier": 2},
-  {"id": "25.14", "name": "Software and Applications", "parent_id": "25", "tier": 2},
-  {"id": "25.15", "name": "Tablets and E-Readers", "parent_id": "25", "tier": 2},
-  {"id": "25.16", "name": "Tech Industry", "parent_id": "25", "tier": 2},
-  {"id": "25.17", "name": "Virtual Reality", "parent_id": "25", "tier": 2},
-  {"id": "25.18", "name": "Wearable Technology", "parent_id": "25", "tier": 2},
-  {"id": "25.19", "name": "Web Development", "parent_id": "25", "tier": 2},
-
-  {"id": "26", "name": "Television", "parent_id": null, "tier": 1},
-  {"id": "26.1", "name": "Animation TV", "parent_id": "26", "tier": 2},
-  {"id": "26.2", "name": "Children's TV", "parent_id": "26", "tier": 2},
-  {"id": "26.3", "name": "Comedy TV", "parent_id": "26", "tier": 2},
-  {"id": "26.4", "name": "Drama TV", "parent_id": "26", "tier": 2},
-  {"id": "26.5", "name": "Factual TV", "parent_id": "26", "tier": 2},
-  {"id": "26.6", "name": "Reality TV", "parent_id": "26", "tier": 2},
-  {"id": "26.7", "name": "Science Fiction TV", "parent_id": "26", "tier": 2},
-  {"id": "26.8", "name": "TV Industry", "parent_id": "26", "tier": 2},
-
-  {"id": "27", "name": "Travel", "parent_id": null, "tier": 1},
-  {"id": "27.1", "name": "Adventure Travel", "parent_id": "27", "tier": 2},
-  {"id": "27.2", "name": "Africa Travel", "parent_id": "27", "tier": 2},
-  {"id": "27.3", "name": "Air Travel", "parent_id": "27", "tier": 2},
-  {"id": "27.4", "name": "Asia Travel", "parent_id": "27", "tier": 2},
-  {"id": "27.5", "name": "Australia and Oceania Travel", "parent_id": "27", "tier": 2},
-  {"id": "27.6", "name": "Beach Travel", "parent_id": "27", "tier": 2},
-  {"id": "27.7", "name": "Bed & Breakfasts", "parent_id": "27", "tier": 2},
-  {"id": "27.8", "name": "Budget Travel", "parent_id": "27", "tier": 2},
-  {"id": "27.9", "name": "Business Travel", "parent_id": "27", "tier": 2},
-  {"id": "27.10", "name": "Camping", "parent_id": "27", "tier": 2},
-  {"id": "27.11", "name": "Carnival", "parent_id": "27", "tier": 2},
-  {"id": "27.12", "name": "Car Rentals", "parent_id": "27", "tier": 2},
-  {"id": "27.13", "name": "Cruises", "parent_id": "27", "tier": 2},
-  {"id": "27.14", "name": "Day Trips", "parent_id": "27", "tier": 2},
-  {"id": "27.15", "name": "Europe Travel", "parent_id": "27", "tier": 2},
-  {"id": "27.16", "name": "Family Travel", "parent_id": "27", "tier": 2},
-  {"id": "27.17", "name": "Honeymoons and Getaways", "parent_id": "27", "tier": 2},
-  {"id": "27.18", "name": "Hotels and Motels", "parent_id": "27", "tier": 2},
-  {"id": "27.19", "name": "Luggage", "parent_id": "27", "tier": 2},
-  {"id": "27.20", "name": "North America Travel", "parent_id": "27", "tier": 2},
-  {"id": "27.21", "name": "Polar Travel", "parent_id": "27", "tier": 2},
-  {"id": "27.22", "name": "Rail Travel", "parent_id": "27", "tier": 2},
-  {"id": "27.23", "name": "Road Trips", "parent_id": "27", "tier": 2},
-  {"id": "27.24", "name": "South America Travel", "parent_id": "27", "tier": 2},
-  {"id": "27.25", "name": "Spas", "parent_id": "27", "tier": 2},
-  {"id": "27.26", "name": "Travel Accessories", "parent_id": "27", "tier": 2},
-  {"id": "27.27", "name": "Travel Preparation and Advice", "parent_id": "27", "tier": 2},
-
-  {"id": "28", "name": "Video Gaming", "parent_id": null, "tier": 1},
-  {"id": "28.1", "name": "Console Games", "parent_id": "28", "tier": 2},
-  {"id": "28.2", "name": "eSports", "parent_id": "28", "tier": 2},
-  {"id": "28.3", "name": "Mobile Games", "parent_id": "28", "tier": 2},
-  {"id": "28.4", "name": "PC Games", "parent_id": "28", "tier": 2},
-  {"id": "28.5", "name": "Video Game Industry", "parent_id": "28", "tier": 2},
-
-  {"id": "29", "name": "Weather", "parent_id": null, "tier": 1}
+  {
+    "id": "150",
+    "name": "Attractions",
+    "parent_id": null,
+    "tier": 1
+  },
+  {
+    "id": "151",
+    "name": "Amusement and Theme Parks",
+    "parent_id": "150",
+    "tier": 2
+  },
+  {
+    "id": "179",
+    "name": "Bars & Restaurants",
+    "parent_id": "150",
+    "tier": 2
+  },
+  {
+    "id": "181",
+    "name": "Casinos & Gambling",
+    "parent_id": "150",
+    "tier": 2
+  },
+  {
+    "id": "153",
+    "name": "Historic Site and Landmark Tours",
+    "parent_id": "150",
+    "tier": 2
+  },
+  {
+    "id": "154",
+    "name": "Malls & Shopping Centers",
+    "parent_id": "150",
+    "tier": 2
+  },
+  {
+    "id": "155",
+    "name": "Museums & Galleries",
+    "parent_id": "150",
+    "tier": 2
+  },
+  {
+    "id": "158",
+    "name": "Nightclubs",
+    "parent_id": "150",
+    "tier": 2
+  },
+  {
+    "id": "159",
+    "name": "Outdoor Attractions",
+    "parent_id": "150",
+    "tier": 2
+  },
+  {
+    "id": "160",
+    "name": "Parks",
+    "parent_id": "150",
+    "tier": 2
+  },
+  {
+    "id": "177",
+    "name": "Theater Venues",
+    "parent_id": "150",
+    "tier": 2
+  },
+  {
+    "id": "178",
+    "name": "Zoos & Aquariums",
+    "parent_id": "150",
+    "tier": 2
+  },
+  {
+    "id": "1",
+    "name": "Automotive",
+    "parent_id": null,
+    "tier": 1
+  },
+  {
+    "id": "2",
+    "name": "Auto Body Styles",
+    "parent_id": "1",
+    "tier": 2
+  },
+  {
+    "id": "3",
+    "name": "Commercial Trucks",
+    "parent_id": "2",
+    "tier": 3
+  },
+  {
+    "id": "8",
+    "name": "Convertible",
+    "parent_id": "2",
+    "tier": 3
+  },
+  {
+    "id": "9",
+    "name": "Coupe",
+    "parent_id": "2",
+    "tier": 3
+  },
+  {
+    "id": "10",
+    "name": "Crossover",
+    "parent_id": "2",
+    "tier": 3
+  },
+  {
+    "id": "11",
+    "name": "Hatchback",
+    "parent_id": "2",
+    "tier": 3
+  },
+  {
+    "id": "12",
+    "name": "Microcar",
+    "parent_id": "2",
+    "tier": 3
+  },
+  {
+    "id": "13",
+    "name": "Minivan",
+    "parent_id": "2",
+    "tier": 3
+  },
+  {
+    "id": "14",
+    "name": "Off-Road Vehicles",
+    "parent_id": "2",
+    "tier": 3
+  },
+  {
+    "id": "15",
+    "name": "Pickup Trucks",
+    "parent_id": "2",
+    "tier": 3
+  },
+  {
+    "id": "4",
+    "name": "Sedan",
+    "parent_id": "2",
+    "tier": 3
+  },
+  {
+    "id": "5",
+    "name": "Station Wagon",
+    "parent_id": "2",
+    "tier": 3
+  },
+  {
+    "id": "6",
+    "name": "SUV",
+    "parent_id": "2",
+    "tier": 3
+  },
+  {
+    "id": "7",
+    "name": "Van",
+    "parent_id": "2",
+    "tier": 3
+  },
+  {
+    "id": "30",
+    "name": "Auto Buying and Selling",
+    "parent_id": "1",
+    "tier": 2
+  },
+  {
+    "id": "31",
+    "name": "Auto Insurance",
+    "parent_id": "1",
+    "tier": 2
+  },
+  {
+    "id": "32",
+    "name": "Auto Parts",
+    "parent_id": "1",
+    "tier": 2
+  },
+  {
+    "id": "33",
+    "name": "Auto Recalls",
+    "parent_id": "1",
+    "tier": 2
+  },
+  {
+    "id": "41",
+    "name": "Auto Rentals",
+    "parent_id": "1",
+    "tier": 2
+  },
+  {
+    "id": "34",
+    "name": "Auto Repair",
+    "parent_id": "1",
+    "tier": 2
+  },
+  {
+    "id": "35",
+    "name": "Auto Safety",
+    "parent_id": "1",
+    "tier": 2
+  },
+  {
+    "id": "36",
+    "name": "Auto Shows",
+    "parent_id": "1",
+    "tier": 2
+  },
+  {
+    "id": "37",
+    "name": "Auto Technology",
+    "parent_id": "1",
+    "tier": 2
+  },
+  {
+    "id": "38",
+    "name": "Auto Infotainment Technologies",
+    "parent_id": "37",
+    "tier": 3
+  },
+  {
+    "id": "39",
+    "name": "Auto Navigation Systems",
+    "parent_id": "37",
+    "tier": 3
+  },
+  {
+    "id": "40",
+    "name": "Auto Safety Technologies",
+    "parent_id": "37",
+    "tier": 3
+  },
+  {
+    "id": "16",
+    "name": "Auto Type",
+    "parent_id": "1",
+    "tier": 2
+  },
+  {
+    "id": "17",
+    "name": "Budget Cars",
+    "parent_id": "16",
+    "tier": 3
+  },
+  {
+    "id": "18",
+    "name": "Certified Pre-Owned Cars",
+    "parent_id": "16",
+    "tier": 3
+  },
+  {
+    "id": "19",
+    "name": "Classic Cars",
+    "parent_id": "16",
+    "tier": 3
+  },
+  {
+    "id": "20",
+    "name": "Concept Cars",
+    "parent_id": "16",
+    "tier": 3
+  },
+  {
+    "id": "21",
+    "name": "Driverless Cars",
+    "parent_id": "16",
+    "tier": 3
+  },
+  {
+    "id": "22",
+    "name": "Green Vehicles",
+    "parent_id": "16",
+    "tier": 3
+  },
+  {
+    "id": "23",
+    "name": "Luxury Cars",
+    "parent_id": "16",
+    "tier": 3
+  },
+  {
+    "id": "24",
+    "name": "Performance Cars",
+    "parent_id": "16",
+    "tier": 3
+  },
+  {
+    "id": "25",
+    "name": "Car Culture",
+    "parent_id": "1",
+    "tier": 2
+  },
+  {
+    "id": "26",
+    "name": "Dash Cam Videos",
+    "parent_id": "1",
+    "tier": 2
+  },
+  {
+    "id": "27",
+    "name": "Motorcycles",
+    "parent_id": "1",
+    "tier": 2
+  },
+  {
+    "id": "28",
+    "name": "Road-Side Assistance",
+    "parent_id": "1",
+    "tier": 2
+  },
+  {
+    "id": "29",
+    "name": "Scooters",
+    "parent_id": "1",
+    "tier": 2
+  },
+  {
+    "id": "42",
+    "name": "Books and Literature",
+    "parent_id": null,
+    "tier": 1
+  },
+  {
+    "id": "43",
+    "name": "Art and Photography",
+    "parent_id": "42",
+    "tier": 2
+  },
+  {
+    "id": "46",
+    "name": "Comics and Graphic Novels",
+    "parent_id": "42",
+    "tier": 2
+  },
+  {
+    "id": "48",
+    "name": "Fiction",
+    "parent_id": "42",
+    "tier": 2
+  },
+  {
+    "id": "49",
+    "name": "Poetry",
+    "parent_id": "42",
+    "tier": 2
+  },
+  {
+    "id": "52",
+    "name": "Business and Finance",
+    "parent_id": null,
+    "tier": 1
+  },
+  {
+    "id": "53",
+    "name": "Business",
+    "parent_id": "52",
+    "tier": 2
+  },
+  {
+    "id": "54",
+    "name": "Business Accounting & Finance",
+    "parent_id": "53",
+    "tier": 3
+  },
+  {
+    "id": "62",
+    "name": "Business Administration",
+    "parent_id": "53",
+    "tier": 3
+  },
+  {
+    "id": "63",
+    "name": "Business Banking & Finance",
+    "parent_id": "53",
+    "tier": 3
+  },
+  {
+    "id": "64",
+    "name": "Angel Investment",
+    "parent_id": "63",
+    "tier": 4
+  },
+  {
+    "id": "65",
+    "name": "Bankruptcy",
+    "parent_id": "63",
+    "tier": 4
+  },
+  {
+    "id": "66",
+    "name": "Business Loans",
+    "parent_id": "63",
+    "tier": 4
+  },
+  {
+    "id": "67",
+    "name": "Debt Factoring & Invoice Discounting",
+    "parent_id": "63",
+    "tier": 4
+  },
+  {
+    "id": "68",
+    "name": "Mergers and Acquisitions",
+    "parent_id": "63",
+    "tier": 4
+  },
+  {
+    "id": "69",
+    "name": "Private Equity",
+    "parent_id": "63",
+    "tier": 4
+  },
+  {
+    "id": "70",
+    "name": "Sale & Lease Back",
+    "parent_id": "63",
+    "tier": 4
+  },
+  {
+    "id": "71",
+    "name": "Venture Capital",
+    "parent_id": "63",
+    "tier": 4
+  },
+  {
+    "id": "72",
+    "name": "Business I.T.",
+    "parent_id": "53",
+    "tier": 3
+  },
+  {
+    "id": "73",
+    "name": "Business Operations",
+    "parent_id": "53",
+    "tier": 3
+  },
+  {
+    "id": "79",
+    "name": "Business Utilities",
+    "parent_id": "53",
+    "tier": 3
+  },
+  {
+    "id": "74",
+    "name": "Consumer Issues",
+    "parent_id": "53",
+    "tier": 3
+  },
+  {
+    "id": "75",
+    "name": "Recalls",
+    "parent_id": "74",
+    "tier": 4
+  },
+  {
+    "id": "76",
+    "name": "Executive Leadership & Management",
+    "parent_id": "53",
+    "tier": 3
+  },
+  {
+    "id": "77",
+    "name": "Government Business",
+    "parent_id": "53",
+    "tier": 3
+  },
+  {
+    "id": "78",
+    "name": "Green Solutions",
+    "parent_id": "53",
+    "tier": 3
+  },
+  {
+    "id": "55",
+    "name": "Human Resources",
+    "parent_id": "53",
+    "tier": 3
+  },
+  {
+    "id": "56",
+    "name": "Large Business",
+    "parent_id": "53",
+    "tier": 3
+  },
+  {
+    "id": "57",
+    "name": "Logistics",
+    "parent_id": "53",
+    "tier": 3
+  },
+  {
+    "id": "58",
+    "name": "Marketing and Advertising",
+    "parent_id": "53",
+    "tier": 3
+  },
+  {
+    "id": "59",
+    "name": "Sales",
+    "parent_id": "53",
+    "tier": 3
+  },
+  {
+    "id": "60",
+    "name": "Small and Medium-sized Business",
+    "parent_id": "53",
+    "tier": 3
+  },
+  {
+    "id": "61",
+    "name": "Startups",
+    "parent_id": "53",
+    "tier": 3
+  },
+  {
+    "id": "80",
+    "name": "Economy",
+    "parent_id": "52",
+    "tier": 2
+  },
+  {
+    "id": "81",
+    "name": "Commodities",
+    "parent_id": "80",
+    "tier": 3
+  },
+  {
+    "id": "82",
+    "name": "Currencies",
+    "parent_id": "80",
+    "tier": 3
+  },
+  {
+    "id": "83",
+    "name": "Financial Crisis",
+    "parent_id": "80",
+    "tier": 3
+  },
+  {
+    "id": "84",
+    "name": "Financial Reform",
+    "parent_id": "80",
+    "tier": 3
+  },
+  {
+    "id": "85",
+    "name": "Financial Regulation",
+    "parent_id": "80",
+    "tier": 3
+  },
+  {
+    "id": "86",
+    "name": "Gasoline Prices",
+    "parent_id": "80",
+    "tier": 3
+  },
+  {
+    "id": "87",
+    "name": "Housing Market",
+    "parent_id": "80",
+    "tier": 3
+  },
+  {
+    "id": "88",
+    "name": "Interest Rates",
+    "parent_id": "80",
+    "tier": 3
+  },
+  {
+    "id": "89",
+    "name": "Job Market",
+    "parent_id": "80",
+    "tier": 3
+  },
+  {
+    "id": "90",
+    "name": "Industries",
+    "parent_id": "52",
+    "tier": 2
+  },
+  {
+    "id": "91",
+    "name": "Advertising Industry",
+    "parent_id": "90",
+    "tier": 3
+  },
+  {
+    "id": "102",
+    "name": "Agriculture",
+    "parent_id": "90",
+    "tier": 3
+  },
+  {
+    "id": "113",
+    "name": "Apparel Industry",
+    "parent_id": "90",
+    "tier": 3
+  },
+  {
+    "id": "117",
+    "name": "Automotive Industry",
+    "parent_id": "90",
+    "tier": 3
+  },
+  {
+    "id": "118",
+    "name": "Aviation Industry",
+    "parent_id": "90",
+    "tier": 3
+  },
+  {
+    "id": "119",
+    "name": "Biotech and Biomedical Industry",
+    "parent_id": "90",
+    "tier": 3
+  },
+  {
+    "id": "120",
+    "name": "Civil Engineering Industry",
+    "parent_id": "90",
+    "tier": 3
+  },
+  {
+    "id": "121",
+    "name": "Construction Industry",
+    "parent_id": "90",
+    "tier": 3
+  },
+  {
+    "id": "122",
+    "name": "Defense Industry",
+    "parent_id": "90",
+    "tier": 3
+  },
+  {
+    "id": "92",
+    "name": "Education industry",
+    "parent_id": "90",
+    "tier": 3
+  },
+  {
+    "id": "93",
+    "name": "Entertainment Industry",
+    "parent_id": "90",
+    "tier": 3
+  },
+  {
+    "id": "94",
+    "name": "Environmental Services Industry",
+    "parent_id": "90",
+    "tier": 3
+  },
+  {
+    "id": "95",
+    "name": "Financial Industry",
+    "parent_id": "90",
+    "tier": 3
+  },
+  {
+    "id": "96",
+    "name": "Food Industry",
+    "parent_id": "90",
+    "tier": 3
+  },
+  {
+    "id": "97",
+    "name": "Healthcare Industry",
+    "parent_id": "90",
+    "tier": 3
+  },
+  {
+    "id": "98",
+    "name": "Hospitality Industry",
+    "parent_id": "90",
+    "tier": 3
+  },
+  {
+    "id": "99",
+    "name": "Information Services Industry",
+    "parent_id": "90",
+    "tier": 3
+  },
+  {
+    "id": "100",
+    "name": "Legal Services Industry",
+    "parent_id": "90",
+    "tier": 3
+  },
+  {
+    "id": "101",
+    "name": "Logistics and Transportation Industry",
+    "parent_id": "90",
+    "tier": 3
+  },
+  {
+    "id": "103",
+    "name": "Management Consulting Industry",
+    "parent_id": "90",
+    "tier": 3
+  },
+  {
+    "id": "104",
+    "name": "Manufacturing Industry",
+    "parent_id": "90",
+    "tier": 3
+  },
+  {
+    "id": "105",
+    "name": "Mechanical and Industrial Engineering Industry",
+    "parent_id": "90",
+    "tier": 3
+  },
+  {
+    "id": "106",
+    "name": "Media Industry",
+    "parent_id": "90",
+    "tier": 3
+  },
+  {
+    "id": "107",
+    "name": "Metals Industry",
+    "parent_id": "90",
+    "tier": 3
+  },
+  {
+    "id": "108",
+    "name": "Non-Profit Organizations",
+    "parent_id": "90",
+    "tier": 3
+  },
+  {
+    "id": "109",
+    "name": "Pharmaceutical Industry",
+    "parent_id": "90",
+    "tier": 3
+  },
+  {
+    "id": "110",
+    "name": "Power and Energy Industry",
+    "parent_id": "90",
+    "tier": 3
+  },
+  {
+    "id": "111",
+    "name": "Publishing Industry",
+    "parent_id": "90",
+    "tier": 3
+  },
+  {
+    "id": "112",
+    "name": "Real Estate Industry",
+    "parent_id": "90",
+    "tier": 3
+  },
+  {
+    "id": "114",
+    "name": "Retail Industry",
+    "parent_id": "90",
+    "tier": 3
+  },
+  {
+    "id": "115",
+    "name": "Technology Industry",
+    "parent_id": "90",
+    "tier": 3
+  },
+  {
+    "id": "116",
+    "name": "Telecommunications Industry",
+    "parent_id": "90",
+    "tier": 3
+  },
+  {
+    "id": "123",
+    "name": "Careers",
+    "parent_id": null,
+    "tier": 1
+  },
+  {
+    "id": "124",
+    "name": "Apprenticeships",
+    "parent_id": "123",
+    "tier": 2
+  },
+  {
+    "id": "125",
+    "name": "Career Advice",
+    "parent_id": "123",
+    "tier": 2
+  },
+  {
+    "id": "126",
+    "name": "Career Planning",
+    "parent_id": "123",
+    "tier": 2
+  },
+  {
+    "id": "127",
+    "name": "Job Search",
+    "parent_id": "123",
+    "tier": 2
+  },
+  {
+    "id": "128",
+    "name": "Job Fairs",
+    "parent_id": "127",
+    "tier": 3
+  },
+  {
+    "id": "129",
+    "name": "Resume Writing and Advice",
+    "parent_id": "127",
+    "tier": 3
+  },
+  {
+    "id": "130",
+    "name": "Remote Working",
+    "parent_id": "123",
+    "tier": 2
+  },
+  {
+    "id": "131",
+    "name": "Vocational Training",
+    "parent_id": "123",
+    "tier": 2
+  },
+  {
+    "id": "80DV8O",
+    "name": "Communication",
+    "parent_id": null,
+    "tier": 1
+  },
+  {
+    "id": "380",
+    "name": "Crime",
+    "parent_id": null,
+    "tier": 1
+  },
+  {
+    "id": "381",
+    "name": "Disasters",
+    "parent_id": null,
+    "tier": 1
+  },
+  {
+    "id": "132",
+    "name": "Education",
+    "parent_id": null,
+    "tier": 1
+  },
+  {
+    "id": "133",
+    "name": "Adult Education",
+    "parent_id": "132",
+    "tier": 2
+  },
+  {
+    "id": "137",
+    "name": "College Education",
+    "parent_id": "132",
+    "tier": 2
+  },
+  {
+    "id": "138",
+    "name": "College Planning",
+    "parent_id": "137",
+    "tier": 3
+  },
+  {
+    "id": "139",
+    "name": "Postgraduate Education",
+    "parent_id": "137",
+    "tier": 3
+  },
+  {
+    "id": "140",
+    "name": "Professional School",
+    "parent_id": "139",
+    "tier": 4
+  },
+  {
+    "id": "141",
+    "name": "Undergraduate Education",
+    "parent_id": "137",
+    "tier": 3
+  },
+  {
+    "id": "142",
+    "name": "Early Childhood Education",
+    "parent_id": "132",
+    "tier": 2
+  },
+  {
+    "id": "143",
+    "name": "Educational Assessment",
+    "parent_id": "132",
+    "tier": 2
+  },
+  {
+    "id": "144",
+    "name": "Standardized Testing",
+    "parent_id": "143",
+    "tier": 3
+  },
+  {
+    "id": "145",
+    "name": "Homeschooling",
+    "parent_id": "132",
+    "tier": 2
+  },
+  {
+    "id": "146",
+    "name": "Homework and Study",
+    "parent_id": "132",
+    "tier": 2
+  },
+  {
+    "id": "147",
+    "name": "Language Learning",
+    "parent_id": "132",
+    "tier": 2
+  },
+  {
+    "id": "148",
+    "name": "Online Education",
+    "parent_id": "132",
+    "tier": 2
+  },
+  {
+    "id": "149",
+    "name": "Primary Education",
+    "parent_id": "132",
+    "tier": 2
+  },
+  {
+    "id": "134",
+    "name": "Private School",
+    "parent_id": "132",
+    "tier": 2
+  },
+  {
+    "id": "135",
+    "name": "Secondary Education",
+    "parent_id": "132",
+    "tier": 2
+  },
+  {
+    "id": "136",
+    "name": "Special Education",
+    "parent_id": "132",
+    "tier": 2
+  },
+  {
+    "id": "JLBCU7",
+    "name": "Entertainment",
+    "parent_id": null,
+    "tier": 1
+  },
+  {
+    "id": "324",
+    "name": "Movies",
+    "parent_id": "JLBCU7",
+    "tier": 2
+  },
+  {
+    "id": "338",
+    "name": "Music",
+    "parent_id": "JLBCU7",
+    "tier": 2
+  },
+  {
+    "id": "640",
+    "name": "Television",
+    "parent_id": "JLBCU7",
+    "tier": 2
+  },
+  {
+    "id": "8VZQHL",
+    "name": "Events",
+    "parent_id": null,
+    "tier": 1
+  },
+  {
+    "id": "162",
+    "name": "Awards Shows",
+    "parent_id": "8VZQHL",
+    "tier": 2
+  },
+  {
+    "id": "180",
+    "name": "Business Expos & Conferences",
+    "parent_id": "8VZQHL",
+    "tier": 2
+  },
+  {
+    "id": "185",
+    "name": "Fan Conventions",
+    "parent_id": "8VZQHL",
+    "tier": 2
+  },
+  {
+    "id": "186",
+    "name": "Family and Relationships",
+    "parent_id": null,
+    "tier": 1
+  },
+  {
+    "id": "187",
+    "name": "Bereavement",
+    "parent_id": "186",
+    "tier": 2
+  },
+  {
+    "id": "188",
+    "name": "Dating",
+    "parent_id": "186",
+    "tier": 2
+  },
+  {
+    "id": "189",
+    "name": "Divorce",
+    "parent_id": "186",
+    "tier": 2
+  },
+  {
+    "id": "190",
+    "name": "Eldercare",
+    "parent_id": "186",
+    "tier": 2
+  },
+  {
+    "id": "191",
+    "name": "Marriage and Civil Unions",
+    "parent_id": "186",
+    "tier": 2
+  },
+  {
+    "id": "192",
+    "name": "Parenting",
+    "parent_id": "186",
+    "tier": 2
+  },
+  {
+    "id": "193",
+    "name": "Adoption and Fostering",
+    "parent_id": "192",
+    "tier": 3
+  },
+  {
+    "id": "194",
+    "name": "Daycare and Pre-School",
+    "parent_id": "192",
+    "tier": 3
+  },
+  {
+    "id": "195",
+    "name": "Internet Safety",
+    "parent_id": "192",
+    "tier": 3
+  },
+  {
+    "id": "196",
+    "name": "Parenting Babies and Toddlers",
+    "parent_id": "192",
+    "tier": 3
+  },
+  {
+    "id": "197",
+    "name": "Parenting Children Aged 4-11",
+    "parent_id": "192",
+    "tier": 3
+  },
+  {
+    "id": "198",
+    "name": "Parenting Teens",
+    "parent_id": "192",
+    "tier": 3
+  },
+  {
+    "id": "199",
+    "name": "Special Needs Kids",
+    "parent_id": "192",
+    "tier": 3
+  },
+  {
+    "id": "200",
+    "name": "Single Life",
+    "parent_id": "186",
+    "tier": 2
+  },
+  {
+    "id": "201",
+    "name": "Fine Art",
+    "parent_id": null,
+    "tier": 1
+  },
+  {
+    "id": "202",
+    "name": "Costume",
+    "parent_id": "201",
+    "tier": 2
+  },
+  {
+    "id": "203",
+    "name": "Dance",
+    "parent_id": "201",
+    "tier": 2
+  },
+  {
+    "id": "204",
+    "name": "Design",
+    "parent_id": "201",
+    "tier": 2
+  },
+  {
+    "id": "205",
+    "name": "Digital Arts",
+    "parent_id": "201",
+    "tier": 2
+  },
+  {
+    "id": "206",
+    "name": "Fine Art Photography",
+    "parent_id": "201",
+    "tier": 2
+  },
+  {
+    "id": "207",
+    "name": "Modern Art",
+    "parent_id": "201",
+    "tier": 2
+  },
+  {
+    "id": "208",
+    "name": "Opera",
+    "parent_id": "201",
+    "tier": 2
+  },
+  {
+    "id": "209",
+    "name": "Theater",
+    "parent_id": "201",
+    "tier": 2
+  },
+  {
+    "id": "210",
+    "name": "Food & Drink",
+    "parent_id": null,
+    "tier": 1
+  },
+  {
+    "id": "211",
+    "name": "Alcoholic Beverages",
+    "parent_id": "210",
+    "tier": 2
+  },
+  {
+    "id": "215",
+    "name": "Barbecues and Grilling",
+    "parent_id": "210",
+    "tier": 2
+  },
+  {
+    "id": "216",
+    "name": "Cooking",
+    "parent_id": "210",
+    "tier": 2
+  },
+  {
+    "id": "217",
+    "name": "Desserts and Baking",
+    "parent_id": "210",
+    "tier": 2
+  },
+  {
+    "id": "218",
+    "name": "Dining Out",
+    "parent_id": "210",
+    "tier": 2
+  },
+  {
+    "id": "219",
+    "name": "Food Allergies",
+    "parent_id": "210",
+    "tier": 2
+  },
+  {
+    "id": "220",
+    "name": "Food Movements",
+    "parent_id": "210",
+    "tier": 2
+  },
+  {
+    "id": "221",
+    "name": "Healthy Cooking and Eating",
+    "parent_id": "210",
+    "tier": 2
+  },
+  {
+    "id": "222",
+    "name": "Non-Alcoholic Beverages",
+    "parent_id": "210",
+    "tier": 2
+  },
+  {
+    "id": "212",
+    "name": "Vegan Diets",
+    "parent_id": "210",
+    "tier": 2
+  },
+  {
+    "id": "213",
+    "name": "Vegetarian Diets",
+    "parent_id": "210",
+    "tier": 2
+  },
+  {
+    "id": "214",
+    "name": "World Cuisines",
+    "parent_id": "210",
+    "tier": 2
+  },
+  {
+    "id": "SPSHQ5",
+    "name": "Genres",
+    "parent_id": null,
+    "tier": 1
+  },
+  {
+    "id": "VKIV56",
+    "name": "Nature",
+    "parent_id": "SPSHQ5",
+    "tier": 1
+  },
+  {
+    "id": "325",
+    "name": "Action/Adventure",
+    "parent_id": "SPSHQ5",
+    "tier": 2
+  },
+  {
+    "id": "641",
+    "name": "Animation & Anime",
+    "parent_id": "SPSHQ5",
+    "tier": 2
+  },
+  {
+    "id": "44",
+    "name": "Biographies",
+    "parent_id": "SPSHQ5",
+    "tier": 2
+  },
+  {
+    "id": "646",
+    "name": "Comedy",
+    "parent_id": "SPSHQ5",
+    "tier": 2
+  },
+  {
+    "id": "332",
+    "name": "Documentary",
+    "parent_id": "SPSHQ5",
+    "tier": 2
+  },
+  {
+    "id": "647",
+    "name": "Drama",
+    "parent_id": "SPSHQ5",
+    "tier": 2
+  },
+  {
+    "id": "648",
+    "name": "Factual",
+    "parent_id": "SPSHQ5",
+    "tier": 2
+  },
+  {
+    "id": "645",
+    "name": "Family/Children",
+    "parent_id": "SPSHQ5",
+    "tier": 2
+  },
+  {
+    "id": "335",
+    "name": "Fantasy",
+    "parent_id": "SPSHQ5",
+    "tier": 2
+  },
+  {
+    "id": "EZWB7V",
+    "name": "History",
+    "parent_id": "SPSHQ5",
+    "tier": 2
+  },
+  {
+    "id": "649",
+    "name": "Holiday",
+    "parent_id": "SPSHQ5",
+    "tier": 2
+  },
+  {
+    "id": "336",
+    "name": "Horror",
+    "parent_id": "SPSHQ5",
+    "tier": 2
+  },
+  {
+    "id": "TIFQA5",
+    "name": "Lifestyle",
+    "parent_id": "SPSHQ5",
+    "tier": 2
+  },
+  {
+    "id": "650",
+    "name": "Music Video",
+    "parent_id": "SPSHQ5",
+    "tier": 2
+  },
+  {
+    "id": "156",
+    "name": "Musicals",
+    "parent_id": "SPSHQ5",
+    "tier": 2
+  },
+  {
+    "id": "331",
+    "name": "Mystery",
+    "parent_id": "SPSHQ5",
+    "tier": 2
+  },
+  {
+    "id": "651",
+    "name": "Reality TV",
+    "parent_id": "SPSHQ5",
+    "tier": 2
+  },
+  {
+    "id": "326",
+    "name": "Romance",
+    "parent_id": "SPSHQ5",
+    "tier": 2
+  },
+  {
+    "id": "652",
+    "name": "Science Fiction",
+    "parent_id": "SPSHQ5",
+    "tier": 2
+  },
+  {
+    "id": "642",
+    "name": "Soap Opera",
+    "parent_id": "SPSHQ5",
+    "tier": 2
+  },
+  {
+    "id": "643",
+    "name": "Special Interest (Indie/Art House)",
+    "parent_id": "SPSHQ5",
+    "tier": 2
+  },
+  {
+    "id": "370",
+    "name": "Sports Radio",
+    "parent_id": "SPSHQ5",
+    "tier": 2
+  },
+  {
+    "id": "371",
+    "name": "Talk Radio",
+    "parent_id": "SPSHQ5",
+    "tier": 2
+  },
+  {
+    "id": "376",
+    "name": "Public Radio",
+    "parent_id": "SPSHQ5",
+    "tier": 3
+  },
+  {
+    "id": "A0AH3G",
+    "name": "Talk Show",
+    "parent_id": "SPSHQ5",
+    "tier": 2
+  },
+  {
+    "id": "KHPC5A",
+    "name": "True Crime",
+    "parent_id": "SPSHQ5",
+    "tier": 2
+  },
+  {
+    "id": "KHPC6A",
+    "name": "Western",
+    "parent_id": "SPSHQ5",
+    "tier": 2
+  },
+  {
+    "id": "51",
+    "name": "Young Adult",
+    "parent_id": "SPSHQ5",
+    "tier": 2
+  },
+  {
+    "id": "223",
+    "name": "Healthy Living",
+    "parent_id": null,
+    "tier": 1
+  },
+  {
+    "id": "224",
+    "name": "Children's Health",
+    "parent_id": "223",
+    "tier": 2
+  },
+  {
+    "id": "225",
+    "name": "Fitness and Exercise",
+    "parent_id": "223",
+    "tier": 2
+  },
+  {
+    "id": "226",
+    "name": "Participant Sports",
+    "parent_id": "225",
+    "tier": 3
+  },
+  {
+    "id": "227",
+    "name": "Running and Jogging",
+    "parent_id": "225",
+    "tier": 3
+  },
+  {
+    "id": "228",
+    "name": "Men's Health",
+    "parent_id": "223",
+    "tier": 2
+  },
+  {
+    "id": "229",
+    "name": "Nutrition",
+    "parent_id": "223",
+    "tier": 2
+  },
+  {
+    "id": "230",
+    "name": "Senior Health",
+    "parent_id": "223",
+    "tier": 2
+  },
+  {
+    "id": "231",
+    "name": "Weight Loss",
+    "parent_id": "223",
+    "tier": 2
+  },
+  {
+    "id": "232",
+    "name": "Wellness",
+    "parent_id": "223",
+    "tier": 2
+  },
+  {
+    "id": "233",
+    "name": "Alternative Medicine",
+    "parent_id": "232",
+    "tier": 3
+  },
+  {
+    "id": "234",
+    "name": "Herbs and Supplements",
+    "parent_id": "233",
+    "tier": 4
+  },
+  {
+    "id": "235",
+    "name": "Holistic Health",
+    "parent_id": "233",
+    "tier": 4
+  },
+  {
+    "id": "236",
+    "name": "Physical Therapy",
+    "parent_id": "232",
+    "tier": 3
+  },
+  {
+    "id": "237",
+    "name": "Smoking Cessation",
+    "parent_id": "232",
+    "tier": 3
+  },
+  {
+    "id": "238",
+    "name": "Women's Health",
+    "parent_id": "223",
+    "tier": 2
+  },
+  {
+    "id": "239",
+    "name": "Hobbies & Interests",
+    "parent_id": null,
+    "tier": 1
+  },
+  {
+    "id": "240",
+    "name": "Antiquing and Antiques",
+    "parent_id": "239",
+    "tier": 2
+  },
+  {
+    "id": "248",
+    "name": "Arts and Crafts",
+    "parent_id": "239",
+    "tier": 2
+  },
+  {
+    "id": "249",
+    "name": "Beadwork",
+    "parent_id": "248",
+    "tier": 3
+  },
+  {
+    "id": "250",
+    "name": "Candle and Soap Making",
+    "parent_id": "248",
+    "tier": 3
+  },
+  {
+    "id": "251",
+    "name": "Drawing and Sketching",
+    "parent_id": "248",
+    "tier": 3
+  },
+  {
+    "id": "252",
+    "name": "Jewelry Making",
+    "parent_id": "248",
+    "tier": 3
+  },
+  {
+    "id": "253",
+    "name": "Needlework",
+    "parent_id": "248",
+    "tier": 3
+  },
+  {
+    "id": "254",
+    "name": "Painting",
+    "parent_id": "248",
+    "tier": 3
+  },
+  {
+    "id": "255",
+    "name": "Photography",
+    "parent_id": "248",
+    "tier": 3
+  },
+  {
+    "id": "256",
+    "name": "Scrapbooking",
+    "parent_id": "248",
+    "tier": 3
+  },
+  {
+    "id": "257",
+    "name": "Woodworking",
+    "parent_id": "248",
+    "tier": 3
+  },
+  {
+    "id": "258",
+    "name": "Beekeeping",
+    "parent_id": "239",
+    "tier": 2
+  },
+  {
+    "id": "259",
+    "name": "Birdwatching",
+    "parent_id": "239",
+    "tier": 2
+  },
+  {
+    "id": "260",
+    "name": "Cigars",
+    "parent_id": "239",
+    "tier": 2
+  },
+  {
+    "id": "261",
+    "name": "Collecting",
+    "parent_id": "239",
+    "tier": 2
+  },
+  {
+    "id": "262",
+    "name": "Comic Books",
+    "parent_id": "261",
+    "tier": 3
+  },
+  {
+    "id": "263",
+    "name": "Stamps and Coins",
+    "parent_id": "261",
+    "tier": 3
+  },
+  {
+    "id": "264",
+    "name": "Content Production",
+    "parent_id": "239",
+    "tier": 2
+  },
+  {
+    "id": "265",
+    "name": "Audio Production",
+    "parent_id": "264",
+    "tier": 3
+  },
+  {
+    "id": "266",
+    "name": "Freelance Writing",
+    "parent_id": "264",
+    "tier": 3
+  },
+  {
+    "id": "267",
+    "name": "Screenwriting",
+    "parent_id": "264",
+    "tier": 3
+  },
+  {
+    "id": "268",
+    "name": "Video Production",
+    "parent_id": "264",
+    "tier": 3
+  },
+  {
+    "id": "269",
+    "name": "Games and Puzzles",
+    "parent_id": "239",
+    "tier": 2
+  },
+  {
+    "id": "270",
+    "name": "Board Games and Puzzles",
+    "parent_id": "269",
+    "tier": 3
+  },
+  {
+    "id": "271",
+    "name": "Card Games",
+    "parent_id": "269",
+    "tier": 3
+  },
+  {
+    "id": "272",
+    "name": "Roleplaying Games",
+    "parent_id": "269",
+    "tier": 3
+  },
+  {
+    "id": "273",
+    "name": "Genealogy and Ancestry",
+    "parent_id": "239",
+    "tier": 2
+  },
+  {
+    "id": "241",
+    "name": "Magic and Illusion",
+    "parent_id": "239",
+    "tier": 2
+  },
+  {
+    "id": "242",
+    "name": "Model Toys",
+    "parent_id": "239",
+    "tier": 2
+  },
+  {
+    "id": "243",
+    "name": "Musical Instruments",
+    "parent_id": "239",
+    "tier": 2
+  },
+  {
+    "id": "244",
+    "name": "Paranormal Phenomena",
+    "parent_id": "239",
+    "tier": 2
+  },
+  {
+    "id": "245",
+    "name": "Radio Control",
+    "parent_id": "239",
+    "tier": 2
+  },
+  {
+    "id": "246",
+    "name": "Sci-fi and Fantasy",
+    "parent_id": "239",
+    "tier": 2
+  },
+  {
+    "id": "247",
+    "name": "Workshops and Classes",
+    "parent_id": "239",
+    "tier": 2
+  },
+  {
+    "id": "1KXCLD",
+    "name": "Holidays",
+    "parent_id": null,
+    "tier": 1
+  },
+  {
+    "id": "157",
+    "name": "National & Civic Holidays",
+    "parent_id": "1KXCLD",
+    "tier": 2
+  },
+  {
+    "id": "274",
+    "name": "Home & Garden",
+    "parent_id": null,
+    "tier": 1
+  },
+  {
+    "id": "275",
+    "name": "Gardening",
+    "parent_id": "274",
+    "tier": 2
+  },
+  {
+    "id": "278",
+    "name": "Home Appliances",
+    "parent_id": "274",
+    "tier": 2
+  },
+  {
+    "id": "279",
+    "name": "Home Entertaining",
+    "parent_id": "274",
+    "tier": 2
+  },
+  {
+    "id": "280",
+    "name": "Home Improvement",
+    "parent_id": "274",
+    "tier": 2
+  },
+  {
+    "id": "281",
+    "name": "Home Security",
+    "parent_id": "274",
+    "tier": 2
+  },
+  {
+    "id": "282",
+    "name": "Indoor Environmental Quality",
+    "parent_id": "274",
+    "tier": 2
+  },
+  {
+    "id": "283",
+    "name": "Interior Decorating",
+    "parent_id": "274",
+    "tier": 2
+  },
+  {
+    "id": "284",
+    "name": "Landscaping",
+    "parent_id": "274",
+    "tier": 2
+  },
+  {
+    "id": "285",
+    "name": "Outdoor Decorating",
+    "parent_id": "274",
+    "tier": 2
+  },
+  {
+    "id": "276",
+    "name": "Remodeling & Construction",
+    "parent_id": "274",
+    "tier": 2
+  },
+  {
+    "id": "277",
+    "name": "Smart Home",
+    "parent_id": "274",
+    "tier": 2
+  },
+  {
+    "id": "383",
+    "name": "Law",
+    "parent_id": null,
+    "tier": 1
+  },
+  {
+    "id": "WQC6HR",
+    "name": "Maps & Navigation",
+    "parent_id": "602",
+    "tier": 1
+  },
+  {
+    "id": "286",
+    "name": "Medical Health",
+    "parent_id": null,
+    "tier": 1
+  },
+  {
+    "id": "323",
+    "name": "Cosmetic Medical Services",
+    "parent_id": "286",
+    "tier": 2
+  },
+  {
+    "id": "287",
+    "name": "Diseases and Conditions",
+    "parent_id": "286",
+    "tier": 2
+  },
+  {
+    "id": "288",
+    "name": "Allergies",
+    "parent_id": "287",
+    "tier": 3
+  },
+  {
+    "id": "306",
+    "name": "Blood Disorders",
+    "parent_id": "287",
+    "tier": 3
+  },
+  {
+    "id": "312",
+    "name": "Bone and Joint Conditions",
+    "parent_id": "287",
+    "tier": 3
+  },
+  {
+    "id": "313",
+    "name": "Brain and Nervous System Disorders",
+    "parent_id": "287",
+    "tier": 3
+  },
+  {
+    "id": "314",
+    "name": "Cancer",
+    "parent_id": "287",
+    "tier": 3
+  },
+  {
+    "id": "315",
+    "name": "Cold and Flu",
+    "parent_id": "287",
+    "tier": 3
+  },
+  {
+    "id": "316",
+    "name": "Dental Health",
+    "parent_id": "287",
+    "tier": 3
+  },
+  {
+    "id": "317",
+    "name": "Diabetes",
+    "parent_id": "287",
+    "tier": 3
+  },
+  {
+    "id": "318",
+    "name": "Digestive Disorders",
+    "parent_id": "287",
+    "tier": 3
+  },
+  {
+    "id": "289",
+    "name": "Ear, Nose and Throat Conditions",
+    "parent_id": "287",
+    "tier": 3
+  },
+  {
+    "id": "290",
+    "name": "Endocrine and Metabolic Diseases",
+    "parent_id": "287",
+    "tier": 3
+  },
+  {
+    "id": "291",
+    "name": "Hormonal Disorders",
+    "parent_id": "290",
+    "tier": 4
+  },
+  {
+    "id": "292",
+    "name": "Menopause",
+    "parent_id": "290",
+    "tier": 4
+  },
+  {
+    "id": "293",
+    "name": "Thyroid Disorders",
+    "parent_id": "290",
+    "tier": 4
+  },
+  {
+    "id": "294",
+    "name": "Eye and Vision Conditions",
+    "parent_id": "287",
+    "tier": 3
+  },
+  {
+    "id": "295",
+    "name": "Foot Health",
+    "parent_id": "287",
+    "tier": 3
+  },
+  {
+    "id": "296",
+    "name": "Heart and Cardiovascular Diseases",
+    "parent_id": "287",
+    "tier": 3
+  },
+  {
+    "id": "297",
+    "name": "Infectious Diseases",
+    "parent_id": "287",
+    "tier": 3
+  },
+  {
+    "id": "298",
+    "name": "Injuries",
+    "parent_id": "287",
+    "tier": 3
+  },
+  {
+    "id": "299",
+    "name": "First Aid",
+    "parent_id": "298",
+    "tier": 4
+  },
+  {
+    "id": "300",
+    "name": "Lung and Respiratory Health",
+    "parent_id": "287",
+    "tier": 3
+  },
+  {
+    "id": "301",
+    "name": "Mental Health",
+    "parent_id": "287",
+    "tier": 3
+  },
+  {
+    "id": "302",
+    "name": "Reproductive Health",
+    "parent_id": "287",
+    "tier": 3
+  },
+  {
+    "id": "303",
+    "name": "Birth Control",
+    "parent_id": "302",
+    "tier": 4
+  },
+  {
+    "id": "304",
+    "name": "Infertility",
+    "parent_id": "302",
+    "tier": 4
+  },
+  {
+    "id": "305",
+    "name": "Pregnancy",
+    "parent_id": "302",
+    "tier": 4
+  },
+  {
+    "id": "307",
+    "name": "Sexual Health",
+    "parent_id": "287",
+    "tier": 3
+  },
+  {
+    "id": "308",
+    "name": "Sexual Conditions",
+    "parent_id": "307",
+    "tier": 4
+  },
+  {
+    "id": "309",
+    "name": "Skin and Dermatology",
+    "parent_id": "287",
+    "tier": 3
+  },
+  {
+    "id": "310",
+    "name": "Sleep Disorders",
+    "parent_id": "287",
+    "tier": 3
+  },
+  {
+    "id": "311",
+    "name": "Substance Abuse",
+    "parent_id": "287",
+    "tier": 3
+  },
+  {
+    "id": "319",
+    "name": "Medical Tests",
+    "parent_id": "286",
+    "tier": 2
+  },
+  {
+    "id": "320",
+    "name": "Pharmaceutical Drugs",
+    "parent_id": "286",
+    "tier": 2
+  },
+  {
+    "id": "321",
+    "name": "Surgery",
+    "parent_id": "286",
+    "tier": 2
+  },
+  {
+    "id": "322",
+    "name": "Vaccines",
+    "parent_id": "286",
+    "tier": 2
+  },
+  {
+    "id": "342",
+    "name": "Adult Album Alternative",
+    "parent_id": "338",
+    "tier": 2
+  },
+  {
+    "id": "339",
+    "name": "Adult Contemporary Music",
+    "parent_id": "338",
+    "tier": 2
+  },
+  {
+    "id": "340",
+    "name": "Soft AC Music",
+    "parent_id": "339",
+    "tier": 3
+  },
+  {
+    "id": "341",
+    "name": "Urban AC Music",
+    "parent_id": "339",
+    "tier": 3
+  },
+  {
+    "id": "343",
+    "name": "Alternative Music",
+    "parent_id": "338",
+    "tier": 2
+  },
+  {
+    "id": "360",
+    "name": "Blues",
+    "parent_id": "338",
+    "tier": 2
+  },
+  {
+    "id": "344",
+    "name": "Children's Music",
+    "parent_id": "338",
+    "tier": 2
+  },
+  {
+    "id": "345",
+    "name": "Classic Hits",
+    "parent_id": "338",
+    "tier": 2
+  },
+  {
+    "id": "346",
+    "name": "Classical Music",
+    "parent_id": "338",
+    "tier": 2
+  },
+  {
+    "id": "347",
+    "name": "College Radio",
+    "parent_id": "338",
+    "tier": 2
+  },
+  {
+    "id": "348",
+    "name": "Comedy (Music and Audio)",
+    "parent_id": "338",
+    "tier": 2
+  },
+  {
+    "id": "349",
+    "name": "Contemporary Hits/Pop/Top 40",
+    "parent_id": "338",
+    "tier": 2
+  },
+  {
+    "id": "350",
+    "name": "Country Music",
+    "parent_id": "338",
+    "tier": 2
+  },
+  {
+    "id": "351",
+    "name": "Dance and Electronic Music",
+    "parent_id": "338",
+    "tier": 2
+  },
+  {
+    "id": "354",
+    "name": "Gospel Music",
+    "parent_id": "338",
+    "tier": 2
+  },
+  {
+    "id": "355",
+    "name": "Hip Hop Music",
+    "parent_id": "338",
+    "tier": 2
+  },
+  {
+    "id": "356",
+    "name": "Inspirational/New Age Music",
+    "parent_id": "338",
+    "tier": 2
+  },
+  {
+    "id": "357",
+    "name": "Jazz",
+    "parent_id": "338",
+    "tier": 2
+  },
+  {
+    "id": "358",
+    "name": "Oldies/Adult Standards",
+    "parent_id": "338",
+    "tier": 2
+  },
+  {
+    "id": "362",
+    "name": "R&B/Soul/Funk",
+    "parent_id": "338",
+    "tier": 2
+  },
+  {
+    "id": "359",
+    "name": "Reggae",
+    "parent_id": "338",
+    "tier": 2
+  },
+  {
+    "id": "361",
+    "name": "Religious (Music and Audio)",
+    "parent_id": "338",
+    "tier": 2
+  },
+  {
+    "id": "363",
+    "name": "Rock Music",
+    "parent_id": "338",
+    "tier": 2
+  },
+  {
+    "id": "364",
+    "name": "Album-oriented Rock",
+    "parent_id": "363",
+    "tier": 3
+  },
+  {
+    "id": "365",
+    "name": "Alternative Rock",
+    "parent_id": "363",
+    "tier": 3
+  },
+  {
+    "id": "366",
+    "name": "Classic Rock",
+    "parent_id": "363",
+    "tier": 3
+  },
+  {
+    "id": "367",
+    "name": "Hard Rock",
+    "parent_id": "363",
+    "tier": 3
+  },
+  {
+    "id": "368",
+    "name": "Soft Rock",
+    "parent_id": "363",
+    "tier": 3
+  },
+  {
+    "id": "353",
+    "name": "Songwriters/Folk",
+    "parent_id": "338",
+    "tier": 2
+  },
+  {
+    "id": "369",
+    "name": "Soundtracks, TV and Showtunes",
+    "parent_id": "338",
+    "tier": 2
+  },
+  {
+    "id": "352",
+    "name": "World/International Music",
+    "parent_id": "338",
+    "tier": 2
+  },
+  {
+    "id": "377",
+    "name": "Urban Contemporary Music",
+    "parent_id": "338",
+    "tier": 2
+  },
+  {
+    "id": "378",
+    "name": "Variety (Music and Audio)",
+    "parent_id": "338",
+    "tier": 2
+  },
+  {
+    "id": "163",
+    "name": "Personal Celebrations & Life Events",
+    "parent_id": null,
+    "tier": 1
+  },
+  {
+    "id": "164",
+    "name": "Anniversary",
+    "parent_id": "163",
+    "tier": 2
+  },
+  {
+    "id": "166",
+    "name": "Baby Shower",
+    "parent_id": "163",
+    "tier": 2
+  },
+  {
+    "id": "167",
+    "name": "Bachelor Party",
+    "parent_id": "163",
+    "tier": 2
+  },
+  {
+    "id": "168",
+    "name": "Bachelorette Party",
+    "parent_id": "163",
+    "tier": 2
+  },
+  {
+    "id": "169",
+    "name": "Birth",
+    "parent_id": "163",
+    "tier": 2
+  },
+  {
+    "id": "170",
+    "name": "Birthday",
+    "parent_id": "163",
+    "tier": 2
+  },
+  {
+    "id": "171",
+    "name": "Funeral",
+    "parent_id": "163",
+    "tier": 2
+  },
+  {
+    "id": "172",
+    "name": "Graduation",
+    "parent_id": "163",
+    "tier": 2
+  },
+  {
+    "id": "173",
+    "name": "Prom",
+    "parent_id": "163",
+    "tier": 2
+  },
+  {
+    "id": "165",
+    "name": "Wedding",
+    "parent_id": "163",
+    "tier": 2
+  },
+  {
+    "id": "391",
+    "name": "Personal Finance",
+    "parent_id": null,
+    "tier": 1
+  },
+  {
+    "id": "392",
+    "name": "Consumer Banking",
+    "parent_id": "391",
+    "tier": 2
+  },
+  {
+    "id": "393",
+    "name": "Financial Assistance",
+    "parent_id": "391",
+    "tier": 2
+  },
+  {
+    "id": "394",
+    "name": "Government Support and Welfare",
+    "parent_id": "393",
+    "tier": 3
+  },
+  {
+    "id": "395",
+    "name": "Student Financial Aid",
+    "parent_id": "393",
+    "tier": 3
+  },
+  {
+    "id": "396",
+    "name": "Financial Planning",
+    "parent_id": "391",
+    "tier": 2
+  },
+  {
+    "id": "397",
+    "name": "Frugal Living",
+    "parent_id": "391",
+    "tier": 2
+  },
+  {
+    "id": "417",
+    "name": "Home Utilities",
+    "parent_id": "391",
+    "tier": 2
+  },
+  {
+    "id": "418",
+    "name": "Gas and Electric",
+    "parent_id": "417",
+    "tier": 3
+  },
+  {
+    "id": "419",
+    "name": "Internet Service Providers",
+    "parent_id": "417",
+    "tier": 3
+  },
+  {
+    "id": "420",
+    "name": "Phone Services",
+    "parent_id": "417",
+    "tier": 3
+  },
+  {
+    "id": "421",
+    "name": "Water Services",
+    "parent_id": "417",
+    "tier": 3
+  },
+  {
+    "id": "398",
+    "name": "Insurance",
+    "parent_id": "391",
+    "tier": 2
+  },
+  {
+    "id": "399",
+    "name": "Health Insurance",
+    "parent_id": "398",
+    "tier": 3
+  },
+  {
+    "id": "400",
+    "name": "Home Insurance",
+    "parent_id": "398",
+    "tier": 3
+  },
+  {
+    "id": "401",
+    "name": "Life Insurance",
+    "parent_id": "398",
+    "tier": 3
+  },
+  {
+    "id": "402",
+    "name": "Motor Insurance",
+    "parent_id": "398",
+    "tier": 3
+  },
+  {
+    "id": "403",
+    "name": "Pet Insurance",
+    "parent_id": "398",
+    "tier": 3
+  },
+  {
+    "id": "404",
+    "name": "Travel Insurance",
+    "parent_id": "398",
+    "tier": 3
+  },
+  {
+    "id": "405",
+    "name": "Personal Debt",
+    "parent_id": "391",
+    "tier": 2
+  },
+  {
+    "id": "406",
+    "name": "Credit Cards",
+    "parent_id": "405",
+    "tier": 3
+  },
+  {
+    "id": "407",
+    "name": "Home Financing",
+    "parent_id": "405",
+    "tier": 3
+  },
+  {
+    "id": "408",
+    "name": "Personal Loans",
+    "parent_id": "405",
+    "tier": 3
+  },
+  {
+    "id": "409",
+    "name": "Student Loans",
+    "parent_id": "405",
+    "tier": 3
+  },
+  {
+    "id": "410",
+    "name": "Personal Investing",
+    "parent_id": "391",
+    "tier": 2
+  },
+  {
+    "id": "411",
+    "name": "Hedge Funds",
+    "parent_id": "410",
+    "tier": 3
+  },
+  {
+    "id": "412",
+    "name": "Mutual Funds",
+    "parent_id": "410",
+    "tier": 3
+  },
+  {
+    "id": "413",
+    "name": "Options",
+    "parent_id": "410",
+    "tier": 3
+  },
+  {
+    "id": "414",
+    "name": "Stocks and Bonds",
+    "parent_id": "410",
+    "tier": 3
+  },
+  {
+    "id": "415",
+    "name": "Personal Taxes",
+    "parent_id": "391",
+    "tier": 2
+  },
+  {
+    "id": "416",
+    "name": "Retirement Planning",
+    "parent_id": "391",
+    "tier": 2
+  },
+  {
+    "id": "422",
+    "name": "Pets",
+    "parent_id": null,
+    "tier": 1
+  },
+  {
+    "id": "423",
+    "name": "Birds",
+    "parent_id": "422",
+    "tier": 2
+  },
+  {
+    "id": "424",
+    "name": "Cats",
+    "parent_id": "422",
+    "tier": 2
+  },
+  {
+    "id": "425",
+    "name": "Dogs",
+    "parent_id": "422",
+    "tier": 2
+  },
+  {
+    "id": "426",
+    "name": "Fish and Aquariums",
+    "parent_id": "422",
+    "tier": 2
+  },
+  {
+    "id": "427",
+    "name": "Large Animals",
+    "parent_id": "422",
+    "tier": 2
+  },
+  {
+    "id": "428",
+    "name": "Pet Adoptions",
+    "parent_id": "422",
+    "tier": 2
+  },
+  {
+    "id": "431",
+    "name": "Pet Supplies",
+    "parent_id": "422",
+    "tier": 2
+  },
+  {
+    "id": "429",
+    "name": "Reptiles",
+    "parent_id": "422",
+    "tier": 2
+  },
+  {
+    "id": "430",
+    "name": "Veterinary Medicine",
+    "parent_id": "422",
+    "tier": 2
+  },
+  {
+    "id": "386",
+    "name": "Politics",
+    "parent_id": null,
+    "tier": 1
+  },
+  {
+    "id": "8YPBBL",
+    "name": "Civic affairs",
+    "parent_id": "386",
+    "tier": 2
+  },
+  {
+    "id": "387",
+    "name": "Elections",
+    "parent_id": "386",
+    "tier": 2
+  },
+  {
+    "id": "388",
+    "name": "Political Issues & Policy",
+    "parent_id": "386",
+    "tier": 2
+  },
+  {
+    "id": "432",
+    "name": "Pop Culture",
+    "parent_id": null,
+    "tier": 1
+  },
+  {
+    "id": "433",
+    "name": "Celebrity Deaths",
+    "parent_id": "432",
+    "tier": 2
+  },
+  {
+    "id": "434",
+    "name": "Celebrity Families",
+    "parent_id": "432",
+    "tier": 2
+  },
+  {
+    "id": "435",
+    "name": "Celebrity Homes",
+    "parent_id": "432",
+    "tier": 2
+  },
+  {
+    "id": "436",
+    "name": "Celebrity Pregnancy",
+    "parent_id": "432",
+    "tier": 2
+  },
+  {
+    "id": "437",
+    "name": "Celebrity Relationships",
+    "parent_id": "432",
+    "tier": 2
+  },
+  {
+    "id": "438",
+    "name": "Celebrity Scandal",
+    "parent_id": "432",
+    "tier": 2
+  },
+  {
+    "id": "439",
+    "name": "Celebrity Style",
+    "parent_id": "432",
+    "tier": 2
+  },
+  {
+    "id": "440",
+    "name": "Humor and Satire",
+    "parent_id": "432",
+    "tier": 2
+  },
+  {
+    "id": "W3CW2J",
+    "name": "Productivity",
+    "parent_id": "602",
+    "tier": 1
+  },
+  {
+    "id": "441",
+    "name": "Real Estate",
+    "parent_id": null,
+    "tier": 1
+  },
+  {
+    "id": "442",
+    "name": "Apartments",
+    "parent_id": "441",
+    "tier": 2
+  },
+  {
+    "id": "445",
+    "name": "Developmental Sites",
+    "parent_id": "441",
+    "tier": 2
+  },
+  {
+    "id": "446",
+    "name": "Hotel Properties",
+    "parent_id": "441",
+    "tier": 2
+  },
+  {
+    "id": "447",
+    "name": "Houses",
+    "parent_id": "441",
+    "tier": 2
+  },
+  {
+    "id": "448",
+    "name": "Industrial Property",
+    "parent_id": "441",
+    "tier": 2
+  },
+  {
+    "id": "449",
+    "name": "Land and Farms",
+    "parent_id": "441",
+    "tier": 2
+  },
+  {
+    "id": "450",
+    "name": "Office Property",
+    "parent_id": "441",
+    "tier": 2
+  },
+  {
+    "id": "451",
+    "name": "Real Estate Buying and Selling",
+    "parent_id": "441",
+    "tier": 2
+  },
+  {
+    "id": "452",
+    "name": "Real Estate Renting and Leasing",
+    "parent_id": "441",
+    "tier": 2
+  },
+  {
+    "id": "443",
+    "name": "Retail Property",
+    "parent_id": "441",
+    "tier": 2
+  },
+  {
+    "id": "444",
+    "name": "Vacation Properties",
+    "parent_id": "441",
+    "tier": 2
+  },
+  {
+    "id": "453",
+    "name": "Religion & Spirituality",
+    "parent_id": null,
+    "tier": 1
+  },
+  {
+    "id": "454",
+    "name": "Agnosticism",
+    "parent_id": "453",
+    "tier": 2
+  },
+  {
+    "id": "456",
+    "name": "Astrology",
+    "parent_id": "453",
+    "tier": 2
+  },
+  {
+    "id": "457",
+    "name": "Atheism",
+    "parent_id": "453",
+    "tier": 2
+  },
+  {
+    "id": "458",
+    "name": "Buddhism",
+    "parent_id": "453",
+    "tier": 2
+  },
+  {
+    "id": "459",
+    "name": "Christianity",
+    "parent_id": "453",
+    "tier": 2
+  },
+  {
+    "id": "460",
+    "name": "Hinduism",
+    "parent_id": "453",
+    "tier": 2
+  },
+  {
+    "id": "461",
+    "name": "Islam",
+    "parent_id": "453",
+    "tier": 2
+  },
+  {
+    "id": "462",
+    "name": "Judaism",
+    "parent_id": "453",
+    "tier": 2
+  },
+  {
+    "id": "463",
+    "name": "Sikhism",
+    "parent_id": "453",
+    "tier": 2
+  },
+  {
+    "id": "455",
+    "name": "Spirituality",
+    "parent_id": "453",
+    "tier": 2
+  },
+  {
+    "id": "464",
+    "name": "Science",
+    "parent_id": null,
+    "tier": 1
+  },
+  {
+    "id": "465",
+    "name": "Biological Sciences",
+    "parent_id": "464",
+    "tier": 2
+  },
+  {
+    "id": "466",
+    "name": "Chemistry",
+    "parent_id": "464",
+    "tier": 2
+  },
+  {
+    "id": "467",
+    "name": "Environment",
+    "parent_id": "464",
+    "tier": 2
+  },
+  {
+    "id": "468",
+    "name": "Genetics",
+    "parent_id": "464",
+    "tier": 2
+  },
+  {
+    "id": "469",
+    "name": "Geography",
+    "parent_id": "464",
+    "tier": 2
+  },
+  {
+    "id": "470",
+    "name": "Geology",
+    "parent_id": "464",
+    "tier": 2
+  },
+  {
+    "id": "471",
+    "name": "Physics",
+    "parent_id": "464",
+    "tier": 2
+  },
+  {
+    "id": "472",
+    "name": "Space and Astronomy",
+    "parent_id": "464",
+    "tier": 2
+  },
+  {
+    "id": "390",
+    "name": "Weather",
+    "parent_id": "464",
+    "tier": 2
+  },
+  {
+    "id": "v9i3On",
+    "name": "Sensitive Topics",
+    "parent_id": null,
+    "tier": 1
+  },
+  {
+    "id": "Rm3SiT",
+    "name": "Adult & Explicit Sexual Content",
+    "parent_id": "v9i3On",
+    "tier": 2
+  },
+  {
+    "id": "avbNf2",
+    "name": "Arms & Ammunition",
+    "parent_id": "v9i3On",
+    "tier": 2
+  },
+  {
+    "id": "XtODT3",
+    "name": "Crime & Harmful Acts to Individuals, Society & Human Right Violations",
+    "parent_id": "v9i3On",
+    "tier": 2
+  },
+  {
+    "id": "I4GWl6",
+    "name": "Death, Injury, or Military Conflict",
+    "parent_id": "v9i3On",
+    "tier": 2
+  },
+  {
+    "id": "Z7rJBM",
+    "name": "Debated Sensitive Social Issues",
+    "parent_id": "v9i3On",
+    "tier": 2
+  },
+  {
+    "id": "HxqYV1",
+    "name": "Hate Speech and Acts of Aggression",
+    "parent_id": "v9i3On",
+    "tier": 2
+  },
+  {
+    "id": "pg0WhF",
+    "name": "Illegal Drugs, Tobacco, eCigarettes, Vaping, Alcohol",
+    "parent_id": "v9i3On",
+    "tier": 2
+  },
+  {
+    "id": "j9PaO9",
+    "name": "Obscenity and Profanity",
+    "parent_id": "v9i3On",
+    "tier": 2
+  },
+  {
+    "id": "mm3UXx",
+    "name": "Online Piracy",
+    "parent_id": "v9i3On",
+    "tier": 2
+  },
+  {
+    "id": "6i4dB6",
+    "name": "Spam or Harmful Content",
+    "parent_id": "v9i3On",
+    "tier": 2
+  },
+  {
+    "id": "8FD8nI",
+    "name": "Terrorism",
+    "parent_id": "v9i3On",
+    "tier": 2
+  },
+  {
+    "id": "473",
+    "name": "Shopping",
+    "parent_id": null,
+    "tier": 1
+  },
+  {
+    "id": "482",
+    "name": "Children's Games and Toys",
+    "parent_id": "473",
+    "tier": 2
+  },
+  {
+    "id": "474",
+    "name": "Coupons and Discounts",
+    "parent_id": "473",
+    "tier": 2
+  },
+  {
+    "id": "475",
+    "name": "Flower Shopping",
+    "parent_id": "473",
+    "tier": 2
+  },
+  {
+    "id": "476",
+    "name": "Gifts and Greetings Cards",
+    "parent_id": "473",
+    "tier": 2
+  },
+  {
+    "id": "477",
+    "name": "Grocery Shopping",
+    "parent_id": "473",
+    "tier": 2
+  },
+  {
+    "id": "478",
+    "name": "Holiday Shopping",
+    "parent_id": "473",
+    "tier": 2
+  },
+  {
+    "id": "479",
+    "name": "Household Supplies",
+    "parent_id": "473",
+    "tier": 2
+  },
+  {
+    "id": "480",
+    "name": "Lotteries and Scratchcards",
+    "parent_id": "473",
+    "tier": 2
+  },
+  {
+    "id": "161",
+    "name": "Party Supplies and Decorations",
+    "parent_id": "473",
+    "tier": 2
+  },
+  {
+    "id": "481",
+    "name": "Sales and Promotions",
+    "parent_id": "473",
+    "tier": 2
+  },
+  {
+    "id": "483",
+    "name": "Sports",
+    "parent_id": null,
+    "tier": 1
+  },
+  {
+    "id": "484",
+    "name": "American Football",
+    "parent_id": "483",
+    "tier": 2
+  },
+  {
+    "id": "507",
+    "name": "Australian Rules Football",
+    "parent_id": "483",
+    "tier": 2
+  },
+  {
+    "id": "518",
+    "name": "Auto Racing",
+    "parent_id": "483",
+    "tier": 2
+  },
+  {
+    "id": "519",
+    "name": "Motorcycle Sports",
+    "parent_id": "518",
+    "tier": 3
+  },
+  {
+    "id": "534",
+    "name": "Badminton",
+    "parent_id": "483",
+    "tier": 2
+  },
+  {
+    "id": "545",
+    "name": "Baseball",
+    "parent_id": "483",
+    "tier": 2
+  },
+  {
+    "id": "547",
+    "name": "Basketball",
+    "parent_id": "483",
+    "tier": 2
+  },
+  {
+    "id": "548",
+    "name": "Beach Volleyball",
+    "parent_id": "483",
+    "tier": 2
+  },
+  {
+    "id": "549",
+    "name": "Bodybuilding",
+    "parent_id": "483",
+    "tier": 2
+  },
+  {
+    "id": "550",
+    "name": "Bowling",
+    "parent_id": "483",
+    "tier": 2
+  },
+  {
+    "id": "485",
+    "name": "Boxing",
+    "parent_id": "483",
+    "tier": 2
+  },
+  {
+    "id": "486",
+    "name": "Cheerleading",
+    "parent_id": "483",
+    "tier": 2
+  },
+  {
+    "id": "487",
+    "name": "College Sports",
+    "parent_id": "483",
+    "tier": 2
+  },
+  {
+    "id": "490",
+    "name": "College Baseball",
+    "parent_id": "487",
+    "tier": 3
+  },
+  {
+    "id": "489",
+    "name": "College Basketball",
+    "parent_id": "487",
+    "tier": 3
+  },
+  {
+    "id": "488",
+    "name": "College Football",
+    "parent_id": "487",
+    "tier": 3
+  },
+  {
+    "id": "491",
+    "name": "Cricket",
+    "parent_id": "483",
+    "tier": 2
+  },
+  {
+    "id": "492",
+    "name": "Cycling",
+    "parent_id": "483",
+    "tier": 2
+  },
+  {
+    "id": "493",
+    "name": "Darts",
+    "parent_id": "483",
+    "tier": 2
+  },
+  {
+    "id": "494",
+    "name": "Disabled Sports",
+    "parent_id": "483",
+    "tier": 2
+  },
+  {
+    "id": "495",
+    "name": "Diving",
+    "parent_id": "483",
+    "tier": 2
+  },
+  {
+    "id": "496",
+    "name": "Equine Sports",
+    "parent_id": "483",
+    "tier": 2
+  },
+  {
+    "id": "497",
+    "name": "Horse Racing",
+    "parent_id": "483",
+    "tier": 3
+  },
+  {
+    "id": "498",
+    "name": "Extreme Sports",
+    "parent_id": "483",
+    "tier": 2
+  },
+  {
+    "id": "499",
+    "name": "Canoeing and Kayaking",
+    "parent_id": "498",
+    "tier": 3
+  },
+  {
+    "id": "500",
+    "name": "Climbing",
+    "parent_id": "498",
+    "tier": 3
+  },
+  {
+    "id": "501",
+    "name": "Paintball",
+    "parent_id": "498",
+    "tier": 3
+  },
+  {
+    "id": "502",
+    "name": "Scuba Diving",
+    "parent_id": "498",
+    "tier": 3
+  },
+  {
+    "id": "503",
+    "name": "Skateboarding",
+    "parent_id": "498",
+    "tier": 3
+  },
+  {
+    "id": "504",
+    "name": "Snowboarding",
+    "parent_id": "498",
+    "tier": 3
+  },
+  {
+    "id": "505",
+    "name": "Surfing and Bodyboarding",
+    "parent_id": "498",
+    "tier": 3
+  },
+  {
+    "id": "506",
+    "name": "Waterskiing and Wakeboarding",
+    "parent_id": "498",
+    "tier": 3
+  },
+  {
+    "id": "508",
+    "name": "Fantasy Sports",
+    "parent_id": "483",
+    "tier": 2
+  },
+  {
+    "id": "509",
+    "name": "Field Hockey",
+    "parent_id": "483",
+    "tier": 2
+  },
+  {
+    "id": "510",
+    "name": "Figure Skating",
+    "parent_id": "483",
+    "tier": 2
+  },
+  {
+    "id": "511",
+    "name": "Fishing Sports",
+    "parent_id": "483",
+    "tier": 2
+  },
+  {
+    "id": "512",
+    "name": "Golf",
+    "parent_id": "483",
+    "tier": 2
+  },
+  {
+    "id": "513",
+    "name": "Gymnastics",
+    "parent_id": "483",
+    "tier": 2
+  },
+  {
+    "id": "514",
+    "name": "Hunting and Shooting",
+    "parent_id": "483",
+    "tier": 2
+  },
+  {
+    "id": "515",
+    "name": "Ice Hockey",
+    "parent_id": "483",
+    "tier": 2
+  },
+  {
+    "id": "516",
+    "name": "Inline Skating",
+    "parent_id": "483",
+    "tier": 2
+  },
+  {
+    "id": "517",
+    "name": "Lacrosse",
+    "parent_id": "483",
+    "tier": 2
+  },
+  {
+    "id": "520",
+    "name": "Martial Arts",
+    "parent_id": "483",
+    "tier": 2
+  },
+  {
+    "id": "521",
+    "name": "Olympic Sports",
+    "parent_id": "483",
+    "tier": 2
+  },
+  {
+    "id": "522",
+    "name": "Summer Olympic Sports",
+    "parent_id": "521",
+    "tier": 3
+  },
+  {
+    "id": "523",
+    "name": "Winter Olympic Sports",
+    "parent_id": "521",
+    "tier": 3
+  },
+  {
+    "id": "524",
+    "name": "Poker and Professional Gambling",
+    "parent_id": "483",
+    "tier": 2
+  },
+  {
+    "id": "525",
+    "name": "Rodeo",
+    "parent_id": "483",
+    "tier": 2
+  },
+  {
+    "id": "526",
+    "name": "Rowing",
+    "parent_id": "483",
+    "tier": 2
+  },
+  {
+    "id": "527",
+    "name": "Rugby",
+    "parent_id": "483",
+    "tier": 2
+  },
+  {
+    "id": "528",
+    "name": "Rugby League",
+    "parent_id": "527",
+    "tier": 3
+  },
+  {
+    "id": "529",
+    "name": "Rugby Union",
+    "parent_id": "527",
+    "tier": 3
+  },
+  {
+    "id": "530",
+    "name": "Sailing",
+    "parent_id": "483",
+    "tier": 2
+  },
+  {
+    "id": "531",
+    "name": "Skiing",
+    "parent_id": "483",
+    "tier": 2
+  },
+  {
+    "id": "532",
+    "name": "Snooker/Pool/Billiards",
+    "parent_id": "483",
+    "tier": 2
+  },
+  {
+    "id": "533",
+    "name": "Soccer",
+    "parent_id": "483",
+    "tier": 2
+  },
+  {
+    "id": "535",
+    "name": "Softball",
+    "parent_id": "483",
+    "tier": 2
+  },
+  {
+    "id": "551",
+    "name": "Sports Equipment",
+    "parent_id": "483",
+    "tier": 2
+  },
+  {
+    "id": "536",
+    "name": "Squash",
+    "parent_id": "483",
+    "tier": 2
+  },
+  {
+    "id": "537",
+    "name": "Swimming",
+    "parent_id": "483",
+    "tier": 2
+  },
+  {
+    "id": "538",
+    "name": "Table Tennis",
+    "parent_id": "483",
+    "tier": 2
+  },
+  {
+    "id": "539",
+    "name": "Tennis",
+    "parent_id": "483",
+    "tier": 2
+  },
+  {
+    "id": "540",
+    "name": "Track and Field",
+    "parent_id": "483",
+    "tier": 2
+  },
+  {
+    "id": "541",
+    "name": "Volleyball",
+    "parent_id": "483",
+    "tier": 2
+  },
+  {
+    "id": "542",
+    "name": "Walking",
+    "parent_id": "483",
+    "tier": 2
+  },
+  {
+    "id": "543",
+    "name": "Water Polo",
+    "parent_id": "483",
+    "tier": 2
+  },
+  {
+    "id": "544",
+    "name": "Weightlifting",
+    "parent_id": "483",
+    "tier": 2
+  },
+  {
+    "id": "546",
+    "name": "Wrestling",
+    "parent_id": "483",
+    "tier": 2
+  },
+  {
+    "id": "552",
+    "name": "Style & Fashion",
+    "parent_id": null,
+    "tier": 1
+  },
+  {
+    "id": "553",
+    "name": "Beauty",
+    "parent_id": "552",
+    "tier": 2
+  },
+  {
+    "id": "554",
+    "name": "Hair Care",
+    "parent_id": "553",
+    "tier": 3
+  },
+  {
+    "id": "555",
+    "name": "Makeup and Accessories",
+    "parent_id": "553",
+    "tier": 3
+  },
+  {
+    "id": "556",
+    "name": "Nail Care",
+    "parent_id": "553",
+    "tier": 3
+  },
+  {
+    "id": "557",
+    "name": "Natural and Organic Beauty",
+    "parent_id": "553",
+    "tier": 3
+  },
+  {
+    "id": "558",
+    "name": "Perfume and Fragrance",
+    "parent_id": "553",
+    "tier": 3
+  },
+  {
+    "id": "559",
+    "name": "Skin Care",
+    "parent_id": "553",
+    "tier": 3
+  },
+  {
+    "id": "574",
+    "name": "Body Art",
+    "parent_id": "552",
+    "tier": 2
+  },
+  {
+    "id": "575",
+    "name": "Children's Clothing",
+    "parent_id": "552",
+    "tier": 2
+  },
+  {
+    "id": "576",
+    "name": "Designer Clothing",
+    "parent_id": "552",
+    "tier": 2
+  },
+  {
+    "id": "577",
+    "name": "Fashion Trends",
+    "parent_id": "552",
+    "tier": 2
+  },
+  {
+    "id": "578",
+    "name": "High Fashion",
+    "parent_id": "552",
+    "tier": 2
+  },
+  {
+    "id": "579",
+    "name": "Men's Fashion",
+    "parent_id": "552",
+    "tier": 2
+  },
+  {
+    "id": "580",
+    "name": "Men's Accessories",
+    "parent_id": "579",
+    "tier": 3
+  },
+  {
+    "id": "581",
+    "name": "Men's Jewelry and Watches",
+    "parent_id": "580",
+    "tier": 4
+  },
+  {
+    "id": "582",
+    "name": "Men's Clothing",
+    "parent_id": "579",
+    "tier": 3
+  },
+  {
+    "id": "583",
+    "name": "Men's Business Wear",
+    "parent_id": "582",
+    "tier": 4
+  },
+  {
+    "id": "584",
+    "name": "Men's Casual Wear",
+    "parent_id": "582",
+    "tier": 4
+  },
+  {
+    "id": "585",
+    "name": "Men's Formal Wear",
+    "parent_id": "582",
+    "tier": 4
+  },
+  {
+    "id": "586",
+    "name": "Men's Outerwear",
+    "parent_id": "582",
+    "tier": 4
+  },
+  {
+    "id": "587",
+    "name": "Men's Sportswear",
+    "parent_id": "582",
+    "tier": 4
+  },
+  {
+    "id": "588",
+    "name": "Men's Underwear and Sleepwear",
+    "parent_id": "582",
+    "tier": 4
+  },
+  {
+    "id": "589",
+    "name": "Men's Shoes and Footwear",
+    "parent_id": "579",
+    "tier": 3
+  },
+  {
+    "id": "590",
+    "name": "Personal Care",
+    "parent_id": "552",
+    "tier": 2
+  },
+  {
+    "id": "591",
+    "name": "Bath and Shower",
+    "parent_id": "590",
+    "tier": 3
+  },
+  {
+    "id": "592",
+    "name": "Deodorant and Antiperspirant",
+    "parent_id": "590",
+    "tier": 3
+  },
+  {
+    "id": "593",
+    "name": "Oral care",
+    "parent_id": "590",
+    "tier": 3
+  },
+  {
+    "id": "594",
+    "name": "Shaving",
+    "parent_id": "590",
+    "tier": 3
+  },
+  {
+    "id": "595",
+    "name": "Street Style",
+    "parent_id": "552",
+    "tier": 2
+  },
+  {
+    "id": "560",
+    "name": "Women's Fashion",
+    "parent_id": "552",
+    "tier": 2
+  },
+  {
+    "id": "561",
+    "name": "Women's Accessories",
+    "parent_id": "560",
+    "tier": 3
+  },
+  {
+    "id": "562",
+    "name": "Women's Glasses",
+    "parent_id": "561",
+    "tier": 4
+  },
+  {
+    "id": "563",
+    "name": "Women's Handbags and Wallets",
+    "parent_id": "561",
+    "tier": 4
+  },
+  {
+    "id": "564",
+    "name": "Women's Hats and Scarves",
+    "parent_id": "561",
+    "tier": 4
+  },
+  {
+    "id": "565",
+    "name": "Women's Jewelry and Watches",
+    "parent_id": "561",
+    "tier": 4
+  },
+  {
+    "id": "566",
+    "name": "Women's Clothing",
+    "parent_id": "560",
+    "tier": 3
+  },
+  {
+    "id": "567",
+    "name": "Women's Business Wear",
+    "parent_id": "566",
+    "tier": 4
+  },
+  {
+    "id": "568",
+    "name": "Women's Casual Wear",
+    "parent_id": "566",
+    "tier": 4
+  },
+  {
+    "id": "569",
+    "name": "Women's Formal Wear",
+    "parent_id": "566",
+    "tier": 4
+  },
+  {
+    "id": "570",
+    "name": "Women's Intimates and Sleepwear",
+    "parent_id": "566",
+    "tier": 4
+  },
+  {
+    "id": "571",
+    "name": "Women's Outerwear",
+    "parent_id": "566",
+    "tier": 4
+  },
+  {
+    "id": "572",
+    "name": "Women's Sportswear",
+    "parent_id": "566",
+    "tier": 4
+  },
+  {
+    "id": "573",
+    "name": "Women's Shoes and Footwear",
+    "parent_id": "560",
+    "tier": 3
+  },
+  {
+    "id": "596",
+    "name": "Technology & Computing",
+    "parent_id": null,
+    "tier": 1
+  },
+  {
+    "id": "597",
+    "name": "Artificial Intelligence",
+    "parent_id": "596",
+    "tier": 2
+  },
+  {
+    "id": "598",
+    "name": "Augmented Reality",
+    "parent_id": "596",
+    "tier": 2
+  },
+  {
+    "id": "599",
+    "name": "Computing",
+    "parent_id": "596",
+    "tier": 2
+  },
+  {
+    "id": "600",
+    "name": "Computer Networking",
+    "parent_id": "599",
+    "tier": 3
+  },
+  {
+    "id": "601",
+    "name": "Computer Peripherals",
+    "parent_id": "599",
+    "tier": 3
+  },
+  {
+    "id": "602",
+    "name": "Software and Applications",
+    "parent_id": "599",
+    "tier": 3
+  },
+  {
+    "id": "603",
+    "name": "3-D Graphics",
+    "parent_id": "602",
+    "tier": 4
+  },
+  {
+    "id": "608",
+    "name": "Antivirus Software",
+    "parent_id": "602",
+    "tier": 4
+  },
+  {
+    "id": "609",
+    "name": "Browsers",
+    "parent_id": "602",
+    "tier": 4
+  },
+  {
+    "id": "610",
+    "name": "Computer Animation",
+    "parent_id": "602",
+    "tier": 4
+  },
+  {
+    "id": "611",
+    "name": "Databases",
+    "parent_id": "602",
+    "tier": 4
+  },
+  {
+    "id": "612",
+    "name": "Desktop Publishing",
+    "parent_id": "602",
+    "tier": 4
+  },
+  {
+    "id": "613",
+    "name": "Digital Audio",
+    "parent_id": "602",
+    "tier": 4
+  },
+  {
+    "id": "614",
+    "name": "Graphics Software",
+    "parent_id": "602",
+    "tier": 4
+  },
+  {
+    "id": "615",
+    "name": "Operating Systems",
+    "parent_id": "602",
+    "tier": 4
+  },
+  {
+    "id": "604",
+    "name": "Photo Editing Software",
+    "parent_id": "602",
+    "tier": 4
+  },
+  {
+    "id": "605",
+    "name": "Shareware and Freeware",
+    "parent_id": "602",
+    "tier": 4
+  },
+  {
+    "id": "606",
+    "name": "Video Software",
+    "parent_id": "602",
+    "tier": 4
+  },
+  {
+    "id": "607",
+    "name": "Web Conferencing",
+    "parent_id": "602",
+    "tier": 4
+  },
+  {
+    "id": "616",
+    "name": "Data Storage and Warehousing",
+    "parent_id": "599",
+    "tier": 3
+  },
+  {
+    "id": "617",
+    "name": "Desktops",
+    "parent_id": "599",
+    "tier": 3
+  },
+  {
+    "id": "618",
+    "name": "Information and Network Security",
+    "parent_id": "599",
+    "tier": 3
+  },
+  {
+    "id": "619",
+    "name": "Internet",
+    "parent_id": "599",
+    "tier": 3
+  },
+  {
+    "id": "620",
+    "name": "Cloud Computing",
+    "parent_id": "619",
+    "tier": 4
+  },
+  {
+    "id": "623",
+    "name": "Email",
+    "parent_id": "619",
+    "tier": 4
+  },
+  {
+    "id": "624",
+    "name": "Internet for Beginners",
+    "parent_id": "619",
+    "tier": 4
+  },
+  {
+    "id": "625",
+    "name": "Internet of Things",
+    "parent_id": "619",
+    "tier": 4
+  },
+  {
+    "id": "626",
+    "name": "IT and Internet Support",
+    "parent_id": "619",
+    "tier": 4
+  },
+  {
+    "id": "627",
+    "name": "Search",
+    "parent_id": "619",
+    "tier": 4
+  },
+  {
+    "id": "628",
+    "name": "Social Networking",
+    "parent_id": "619",
+    "tier": 4
+  },
+  {
+    "id": "629",
+    "name": "Web Design and HTML",
+    "parent_id": "619",
+    "tier": 4
+  },
+  {
+    "id": "621",
+    "name": "Web Development",
+    "parent_id": "619",
+    "tier": 4
+  },
+  {
+    "id": "622",
+    "name": "Web Hosting",
+    "parent_id": "619",
+    "tier": 4
+  },
+  {
+    "id": "630",
+    "name": "Laptops",
+    "parent_id": "599",
+    "tier": 3
+  },
+  {
+    "id": "631",
+    "name": "Programming Languages",
+    "parent_id": "599",
+    "tier": 3
+  },
+  {
+    "id": "632",
+    "name": "Consumer Electronics",
+    "parent_id": "596",
+    "tier": 2
+  },
+  {
+    "id": "633",
+    "name": "Cameras and Camcorders",
+    "parent_id": "632",
+    "tier": 3
+  },
+  {
+    "id": "634",
+    "name": "Home Entertainment Systems",
+    "parent_id": "632",
+    "tier": 3
+  },
+  {
+    "id": "635",
+    "name": "Smartphones",
+    "parent_id": "632",
+    "tier": 3
+  },
+  {
+    "id": "636",
+    "name": "Tablets and E-readers",
+    "parent_id": "632",
+    "tier": 3
+  },
+  {
+    "id": "637",
+    "name": "Wearable Technology",
+    "parent_id": "632",
+    "tier": 3
+  },
+  {
+    "id": "638",
+    "name": "Robotics",
+    "parent_id": "596",
+    "tier": 2
+  },
+  {
+    "id": "639",
+    "name": "Virtual Reality",
+    "parent_id": "596",
+    "tier": 2
+  },
+  {
+    "id": "653",
+    "name": "Travel",
+    "parent_id": null,
+    "tier": 1
+  },
+  {
+    "id": "654",
+    "name": "Travel Accessories",
+    "parent_id": "653",
+    "tier": 2
+  },
+  {
+    "id": "655",
+    "name": "Travel Locations",
+    "parent_id": "653",
+    "tier": 2
+  },
+  {
+    "id": "656",
+    "name": "Africa Travel",
+    "parent_id": "655",
+    "tier": 3
+  },
+  {
+    "id": "657",
+    "name": "Asia Travel",
+    "parent_id": "655",
+    "tier": 3
+  },
+  {
+    "id": "658",
+    "name": "Australia and Oceania Travel",
+    "parent_id": "655",
+    "tier": 3
+  },
+  {
+    "id": "659",
+    "name": "Europe Travel",
+    "parent_id": "655",
+    "tier": 3
+  },
+  {
+    "id": "660",
+    "name": "North America Travel",
+    "parent_id": "655",
+    "tier": 3
+  },
+  {
+    "id": "661",
+    "name": "Polar Travel",
+    "parent_id": "655",
+    "tier": 3
+  },
+  {
+    "id": "662",
+    "name": "South America Travel",
+    "parent_id": "655",
+    "tier": 3
+  },
+  {
+    "id": "663",
+    "name": "Travel Preparation and Advice",
+    "parent_id": "653",
+    "tier": 2
+  },
+  {
+    "id": "664",
+    "name": "Travel Type",
+    "parent_id": "653",
+    "tier": 2
+  },
+  {
+    "id": "665",
+    "name": "Adventure Travel",
+    "parent_id": "664",
+    "tier": 3
+  },
+  {
+    "id": "672",
+    "name": "Air Travel",
+    "parent_id": "664",
+    "tier": 3
+  },
+  {
+    "id": "673",
+    "name": "Beach Travel",
+    "parent_id": "664",
+    "tier": 3
+  },
+  {
+    "id": "674",
+    "name": "Bed & Breakfasts",
+    "parent_id": "664",
+    "tier": 3
+  },
+  {
+    "id": "675",
+    "name": "Budget Travel",
+    "parent_id": "664",
+    "tier": 3
+  },
+  {
+    "id": "676",
+    "name": "Business Travel",
+    "parent_id": "664",
+    "tier": 3
+  },
+  {
+    "id": "677",
+    "name": "Camping",
+    "parent_id": "664",
+    "tier": 3
+  },
+  {
+    "id": "678",
+    "name": "Cruises",
+    "parent_id": "664",
+    "tier": 3
+  },
+  {
+    "id": "679",
+    "name": "Day Trips",
+    "parent_id": "664",
+    "tier": 3
+  },
+  {
+    "id": "666",
+    "name": "Family Travel",
+    "parent_id": "664",
+    "tier": 3
+  },
+  {
+    "id": "667",
+    "name": "Honeymoons and Getaways",
+    "parent_id": "664",
+    "tier": 3
+  },
+  {
+    "id": "668",
+    "name": "Hotels and Motels",
+    "parent_id": "664",
+    "tier": 3
+  },
+  {
+    "id": "669",
+    "name": "Rail Travel",
+    "parent_id": "664",
+    "tier": 3
+  },
+  {
+    "id": "670",
+    "name": "Road Trips",
+    "parent_id": "664",
+    "tier": 3
+  },
+  {
+    "id": "671",
+    "name": "Spas",
+    "parent_id": "664",
+    "tier": 3
+  },
+  {
+    "id": "680",
+    "name": "Video Gaming",
+    "parent_id": null,
+    "tier": 1
+  },
+  {
+    "id": "681",
+    "name": "Console Games",
+    "parent_id": "680",
+    "tier": 2
+  },
+  {
+    "id": "682",
+    "name": "eSports",
+    "parent_id": "680",
+    "tier": 2
+  },
+  {
+    "id": "683",
+    "name": "Mobile Games",
+    "parent_id": "680",
+    "tier": 2
+  },
+  {
+    "id": "684",
+    "name": "PC Games",
+    "parent_id": "680",
+    "tier": 2
+  },
+  {
+    "id": "685",
+    "name": "Video Game Genres",
+    "parent_id": "680",
+    "tier": 2
+  },
+  {
+    "id": "686",
+    "name": "Action Video Games",
+    "parent_id": "685",
+    "tier": 3
+  },
+  {
+    "id": "691",
+    "name": "Action-Adventure Video Games",
+    "parent_id": "685",
+    "tier": 3
+  },
+  {
+    "id": "MQ2XML",
+    "name": "Adult Video Games",
+    "parent_id": "685",
+    "tier": 3
+  },
+  {
+    "id": "692",
+    "name": "Adventure Video Games",
+    "parent_id": "685",
+    "tier": 3
+  },
+  {
+    "id": "ZJG29S",
+    "name": "Casino and Gambling Video Games",
+    "parent_id": "685",
+    "tier": 3
+  },
+  {
+    "id": "693",
+    "name": "Casual Games",
+    "parent_id": "685",
+    "tier": 3
+  },
+  {
+    "id": "694",
+    "name": "Educational Video Games",
+    "parent_id": "685",
+    "tier": 3
+  },
+  {
+    "id": "695",
+    "name": "Exercise and Fitness Video Games",
+    "parent_id": "685",
+    "tier": 3
+  },
+  {
+    "id": "VWGKS7",
+    "name": "Family Video Games",
+    "parent_id": "685",
+    "tier": 3
+  },
+  {
+    "id": "II436J",
+    "name": "Horror Video Games",
+    "parent_id": "685",
+    "tier": 3
+  },
+  {
+    "id": "696",
+    "name": "MMOs",
+    "parent_id": "685",
+    "tier": 3
+  },
+  {
+    "id": "697",
+    "name": "Music and Party Video Games",
+    "parent_id": "685",
+    "tier": 3
+  },
+  {
+    "id": "698",
+    "name": "Puzzle Video Games",
+    "parent_id": "685",
+    "tier": 3
+  },
+  {
+    "id": "VK7KD0",
+    "name": "Racing Video Games",
+    "parent_id": "685",
+    "tier": 3
+  },
+  {
+    "id": "687",
+    "name": "Role-Playing Video Games",
+    "parent_id": "685",
+    "tier": 3
+  },
+  {
+    "id": "688",
+    "name": "Simulation Video Games",
+    "parent_id": "685",
+    "tier": 3
+  },
+  {
+    "id": "689",
+    "name": "Sports Video Games",
+    "parent_id": "685",
+    "tier": 3
+  },
+  {
+    "id": "690",
+    "name": "Strategy Video Games",
+    "parent_id": "685",
+    "tier": 3
+  },
+  {
+    "id": "389",
+    "name": "War and Conflicts",
+    "parent_id": null,
+    "tier": 1
+  }
 ]

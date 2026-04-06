@@ -28,7 +28,7 @@ gold_labels:
   - keyword: sports
     is_news_relevant: true
     keyword_type: category
-    iab_category_id: '23'
+    iab_category_id: '483'
     mention_type: explicit
   entities: []
 notes: Tests broad category extraction when user expresses general interest across

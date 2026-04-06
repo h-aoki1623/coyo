@@ -19,7 +19,7 @@ gold_labels:
   - keyword: basketball
     is_news_relevant: true
     keyword_type: category
-    iab_category_id: '23.6'
+    iab_category_id: '547'
     mention_type: explicit
   entities: []
 notes: Basketball is extracted as a sports category with news relevance. No entities
