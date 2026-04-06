@@ -28,17 +28,19 @@ transcript:
   text: That's a good idea !
 gold_labels:
   categories:
-  - keyword: health and wellness
+  - keyword: fitness and exercise
     is_news_relevant: false
     keyword_type: category
+    iab_category_id: '225'
     mention_type: implicit
   entities:
   - keyword: china
     is_news_relevant: true
     keyword_type: entity
     mention_type: explicit
-notes: Extracted 'health and wellness' as the user is discussing exercise, weight, and 
-  health-related issues, indicating an implicit interest in this topic. Extracted 'china' 
-  as an entity since the user mentions needing to keep up with events there for business 
-  purposes, indicating it's a specific geographic region of professional relevance. The 
-  mention is news-relevant as China news would return fresh articles regularly.
+notes: Extracted 'health and wellness' as the user is discussing exercise, weight,
+  and health-related issues, indicating an implicit interest in this topic. Extracted
+  'china' as an entity since the user mentions needing to keep up with events there
+  for business purposes, indicating it's a specific geographic region of professional
+  relevance. The mention is news-relevant as China news would return fresh articles
+  regularly.

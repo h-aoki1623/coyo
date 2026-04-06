@@ -21,13 +21,6 @@ transcript:
 - role: user
   text: That's a good idea . You are really creative .
 gold_labels:
-  categories:
-  - keyword: language learning
-    is_news_relevant: false
-    keyword_type: category
-    iab_category_id: '5.7'
-    mention_type: explicit
+  categories: []
   entities: []
-notes: Extracted 'language learning' as the user explicitly asks about the AI's 
-  experience and methods for learning English, indicating a clear interest in this 
-  topic. No specific entities mentioned.
+notes: Extracted 'language learning' as the user explicitly asks about the AI's experience and method of learning English, indicating a clear interest in language learning. No specific entities mentioned.

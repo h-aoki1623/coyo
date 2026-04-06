@@ -30,10 +30,14 @@ gold_labels:
   - keyword: basketball
     is_news_relevant: true
     keyword_type: category
-    iab_category_id: '23.6'
+    iab_category_id: '547'
     mention_type: implicit
   entities:
   - keyword: nba
+    is_news_relevant: true
+    keyword_type: entity
+    mention_type: implicit
+  - keyword: lakers
     is_news_relevant: true
     keyword_type: entity
     mention_type: implicit

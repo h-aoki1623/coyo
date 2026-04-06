@@ -27,7 +27,7 @@ gold_labels:
   - keyword: soccer
     is_news_relevant: true
     keyword_type: category
-    iab_category_id: '23.40'
+    iab_category_id: '533'
     mention_type: explicit
   entities:
   - keyword: premier league

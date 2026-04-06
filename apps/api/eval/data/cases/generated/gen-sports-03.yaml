@@ -41,5 +41,8 @@ gold_labels:
     is_news_relevant: true
     keyword_type: entity
     mention_type: explicit
-notes: 'Tests IAB normalization: ''F1'' or ''auto racing''. Also tests entity extraction
-  for drivers.'
+  - keyword: red bull
+    is_news_relevant: true
+    keyword_type: entity
+    mention_type: implicit
+notes: Tests that 'overtaking moves', 'car control', and 'racecraft' are NOT extracted as keywords. The user explicitly mentions 'F1' and 'Max Verstappen', which are extracted as a category and entity respectively. 'Red Bull' is mentioned implicitly as Max's team, so it is also extracted as an entity.

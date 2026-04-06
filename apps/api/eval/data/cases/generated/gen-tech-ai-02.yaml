@@ -34,11 +34,11 @@ transcript:
     questions in programming communities when you're stuck!
 gold_labels:
   categories:
-  - keyword: technology
+  - keyword: technology & computing
     is_news_relevant: true
     keyword_type: category
-    iab_category_id: '27'
     mention_type: implicit
+    iab_category_id: '596'
   entities:
   - keyword: python
     is_news_relevant: true

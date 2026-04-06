@@ -23,7 +23,7 @@ gold_labels:
   - keyword: fitness and exercise
     is_news_relevant: false
     keyword_type: category
-    iab_category_id: '10.2'
+    iab_category_id: '225'
     mention_type: implicit
   entities: []
 notes: 'Tests granularity: ''yoga'' should NOT be extracted as a separate category

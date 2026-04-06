@@ -30,6 +30,7 @@ gold_labels:
     is_news_relevant: false
     keyword_type: category
     mention_type: implicit
+    iab_category_id: '225'
   entities: []
 notes: This conversation is about a fitness class experience. While fitness/exercise
   is discussed, the user's comments focus on the instructor's appearance and the social

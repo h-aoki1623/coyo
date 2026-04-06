@@ -46,7 +46,7 @@ class TestGetCategory:
         assert taxonomy_service.get_category("nonexistent") is None
 
     def test_subcategory_has_parent_id(self, taxonomy_service: IABTaxonomyService) -> None:
-        cat = taxonomy_service.get_category("1.1")
+        cat = taxonomy_service.get_category("2")
         assert cat is not None
         assert cat.parent_id == "1"
 

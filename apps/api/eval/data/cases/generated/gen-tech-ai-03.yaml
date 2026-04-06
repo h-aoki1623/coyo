@@ -38,11 +38,11 @@ transcript:
     as you scale up.
 gold_labels:
   categories:
-  - keyword: technology
+  - keyword: technology & computing
     is_news_relevant: true
     keyword_type: category
-    iab_category_id: '27'
     mention_type: implicit
+    iab_category_id: '596'
   entities:
   - keyword: aws
     is_news_relevant: true

@@ -22,13 +22,6 @@ transcript:
 - role: ai
   text: I don't know , but you know how to surround yourself with great friends !
 gold_labels:
-  categories:
-  - keyword: language learning
-    is_news_relevant: false
-    keyword_type: category
-    iab_category_id: '5.7'
-    mention_type: explicit
+  categories: []
   entities: []
-notes: Extracted 'language learning' as the user explicitly discusses having a German 
-  pen friend to practice writing in German, indicating a clear interest in language 
-  learning. No specific entities mentioned.
+notes: Extracted 'language learning' as the user discusses practicing German with pen friends and mentions writing in English, indicating an interest in language learning. No specific entities mentioned.

@@ -27,15 +27,6 @@ transcript:
 - role: user
   text: OK , I'll take a small , for 1 year , in this branch , please .
 gold_labels:
-  categories:
-    - keyword: personal finance
-      is_news_relevant: true
-      keyword_type: category
-      iab_category_id: '16'
-      mention_type: implicit
+  categories: []
   entities: []
-notes: Extracted 'personal finance' as the user shows genuine interest in securing important 
-  documents and discusses financial security measures, indicating an implicit interest 
-  in this topic. No specific entities mentioned as the conversation focuses on general 
-  security concerns rather than specific brands, people, or organizations. The mention 
-  is news-relevant as financial security and personal finance topics are commonly covered in news media.
+notes: This conversation is about renting a safety deposit box at a bank. The user is interested in finding a secure place to store insurance documents and discusses the options for box sizes and key holders with the AI. However, no specific interests, categories, or entities are mentioned in the conversation. The focus is on the general topic of safety deposit boxes rather than any particular aspect that would indicate a specific interest or entity.

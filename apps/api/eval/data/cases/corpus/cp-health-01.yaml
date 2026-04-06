@@ -21,14 +21,6 @@ transcript:
   text: Look at it this way , when you quit , you will save money , time and your
     life !
 gold_labels:
-  categories:
-  - keyword: healthy living
-    is_news_relevant: false
-    keyword_type: category
-    iab_category_id: '10'
-    mention_type: implicit
+  categories: []
   entities: []
-notes: The conversation focuses on smoking cessation and health concerns. 'healthy
-  living' is extracted as the user shows genuine engagement with their health condition.
-  No entities are present as 'Doctor' is a generic title, not a specific person. Medical/health
-  topics are generally not news-relevant in this personal context.
+notes: This conversation is about a health issue related to smoking. The user is discussing their struggle with quitting smoking and the health consequences they are facing. However, no specific interests, categories, or entities are mentioned in the conversation. The focus is on the general topic of smoking and health rather than any particular aspect that would indicate a specific interest or entity.

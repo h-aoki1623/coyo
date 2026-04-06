@@ -36,13 +36,6 @@ gold_labels:
   - keyword: war and conflicts
     is_news_relevant: true
     keyword_type: category
-    iab_category_id: '15.9'
+    iab_category_id: '389'
     mention_type: explicit
-  - keyword: politics
-    is_news_relevant: true
-    keyword_type: category
-    iab_category_id: '15.8'
-    mention_type: implicit
-notes: Extracted war and conflicts and politics as the user shows sustained engagement
-  discussing causes of war, civil wars, and peace solutions. Topics like poverty and resources
-  were mentioned only as causes/context, not as independent interests.
+notes: The conversation is focused on the causes of war, particularly poverty and civil wars. The user expresses opinions on why wars happen and discusses potential solutions, showing engagement with the topic of war and conflicts. No specific entities are mentioned in the conversation.

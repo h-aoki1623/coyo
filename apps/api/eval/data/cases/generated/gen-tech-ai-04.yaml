@@ -28,7 +28,7 @@ gold_labels:
   - keyword: video gaming
     is_news_relevant: true
     keyword_type: category
-    iab_category_id: null
+    iab_category_id: '680'
     mention_type: explicit
   entities:
   - keyword: nintendo

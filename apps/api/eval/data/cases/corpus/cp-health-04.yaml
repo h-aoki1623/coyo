@@ -22,13 +22,6 @@ transcript:
   text: Yes . You've got to cut down on bread and potatoes and take more exercise
     .
 gold_labels:
-  categories: 
-  - keyword: healthy living
-    is_news_relevant: false
-    keyword_type: category
-    iab_category_id: '10'
-    mention_type: implicit
+  categories: []
   entities: []
-notes: This is a medical consultation about general health issues (tiredness, blood
-  pressure, weight). No specific interests, hobbies, or entities are expressed. Medical
-  terms and general health topics are not extractable categories per the guidelines.
+notes: This conversation is about a health issue related to high blood pressure and weight. The user is discussing their symptoms and the doctor's advice on lifestyle changes. However, no specific interests, categories, or entities are mentioned in the conversation. The focus is on general health advice rather than any particular aspect that would indicate a specific interest or entity.

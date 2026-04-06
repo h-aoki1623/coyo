@@ -25,12 +25,7 @@ transcript:
 - role: ai
   text: You said it .
 gold_labels:
-  categories:
-  - keyword: language learning
-    is_news_relevant: false
-    keyword_type: category
-    iab_category_id: '5.7'
-    mention_type: explicit
+  categories: []
   entities: []
 notes: No extractable keywords. The conversation is about English language learning
   in general terms. 'English' as a language subject is too generic/educational to
