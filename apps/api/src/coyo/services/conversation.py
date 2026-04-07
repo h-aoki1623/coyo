@@ -51,16 +51,21 @@ class ConversationService:
         and returns the newly created conversation.
         """
         if topic_suggestion_id is not None:
-            from datetime import date
-
             # Deferred import to avoid circular dependency
             from coyo.repositories.topic_suggestion import TopicSuggestionRepository
 
             suggestion_repo = TopicSuggestionRepository(self._session)
             suggestion = await suggestion_repo.get_by_id(topic_suggestion_id)
-            if suggestion is None or suggestion.generated_date != date.today():
+            if suggestion is None:
                 raise NotFoundError("TopicSuggestion", str(topic_suggestion_id))
-            # Verify the user has access to this suggestion (IDOR prevention)
+            # Verify the user has access to this suggestion (IDOR prevention).
+            # We intentionally do NOT compare suggestion.generated_date against
+            # date.today(): the topic generation cron fires at 06:00 JST (=
+            # 21:00 UTC the previous UTC day), so generated_date is stored as
+            # a UTC date that drifts from date.today() every day after
+            # 00:00 UTC (09:00 JST). Ownership via user_has_suggestion is
+            # sufficient to prevent IDOR, and stale suggestions are cleaned
+            # up separately by the cron job.
             has_access = await suggestion_repo.user_has_suggestion(
                 user_id, topic_suggestion_id
             )
