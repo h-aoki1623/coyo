@@ -57,6 +57,8 @@ jobs:
         with:
           version: "0.7.19"
           enable-cache: true
+          # No uv.lock yet (introduced in PR1b); key the cache off pyproject.toml.
+          cache-dependency-glob: "apps/api/pyproject.toml"
       - run: uv pip install --system "ruff>=0.9"
       - run: ruff check src/
 
@@ -102,6 +104,8 @@ jobs:
         with:
           version: "0.7.19"
           enable-cache: true
+          # No uv.lock yet (introduced in PR1b); key the cache off pyproject.toml.
+          cache-dependency-glob: "apps/api/pyproject.toml"
       - run: uv pip install --system -e ".[dev]"
       - run: pytest --tb=short
 
