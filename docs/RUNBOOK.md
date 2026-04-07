@@ -149,9 +149,9 @@ make docker-reset && make migrate
 ```bash
 cd apps/api
 rm -rf .venv
-python3.12 -m venv .venv
+uv venv
 source .venv/bin/activate
-pip install -e ".[dev]"
+uv pip install -e ".[dev]"
 ```
 
 ### TypeScript type mismatches

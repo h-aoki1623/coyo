@@ -31,6 +31,7 @@ coyo/
 ### Prerequisites
 
 - Python 3.12+
+- [uv](https://docs.astral.sh/uv/) (`curl -LsSf https://astral.sh/uv/install.sh | sh`)
 - Node.js 20+
 - Docker (Docker Desktop, OrbStack, or Colima)
 
@@ -44,9 +45,9 @@ make docker-up          # Start Postgres + Redis
 
 ```bash
 cd apps/api
-python -m venv .venv
+uv venv
 source .venv/bin/activate
-pip install -e ".[dev]"
+uv pip install -e ".[dev]"
 cp ../../.env.example .env  # Edit OPENAI_API_KEY with your real key
 make -C ../.. migrate       # Run database migrations
 uvicorn src.coyo.main:app --reload

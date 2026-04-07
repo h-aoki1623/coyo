@@ -51,7 +51,15 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install ruff>=0.9
+      # SHA-pinned to v3.2.4 for supply-chain safety. Refresh with the SHA from
+      # https://github.com/astral-sh/setup-uv/releases when bumping the version.
+      - uses: astral-sh/setup-uv@caf0cab7a618c569241d31dcd442f54681755d39  # v3.2.4
+        with:
+          version: "0.7.19"
+          enable-cache: true
+          # No uv.lock yet (introduced in PR1b); key the cache off pyproject.toml.
+          cache-dependency-glob: "apps/api/pyproject.toml"
+      - run: uv pip install --system "ruff>=0.9"
       - run: ruff check src/
 
   lint-mobile:
@@ -90,7 +98,15 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install -e ".[dev]"
+      # SHA-pinned to v3.2.4 for supply-chain safety. Refresh with the SHA from
+      # https://github.com/astral-sh/setup-uv/releases when bumping the version.
+      - uses: astral-sh/setup-uv@caf0cab7a618c569241d31dcd442f54681755d39  # v3.2.4
+        with:
+          version: "0.7.19"
+          enable-cache: true
+          # No uv.lock yet (introduced in PR1b); key the cache off pyproject.toml.
+          cache-dependency-glob: "apps/api/pyproject.toml"
+      - run: uv pip install --system -e ".[dev]"
       - run: pytest --tb=short
 
   test-mobile:
