@@ -1,6 +1,3 @@
-import { useEffect } from 'react';
-import { View, ActivityIndicator, StyleSheet } from 'react-native';
-
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import { Colors } from '@/constants/colors';
@@ -44,26 +41,18 @@ function MainNavigator() {
   );
 }
 
+/**
+ * Root router. By the time this component renders, App.tsx has already
+ * confirmed that fonts are loaded, Firebase auth has settled, and (for
+ * authenticated home-bound users) the suggestions prefetch has either
+ * finished or timed out — so this navigator can safely assume the auth
+ * store is initialized and route directly to the appropriate stack.
+ */
 export function RootNavigator() {
   const isOnline = useNetworkStatus();
-  const isInitialized = useAuthStore((s) => s.isInitialized);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const isEmailVerified = useAuthStore((s) => s.isEmailVerified);
   const user = useAuthStore((s) => s.user);
-
-  useEffect(() => {
-    const unsubscribe = useAuthStore.getState().initialize();
-    return unsubscribe;
-  }, []);
-
-  // Show loading while auth state is being determined
-  if (!isInitialized) {
-    return (
-      <View style={styles.loading}>
-        <ActivityIndicator size="large" color={Colors.buttonPrimaryBg} />
-      </View>
-    );
-  }
 
   // Not authenticated -> show auth flow
   if (!isAuthenticated) {
@@ -75,8 +64,8 @@ export function RootNavigator() {
     );
   }
 
-  // Authenticated but email not verified (email/password sign-in only)
-  // Google/Apple SSO users are always considered verified
+  // Authenticated but email not verified (email/password sign-in only).
+  // Google/Apple SSO users are always considered verified.
   const providerId = user?.providerData?.[0]?.providerId;
   if (!isEmailVerified && providerId === 'password') {
     return (
@@ -95,12 +84,3 @@ export function RootNavigator() {
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  loading: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: Colors.surfacePrimary,
-  },
-});

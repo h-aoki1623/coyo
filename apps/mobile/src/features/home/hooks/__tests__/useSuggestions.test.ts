@@ -1,9 +1,9 @@
 import { renderHook, waitFor } from '@testing-library/react-native';
 
 import { useSuggestions } from '../useSuggestions';
+import { useSuggestionsStore } from '@/stores/suggestions-store';
 import type { TopicSuggestionsResponse } from '@/types/suggestion';
 
-// Mock apiClient
 const mockGet = jest.fn();
 jest.mock('@/api/client', () => ({
   apiClient: {
@@ -18,7 +18,7 @@ const mockResponse: TopicSuggestionsResponse = {
       title: 'Your Basketball Update',
       summary: 'Latest news from your favorite teams',
       sourceKeyword: 'basketball',
-      pool: 'personal' as const,
+      pool: 'personal',
       rank: 1,
     },
   ],
@@ -28,7 +28,7 @@ const mockResponse: TopicSuggestionsResponse = {
       title: 'Breaking Tech News',
       summary: 'AI developments this week',
       sourceKeyword: 'technology',
-      pool: 'common' as const,
+      pool: 'common',
       rank: 1,
     },
   ],
@@ -37,21 +37,23 @@ const mockResponse: TopicSuggestionsResponse = {
 describe('useSuggestions', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    useSuggestionsStore.getState().reset();
   });
 
-  it('returns empty suggestions and loading true initially', () => {
-    mockGet.mockReturnValue(new Promise(() => {})); // Never resolves
+  it('returns cached suggestions immediately when the store is already primed', async () => {
+    mockGet.mockResolvedValue({ data: mockResponse });
+    await useSuggestionsStore.getState().prefetch();
+    mockGet.mockClear();
 
     const { result } = renderHook(() => useSuggestions());
 
-    expect(result.current.isLoading).toBe(true);
-    expect(result.current.suggestions).toEqual({
-      personal: [],
-      trending: [],
-    });
+    expect(result.current.isLoading).toBe(false);
+    expect(result.current.suggestions).toEqual(mockResponse);
+    // No additional API call — the store cache is reused.
+    expect(mockGet).not.toHaveBeenCalled();
   });
 
-  it('fetches and returns suggestions from API', async () => {
+  it('triggers a prefetch when the store is empty', async () => {
     mockGet.mockResolvedValue({ data: mockResponse });
 
     const { result } = renderHook(() => useSuggestions());
@@ -64,7 +66,7 @@ describe('useSuggestions', () => {
     expect(mockGet).toHaveBeenCalledWith('/api/topics/suggestions');
   });
 
-  it('handles API error gracefully and returns empty suggestions', async () => {
+  it('handles API failure gracefully and exposes empty suggestions', async () => {
     mockGet.mockRejectedValue(new Error('Network error'));
 
     const { result } = renderHook(() => useSuggestions());
@@ -73,61 +75,19 @@ describe('useSuggestions', () => {
       expect(result.current.isLoading).toBe(false);
     });
 
-    expect(result.current.suggestions).toEqual({
-      personal: [],
-      trending: [],
-    });
+    expect(result.current.suggestions).toEqual({ personal: [], trending: [] });
   });
 
-  it('handles API returning error envelope (no data) gracefully', async () => {
-    mockGet.mockResolvedValue({
-      error: { code: 'INTERNAL_ERROR', message: 'Server error' },
-    });
-
-    const { result } = renderHook(() => useSuggestions());
-
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
-    });
-
-    // data is undefined, so suggestions stay as the empty default
-    expect(result.current.suggestions).toEqual({
-      personal: [],
-      trending: [],
-    });
-  });
-
-  it('sets isLoading to false after successful fetch', async () => {
-    mockGet.mockResolvedValue({ data: mockResponse });
-
-    const { result } = renderHook(() => useSuggestions());
-
-    expect(result.current.isLoading).toBe(true);
-
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
-    });
-  });
-
-  it('sets isLoading to false after failed fetch', async () => {
-    mockGet.mockRejectedValue(new Error('timeout'));
-
-    const { result } = renderHook(() => useSuggestions());
-
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
-    });
-  });
-
-  it('calls the correct API endpoint', async () => {
+  it('does not refetch when called multiple times concurrently', async () => {
     mockGet.mockResolvedValue({ data: mockResponse });
 
     renderHook(() => useSuggestions());
+    renderHook(() => useSuggestions());
 
     await waitFor(() => {
-      expect(mockGet).toHaveBeenCalledTimes(1);
+      expect(useSuggestionsStore.getState().isReady).toBe(true);
     });
 
-    expect(mockGet).toHaveBeenCalledWith('/api/topics/suggestions');
+    expect(mockGet).toHaveBeenCalledTimes(1);
   });
 });
