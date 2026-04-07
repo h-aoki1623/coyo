@@ -1,30 +1,23 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useEffect } from 'react';
 
-import { apiClient } from '@/api/client';
-import type { TopicSuggestionsResponse } from '@/types/suggestion';
+import { useSuggestionsStore } from '@/stores/suggestions-store';
 
-const EMPTY_RESPONSE: TopicSuggestionsResponse = { personal: [], trending: [] };
-
+/**
+ * Reads cached topic suggestions from the store. The store is normally
+ * primed by `auth-store.initialize()` immediately after sign-in, so by the
+ * time HomeScreen mounts the data is already available. If for any reason
+ * the cache is empty (e.g., a hot reload), this hook triggers a fetch.
+ */
 export function useSuggestions() {
-  const [suggestions, setSuggestions] = useState<TopicSuggestionsResponse>(EMPTY_RESPONSE);
-  const [isLoading, setIsLoading] = useState(true);
-
-  const fetchSuggestions = useCallback(async () => {
-    try {
-      const result = await apiClient.get<TopicSuggestionsResponse>('/api/topics/suggestions');
-      if (result.data) {
-        setSuggestions(result.data);
-      }
-    } catch {
-      // Silently fail — suggestions are optional enhancement
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  const suggestions = useSuggestionsStore((s) => s.suggestions);
+  const isReady = useSuggestionsStore((s) => s.isReady);
+  const isLoading = useSuggestionsStore((s) => s.isLoading);
 
   useEffect(() => {
-    fetchSuggestions();
-  }, [fetchSuggestions]);
+    if (!isReady && !isLoading) {
+      useSuggestionsStore.getState().prefetch();
+    }
+  }, [isReady, isLoading]);
 
-  return { suggestions, isLoading };
+  return { suggestions, isLoading: isLoading && !isReady };
 }

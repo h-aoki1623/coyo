@@ -74,6 +74,20 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     googleServicesFile: process.env.GOOGLE_SERVICES_JSON ?? resolveFirebaseConfig('google-services.json'),
   },
   plugins: [
+    [
+      'expo-splash-screen',
+      {
+        // Brand splash matching Figma node 233:1609 — solid brand-blue with
+        // the white "co" logo centered. The native splash stays visible
+        // until App.tsx confirms fonts + auth init + suggestions prefetch
+        // (or 2.5s timeout) are all ready, so the user lands directly on a
+        // fully-populated Home screen.
+        backgroundColor: '#3B82F6',
+        image: './assets/splash-logo.png',
+        imageWidth: 100,
+        resizeMode: 'contain',
+      },
+    ],
     'expo-secure-store',
     'expo-font',
     'expo-localization',
