@@ -1,0 +1,17 @@
+id: cp-work-01
+source: corpus
+domain: work
+transcript:
+- role: user
+  text: Everything's gone wrong .
+- role: ai
+  text: I know , it's not as I had planned .
+- role: user
+  text: What are we going to do now ?
+- role: ai
+  text: I'll speak to Bob , he'll be able to help us .
+gold_labels:
+  categories: []
+  entities: []
+notes: No categories extracted as the conversation is about a personal situation without
+  expressing interest in any specific topics.

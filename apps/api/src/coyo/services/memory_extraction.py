@@ -29,7 +29,7 @@ if TYPE_CHECKING:
 logger = structlog.get_logger()
 
 MAX_CATEGORIES = 3
-MAX_ENTITIES = 5
+MAX_ENTITIES = 3
 _MAX_KEYWORD_LENGTH = 100
 _MAX_SUMMARY_LENGTH = 200
 _CONFIDENCE_THRESHOLD = 0.5
@@ -44,9 +44,7 @@ _BATCH_INTERVAL = 5
 class MemoryItem(BaseModel):
     """A single extracted user profile attribute."""
 
-    key: Literal[
-        "english_goal", "job_industry", "hometown_or_location", "family_status"
-    ]
+    key: Literal["english_goal", "job_industry", "hometown_or_location", "family_status"]
     value: str | None = Field(default=None, max_length=200)
     confidence: float = Field(ge=0.0, le=1.0)
     is_negation: bool = False
@@ -78,7 +76,7 @@ class MemoryExtractionResult(BaseModel):
 
     @model_validator(mode="before")
     @classmethod
-    def normalize_raw_categories_and_entities(cls, data: dict) -> dict:
+    def normalize_raw_categories_and_entities(cls, data: dict[str, object]) -> dict[str, object]:
         """Normalize plain strings in categories/entities to dicts before validation.
 
         LLMs sometimes return plain keyword strings instead of full objects.
@@ -89,8 +87,7 @@ class MemoryExtractionResult(BaseModel):
                 items = data.get(field, [])
                 if isinstance(items, list):
                     data[field] = [
-                        {"keyword": item} if isinstance(item, str) else item
-                        for item in items
+                        {"keyword": item} if isinstance(item, str) else item for item in items
                     ]
         return data
 
@@ -126,23 +123,82 @@ Rules:
 - Do NOT extract passwords, financial details, health conditions
 - If no relevant facts, return "memories": []
 
-=== VALIDITY RULES FOR KEYWORDS ===
+=== INTERESTS (CATEGORIES & ENTITIES) ===
 
-All keywords must pass this test:
-  "I'm interested in ___" sounds natural in English. If not, skip it.
+--- STEP 1: SIGNAL DETECTION ---
+Extract a category or entity ONLY when at least one signal is present.
+Merely MENTIONING a topic is NOT a signal — the user must show engagement,
+enthusiasm, or ongoing involvement.
+
+[Explicit Signals — high confidence]
+- User directly states interest: "I love X", "I'm really into X", "I'm a fan of X"
+- User describes ongoing engagement: "I've been following X", "I practice X every day"
+- User shows sustained enthusiasm across multiple turns about the same topic
+- User asks curiosity-driven follow-up questions about a topic
+
+[Implicit Signals — medium confidence]
+- User demonstrates specialized knowledge that indicates deep familiarity
+  (e.g., discusses specific political details → politics)
+- Interest in a specific entity implies the parent category
+  (e.g., fan of Max Verstappen → F1)
+- Multiple casual references to sub-categories of the same parent → extract parent
+  (e.g., mentions watching tennis, soccer, and baseball occasionally → "sports")
+- User describes habitual behavior tied to a topic
+  (e.g., "I check my portfolio every morning" → personal investing)
+- User shows repeated engagement with or positive sentiment toward
+  a specific category or entity across the conversation
+
+[No Signal = No Extraction]
+If no explicit or implicit signal is present, return empty lists.
+
+--- STEP 2: EXCLUSION FILTER ---
+Even if a signal seems present, DO NOT extract if ANY of these apply:
+
+1. TRANSACTIONAL CONTEXT: Topic appears only because the user is conducting business
+   (hotel check-in ≠ travel; bank visit ≠ finance; doctor visit ≠ health)
+2. NON-CELEBRITY NAMES: Personal names from dialogue that are not public figures
+   (Dick, Leo, Bob, Kate, Olga → skip. Elon Musk, Carlos Alcaraz → extract)
+3. AI-SIDE INTEREST: Topic is introduced/discussed primarily by the AI, not the user
+4. DAILY ROUTINE: Eating, drinking coffee, smoking, commuting — unless user shows genuine
+   passion beyond routine (e.g., "I love trying different coffee beans from around the world"
+   = interest; "let's get coffee" = routine)
+5. CONVERSATION-SCOPED: User's interest is limited to this conversation's context only
+   ("I'm curious about that" in response to AI introducing a topic → skip)
+6. AMBIGUOUS CONTEXT: Multiple plausible explanations exist and none clearly indicates interest
+   (being in a hotel lobby could be work travel, tourism, or just a meeting location)
+7. CASUAL MENTION: Topic touched on in passing without follow-up, enthusiasm, or depth
+   (user mentions "America" once in passing ≠ interest in America)
+8. GENERIC LOCATIONS: Countries/cities mentioned as contextual background, not as places the
+   user is genuinely interested in (e.g., "I work in London" ≠ interest in London)
+9. LANGUAGE LEARNING ACTIVITY: This app is for English conversation practice, so
+   language learning topics (grammar, pronunciation, vocabulary, language learning itself)
+   are the app's purpose, not user interests. Do NOT extract them.
+
+--- STEP 3: FORMATTING RULES ---
 
 [For categories]
 - categories: broad interest subjects (max 3, English, lowercase)
 - Must correspond to an IAB Content Taxonomy category (Tier 1 through Tier 4)
-  e.g., "sports", "technology"                            ← Tier 1
-        "tennis", "cooking", "generative AI"              ← Tier 2
-        "running and jogging", "barbecues and grilling"   ← Tier 3
+  e.g., "sports", "technology & computing"                ← Tier 1
+        "tennis", "artificial intelligence"               ← Tier 2
+        "running and jogging"                             ← Tier 3
         "herbs and supplements"                           ← Tier 4
+- Common IAB label hints (use the exact IAB label):
+  → saving/budgeting/investing talk → "personal finance" (NOT "financial services", "economics")
+  → wars/military conflicts → "war and conflicts" (NOT "war")
 
 [For entities]
-- entities: specific proper nouns (max 5, English, lowercase)
-- Must be a proper noun with a unique real-world identity
-  (person, event, organization, product — Knowledge Graph level)
+- entities: specific proper nouns (max 3, English, lowercase)
+- Must be a NOTABLE proper noun — a person, organization, product, or event that has
+  a Wikipedia article or equivalent public presence
+- DO NOT extract:
+  → Personal names from conversation (Dick, Bob, Kate, Leo, Dr. Mustn)
+  → Generic institutions without specific identity ("a bank", "the hospital")
+  → Common nouns disguised as entities ("doctor", "player", "team")
+  → Sub-components when the parent entity captures the interest
+    (M2 chip → Apple is the interest; Focus mode → Apple; Flask → skip)
+  → Entities mentioned only once with no positive reaction from the user
+    (opponent teams, comparison targets, passing references)
 
 [Granularity — applies to both categories and entities]
 - Choose the tier that best reflects the SCOPE OF INTEREST the user expressed,
@@ -166,15 +222,44 @@ All keywords must pass this test:
   e.g., "the player", "a famous chef", "my favorite team" → skip
 
 [Deduplication — semantic, not exact match]
-- If two keywords refer to the same concept, keep only the shorter/broader one.
+- If two keywords refer to the same concept, keep only one.
   e.g., "grand slam" + "grand slam tournaments" → keep "grand slam" only
+        "EV" + "electric vehicles" → keep "electric vehicles" (IAB term)
 
 [is_news_relevant]
 - true:  keyword generates regular news (sports, politics, economy, tech, etc.)
          Ask: does "{keyword} news" return fresh articles regularly?
 - false: evergreen categories (food, daily life, grammar, hobbies)
 
-=== INTEREST SUMMARIES ===
+--- EXAMPLES ---
+
+Example 1 (transactional → extract nothing):
+User: "I have a reservation for a double."
+AI: "What's your last name?"
+User: "It's Smith. Here is my driver's license."
+→ categories: [], entities: []
+Reason: Hotel check-in is transactional, not an expression of interest.
+
+Example 2 (casual daily routine → extract nothing):
+User: "So Dick, how about getting some coffee for tonight?"
+AI: "I don't honestly like that kind of stuff."
+User: "Come on, you can at least try."
+→ categories: [], entities: []
+Reason: Coffee is daily routine; Dick is a personal name, not a notable entity.
+
+Example 3 (genuine interest — explicit + implicit signals):
+User: "I went to the baseball game last weekend. It was amazing — a walk-off homer!"
+User: "My tech stocks are up 15%. I check my portfolio almost every morning!"
+→ categories: ["baseball", "personal investing"], entities: []
+Reason: Baseball = explicit enthusiasm. Personal investing = habitual behavior (implicit signal).
+
+Example 4 (entity interest implies parent category):
+User: "I watched Carlos Alcaraz play last night!"
+User: "I've been following him since his first grand slam."
+→ categories: ["tennis"], entities: ["carlos alcaraz"]
+Reason: Ongoing engagement with a specific athlete. Tennis implied by entity.
+
+--- INTEREST SUMMARIES ---
 For each category/entity, generate summary if conversation has specific info about it.
 - Third person ("User is...", "User started...")
 - Hard limit: 200 characters
@@ -247,7 +332,6 @@ def _keyword_matches(keyword: str, text: str) -> bool:
     return bool(re.search(pattern, text.lower()))
 
 
-
 def trim_to_word_boundary(text: str, *, max_chars: int = _MAX_SUMMARY_LENGTH) -> str:
     """Trim text to max_chars at a word boundary."""
     if len(text) <= max_chars:
@@ -280,9 +364,7 @@ class MemoryExtractionService:
         try:
             session_factory = get_session_factory()
             async with session_factory() as session:
-                await MemoryExtractionService._extract(
-                    session, conversation_id, user_id
-                )
+                await MemoryExtractionService._extract(session, conversation_id, user_id)
                 await session.commit()
         except Exception:
             logger.exception(
@@ -299,9 +381,7 @@ class MemoryExtractionService:
         """Run memory extraction. Raises on failure for Cloud Tasks retry."""
         session_factory = get_session_factory()
         async with session_factory() as session:
-            await MemoryExtractionService._extract(
-                session, conversation_id, user_id
-            )
+            await MemoryExtractionService._extract(session, conversation_id, user_id)
             await session.commit()
 
     @staticmethod
@@ -352,9 +432,7 @@ class MemoryExtractionService:
         current_conv_idx = row[0]
 
         # 3. Build transcript (all turns for full context)
-        transcript = await MemoryExtractionService._build_transcript(
-            session, conversation_id
-        )
+        transcript = await MemoryExtractionService._build_transcript(session, conversation_id)
         if not transcript.strip():
             logger.info(
                 "memory_extraction_empty_transcript",
@@ -374,9 +452,7 @@ class MemoryExtractionService:
         )
 
         # 6. Process memories (profile attributes)
-        await MemoryExtractionService._process_memories(
-            session, user_id, extraction.memories
-        )
+        await MemoryExtractionService._process_memories(session, user_id, extraction.memories)
 
         # 7. Upsert interests (categories + entities) via post-processing pipeline
         seen_keywords = await MemoryExtractionService._upsert_interests(
@@ -385,9 +461,7 @@ class MemoryExtractionService:
 
         # 8. Batch regeneration every N conversations
         if current_conv_idx % _BATCH_INTERVAL == 0:
-            await MemoryExtractionService._regenerate_interest_summaries(
-                session, user_id
-            )
+            await MemoryExtractionService._regenerate_interest_summaries(session, user_id)
             await MemoryExtractionService._regenerate_profile_summary(
                 session, user_id, current_conv_idx
             )
@@ -423,6 +497,15 @@ class MemoryExtractionService:
         return "\n".join(lines)
 
     @staticmethod
+    async def extract_from_transcript(transcript: str) -> MemoryExtractionResult:
+        """Extract memories, categories, and entities from a transcript.
+
+        Public API for evaluation and testing. Uses the production prompt and
+        model configuration to call the LLM.
+        """
+        return await MemoryExtractionService._call_llm(transcript)
+
+    @staticmethod
     async def _call_llm(transcript: str) -> MemoryExtractionResult:
         """Call LLM to extract memories, categories, and entities from transcript."""
         settings = get_settings()
@@ -452,9 +535,7 @@ class MemoryExtractionService:
         source_keyword: str | None = None
 
         if conversation.topic_suggestion_id is not None:
-            suggestion = await session.get(
-                TopicSuggestion, conversation.topic_suggestion_id
-            )
+            suggestion = await session.get(TopicSuggestion, conversation.topic_suggestion_id)
             if suggestion is not None:
                 topic_title = suggestion.title
                 source_keyword = suggestion.source_keyword
@@ -484,7 +565,7 @@ class MemoryExtractionService:
             if mem.is_negation and existing:
                 await repo.delete(user_id, mem.key)
             elif not existing:
-                if mem.confidence >= _CONFIDENCE_THRESHOLD:
+                if mem.value is not None and mem.confidence >= _CONFIDENCE_THRESHOLD:
                     await repo.upsert(
                         user_id=user_id,
                         key=mem.key,
@@ -582,9 +663,7 @@ class MemoryExtractionService:
         if not interests:
             return
 
-        recent_summaries = await conv_summary_repo.get_latest_for_user(
-            user_id, limit=10
-        )
+        recent_summaries = await conv_summary_repo.get_latest_for_user(user_id, limit=10)
 
         llm = OpenAIClient(model=settings.llm_interest_model)
 
@@ -595,9 +674,7 @@ class MemoryExtractionService:
                 if _keyword_matches(interest.keyword, s.summary)
                 or (s.source_keyword and _keyword_matches(interest.keyword, s.source_keyword))
             ]
-            related_text = "\n".join(
-                f"- {s.topic_title}: {s.summary}" for s in related
-            )
+            related_text = "\n".join(f"- {s.topic_title}: {s.summary}" for s in related)
             if not related_text:
                 related_text = "(no related conversations found)"
 
@@ -624,9 +701,7 @@ class MemoryExtractionService:
                 )
                 if response.summary:
                     trimmed = trim_to_word_boundary(response.summary)
-                    await interest_repo.update_summary(
-                        user_id, interest.keyword, trimmed
-                    )
+                    await interest_repo.update_summary(user_id, interest.keyword, trimmed)
             except Exception:
                 logger.exception(
                     "interest_summary_regeneration_failed",
@@ -649,14 +724,10 @@ class MemoryExtractionService:
 
         # Gather data
         attributes = await attr_repo.get_all_for_user(user_id)
-        top_interests = await interest_repo.get_top_interests(
-            user_id, current_conv_idx, limit=10
-        )
+        top_interests = await interest_repo.get_top_interests(user_id, current_conv_idx, limit=10)
         recent_convs = await conv_summary_repo.get_latest_for_user(user_id, limit=5)
 
-        attrs_text = "\n".join(
-            f"- {a.key}: {a.value}" for a in attributes
-        )
+        attrs_text = "\n".join(f"- {a.key}: {a.value}" for a in attributes)
         if not attrs_text:
             attrs_text = "(no attributes yet)"
 
@@ -666,9 +737,7 @@ class MemoryExtractionService:
         if not interests_text:
             interests_text = "(no interests yet)"
 
-        convs_text = "\n".join(
-            f"- {c.topic_title}: {c.summary}" for c in recent_convs
-        )
+        convs_text = "\n".join(f"- {c.topic_title}: {c.summary}" for c in recent_convs)
         if not convs_text:
             convs_text = "(no recent conversations)"
 

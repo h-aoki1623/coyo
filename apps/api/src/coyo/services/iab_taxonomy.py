@@ -69,9 +69,27 @@ class IABTaxonomyService:
         """Return all category names."""
         return list(self._label_list)
 
+    def format_for_prompt(self) -> str:
+        """Return the full taxonomy as a compact table string for LLM prompts.
+
+        Format: "ID | Name" per line, suitable for inclusion in a system message.
+        """
+        lines = ["ID | Name"]
+        for cat in self._ordered_categories:
+            lines.append(f"{cat.id} | {cat.name}")
+        return "\n".join(lines)
+
     def get_category(self, iab_id: str) -> IABCategory | None:
         """Look up a category by ID."""
         return self._categories.get(iab_id)
+
+    def find_by_name(self, name: str) -> IABCategory | None:
+        """Find a category by exact name match (case-insensitive)."""
+        name_lower = name.strip().lower()
+        for cat in self._ordered_categories:
+            if cat.name.lower() == name_lower:
+                return cat
+        return None
 
     async def ensure_embeddings(self, embedding_service: EmbeddingService) -> None:
         """Compute and cache label embeddings if not already done."""

@@ -1,0 +1,12 @@
+id: gen-edge-case-01
+source: generated
+domain: edge-case
+transcript:
+- role: ai
+  text: Do you know what I'm talking about?
+- role: user
+  text: No.
+gold_labels:
+  categories: []
+  entities: []
+notes: Minimal conversation — no extractable keywords.

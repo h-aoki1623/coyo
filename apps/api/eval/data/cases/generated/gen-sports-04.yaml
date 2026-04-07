@@ -1,0 +1,38 @@
+id: gen-sports-04
+source: generated
+domain: sports
+transcript:
+- role: user
+  text: Do you follow football at all? I've been watching the Premier League every
+    weekend lately.
+- role: ai
+  text: Oh yes, I enjoy football! How's this season been for you? Any particularly
+    exciting matches?
+- role: user
+  text: Yeah, it's been quite good actually. I usually have this whole routine now
+    - grab a coffee, maybe some snacks, and just settle in for the afternoon matches.
+    Saw the United match last week, it was... well, a bit dull to be honest.
+- role: ai
+  text: I know what you mean about having a matchday routine - it's part of the fun,
+    isn't it? Which matches are you looking forward to this weekend?
+- role: user
+  text: There's a few good ones coming up. I think the early kickoff should be decent,
+    and then there's usually a couple in the afternoon that look promising. It's become
+    a proper habit now, watching football on Saturdays.
+- role: ai
+  text: Sounds like you've got your weekends well sorted! Do you ever go to matches
+    in person, or do you prefer watching from home?
+gold_labels:
+  categories:
+  - keyword: soccer
+    is_news_relevant: true
+    keyword_type: category
+    iab_category_id: '533'
+    mention_type: explicit
+  entities:
+  - keyword: premier league
+    is_news_relevant: true
+    keyword_type: entity
+    mention_type: explicit
+notes: 'Tests regional variant handling: user says ''football'' but the interest category
+  is ''soccer''.'

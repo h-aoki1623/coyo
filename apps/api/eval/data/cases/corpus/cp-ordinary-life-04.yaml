@@ -1,0 +1,37 @@
+id: cp-ordinary-life-04
+source: corpus
+domain: ordinary_life
+transcript:
+- role: user
+  text: Isn ’ t he the best instructor ? I think he ’ s so hot . Wow ! I really feel
+    energized , don ’ t you ?
+- role: ai
+  text: I swear , I ’ m going to kill you for this .
+- role: user
+  text: What ’ s wrong ? Didn ’ t you think it was fun ? !
+- role: ai
+  text: Oh , yeah ! I had a blast ! I love sweating like a pig with a bunch of pot
+    bellies who all smell bad . Sorry , I ’ m just not into this health kick .
+- role: user
+  text: Oh , no , get off it . It wasn ’ t such a killer class . You just have to
+    get into it . Like they say , no pain , no gain .
+- role: ai
+  text: I am wiped out . Thank you .
+- role: user
+  text: Look , next time get yourself some comfy shoes . You ’ re gonna come back
+    again with me , aren ’ t you ?
+- role: ai
+  text: Never ! But thank you for inviting me .
+- role: user
+  text: Come on . You ’ ll feel better after we hit the showers .
+gold_labels:
+  categories:
+  - keyword: fitness and exercise
+    is_news_relevant: false
+    keyword_type: category
+    mention_type: implicit
+    iab_category_id: '225'
+  entities: []
+notes: This conversation is about a fitness class experience. While fitness/exercise
+  is discussed, the user's comments focus on the instructor's appearance and the social
+  aspect rather than expressing genuine interest in fitness as a topic.

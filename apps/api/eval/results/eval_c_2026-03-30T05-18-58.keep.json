@@ -1,0 +1,445 @@
+{
+  "timestamp": "2026-03-30T05:18:58.720610+00:00",
+  "threshold_used": 0.9,
+  "false_merge_rate": 0.0,
+  "false_split_rate": 1.0,
+  "merge_pair_count": 18,
+  "split_pair_count": 18,
+  "false_merge_pairs": [],
+  "false_split_pairs": [
+    {
+      "a": "Formula 1",
+      "b": "F1",
+      "similarity": 0.6446,
+      "expected_merge": true,
+      "actual_merge": false,
+      "correct": false
+    },
+    {
+      "a": "artificial intelligence",
+      "b": "AI",
+      "similarity": 0.5402,
+      "expected_merge": true,
+      "actual_merge": false,
+      "correct": false
+    },
+    {
+      "a": "electric vehicles",
+      "b": "EV",
+      "similarity": 0.4555,
+      "expected_merge": true,
+      "actual_merge": false,
+      "correct": false
+    },
+    {
+      "a": "United States of America",
+      "b": "USA",
+      "similarity": 0.6017,
+      "expected_merge": true,
+      "actual_merge": false,
+      "correct": false
+    },
+    {
+      "a": "International Space Station",
+      "b": "ISS",
+      "similarity": 0.4244,
+      "expected_merge": true,
+      "actual_merge": false,
+      "correct": false
+    },
+    {
+      "a": "mixed martial arts",
+      "b": "MMA",
+      "similarity": 0.6539,
+      "expected_merge": true,
+      "actual_merge": false,
+      "correct": false
+    },
+    {
+      "a": "soccer",
+      "b": "football",
+      "similarity": 0.5942,
+      "expected_merge": true,
+      "actual_merge": false,
+      "correct": false
+    },
+    {
+      "a": "lorry",
+      "b": "truck",
+      "similarity": 0.474,
+      "expected_merge": true,
+      "actual_merge": false,
+      "correct": false
+    },
+    {
+      "a": "mobile phone",
+      "b": "cell phone",
+      "similarity": 0.8113,
+      "expected_merge": true,
+      "actual_merge": false,
+      "correct": false
+    },
+    {
+      "a": "hip hop",
+      "b": "rap music",
+      "similarity": 0.4536,
+      "expected_merge": true,
+      "actual_merge": false,
+      "correct": false
+    },
+    {
+      "a": "movies",
+      "b": "cinema",
+      "similarity": 0.5419,
+      "expected_merge": true,
+      "actual_merge": false,
+      "correct": false
+    },
+    {
+      "a": "jogging",
+      "b": "running",
+      "similarity": 0.6213,
+      "expected_merge": true,
+      "actual_merge": false,
+      "correct": false
+    },
+    {
+      "a": "cooking",
+      "b": "culinary arts",
+      "similarity": 0.5719,
+      "expected_merge": true,
+      "actual_merge": false,
+      "correct": false
+    },
+    {
+      "a": "NBA basketball",
+      "b": "NBA",
+      "similarity": 0.8821,
+      "expected_merge": true,
+      "actual_merge": false,
+      "correct": false
+    },
+    {
+      "a": "grand slam tournaments",
+      "b": "grand slam",
+      "similarity": 0.8081,
+      "expected_merge": true,
+      "actual_merge": false,
+      "correct": false
+    },
+    {
+      "a": "machine learning algorithms",
+      "b": "machine learning",
+      "similarity": 0.8093,
+      "expected_merge": true,
+      "actual_merge": false,
+      "correct": false
+    },
+    {
+      "a": "climate change",
+      "b": "global warming",
+      "similarity": 0.7375,
+      "expected_merge": true,
+      "actual_merge": false,
+      "correct": false
+    },
+    {
+      "a": "cryptocurrency",
+      "b": "crypto",
+      "similarity": 0.6265,
+      "expected_merge": true,
+      "actual_merge": false,
+      "correct": false
+    }
+  ],
+  "all_results": [
+    {
+      "a": "Formula 1",
+      "b": "F1",
+      "similarity": 0.6446,
+      "expected_merge": true,
+      "actual_merge": false,
+      "correct": false
+    },
+    {
+      "a": "artificial intelligence",
+      "b": "AI",
+      "similarity": 0.5402,
+      "expected_merge": true,
+      "actual_merge": false,
+      "correct": false
+    },
+    {
+      "a": "electric vehicles",
+      "b": "EV",
+      "similarity": 0.4555,
+      "expected_merge": true,
+      "actual_merge": false,
+      "correct": false
+    },
+    {
+      "a": "United States of America",
+      "b": "USA",
+      "similarity": 0.6017,
+      "expected_merge": true,
+      "actual_merge": false,
+      "correct": false
+    },
+    {
+      "a": "International Space Station",
+      "b": "ISS",
+      "similarity": 0.4244,
+      "expected_merge": true,
+      "actual_merge": false,
+      "correct": false
+    },
+    {
+      "a": "mixed martial arts",
+      "b": "MMA",
+      "similarity": 0.6539,
+      "expected_merge": true,
+      "actual_merge": false,
+      "correct": false
+    },
+    {
+      "a": "soccer",
+      "b": "football",
+      "similarity": 0.5942,
+      "expected_merge": true,
+      "actual_merge": false,
+      "correct": false
+    },
+    {
+      "a": "lorry",
+      "b": "truck",
+      "similarity": 0.474,
+      "expected_merge": true,
+      "actual_merge": false,
+      "correct": false
+    },
+    {
+      "a": "mobile phone",
+      "b": "cell phone",
+      "similarity": 0.8113,
+      "expected_merge": true,
+      "actual_merge": false,
+      "correct": false
+    },
+    {
+      "a": "hip hop",
+      "b": "rap music",
+      "similarity": 0.4536,
+      "expected_merge": true,
+      "actual_merge": false,
+      "correct": false
+    },
+    {
+      "a": "movies",
+      "b": "cinema",
+      "similarity": 0.5419,
+      "expected_merge": true,
+      "actual_merge": false,
+      "correct": false
+    },
+    {
+      "a": "jogging",
+      "b": "running",
+      "similarity": 0.6213,
+      "expected_merge": true,
+      "actual_merge": false,
+      "correct": false
+    },
+    {
+      "a": "cooking",
+      "b": "culinary arts",
+      "similarity": 0.5719,
+      "expected_merge": true,
+      "actual_merge": false,
+      "correct": false
+    },
+    {
+      "a": "NBA basketball",
+      "b": "NBA",
+      "similarity": 0.8821,
+      "expected_merge": true,
+      "actual_merge": false,
+      "correct": false
+    },
+    {
+      "a": "grand slam tournaments",
+      "b": "grand slam",
+      "similarity": 0.8081,
+      "expected_merge": true,
+      "actual_merge": false,
+      "correct": false
+    },
+    {
+      "a": "machine learning algorithms",
+      "b": "machine learning",
+      "similarity": 0.8093,
+      "expected_merge": true,
+      "actual_merge": false,
+      "correct": false
+    },
+    {
+      "a": "climate change",
+      "b": "global warming",
+      "similarity": 0.7375,
+      "expected_merge": true,
+      "actual_merge": false,
+      "correct": false
+    },
+    {
+      "a": "cryptocurrency",
+      "b": "crypto",
+      "similarity": 0.6265,
+      "expected_merge": true,
+      "actual_merge": false,
+      "correct": false
+    },
+    {
+      "a": "tennis",
+      "b": "badminton",
+      "similarity": 0.5718,
+      "expected_merge": false,
+      "actual_merge": false,
+      "correct": true
+    },
+    {
+      "a": "surfing",
+      "b": "swimming",
+      "similarity": 0.5528,
+      "expected_merge": false,
+      "actual_merge": false,
+      "correct": true
+    },
+    {
+      "a": "skiing",
+      "b": "snowboarding",
+      "similarity": 0.8088,
+      "expected_merge": false,
+      "actual_merge": false,
+      "correct": true
+    },
+    {
+      "a": "boxing",
+      "b": "wrestling",
+      "similarity": 0.5426,
+      "expected_merge": false,
+      "actual_merge": false,
+      "correct": true
+    },
+    {
+      "a": "baseball",
+      "b": "cricket",
+      "similarity": 0.5583,
+      "expected_merge": false,
+      "actual_merge": false,
+      "correct": true
+    },
+    {
+      "a": "NBA",
+      "b": "NFL",
+      "similarity": 0.4962,
+      "expected_merge": false,
+      "actual_merge": false,
+      "correct": true
+    },
+    {
+      "a": "NASA",
+      "b": "SpaceX",
+      "similarity": 0.4323,
+      "expected_merge": false,
+      "actual_merge": false,
+      "correct": true
+    },
+    {
+      "a": "Apple",
+      "b": "Samsung",
+      "similarity": 0.5996,
+      "expected_merge": false,
+      "actual_merge": false,
+      "correct": true
+    },
+    {
+      "a": "United Nations",
+      "b": "NATO",
+      "similarity": 0.4491,
+      "expected_merge": false,
+      "actual_merge": false,
+      "correct": true
+    },
+    {
+      "a": "cooking",
+      "b": "dining out",
+      "similarity": 0.4935,
+      "expected_merge": false,
+      "actual_merge": false,
+      "correct": true
+    },
+    {
+      "a": "investing",
+      "b": "economy",
+      "similarity": 0.3829,
+      "expected_merge": false,
+      "actual_merge": false,
+      "correct": true
+    },
+    {
+      "a": "photography",
+      "b": "videography",
+      "similarity": 0.5486,
+      "expected_merge": false,
+      "actual_merge": false,
+      "correct": true
+    },
+    {
+      "a": "reading",
+      "b": "writing",
+      "similarity": 0.5706,
+      "expected_merge": false,
+      "actual_merge": false,
+      "correct": true
+    },
+    {
+      "a": "painting",
+      "b": "sculpture",
+      "similarity": 0.4799,
+      "expected_merge": false,
+      "actual_merge": false,
+      "correct": true
+    },
+    {
+      "a": "F1",
+      "b": "NASCAR",
+      "similarity": 0.2756,
+      "expected_merge": false,
+      "actual_merge": false,
+      "correct": true
+    },
+    {
+      "a": "MotoGP",
+      "b": "F1",
+      "similarity": 0.313,
+      "expected_merge": false,
+      "actual_merge": false,
+      "correct": true
+    },
+    {
+      "a": "machine learning",
+      "b": "robotics",
+      "similarity": 0.4356,
+      "expected_merge": false,
+      "actual_merge": false,
+      "correct": true
+    },
+    {
+      "a": "virtual reality",
+      "b": "augmented reality",
+      "similarity": 0.6652,
+      "expected_merge": false,
+      "actual_merge": false,
+      "correct": true
+    }
+  ]
+}

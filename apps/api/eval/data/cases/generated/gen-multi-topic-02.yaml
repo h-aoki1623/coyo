@@ -1,0 +1,48 @@
+id: gen-multi-topic-02
+source: generated
+domain: multi-topic
+transcript:
+- role: user
+  text: So I just got back from Tokyo last week! It was amazing. I try to travel abroad
+    at least three or four times a year, and Japan has been on my list for ages.
+- role: ai
+  text: Oh wow, Tokyo! That must have been incredible. What made you finally decide
+    to visit Japan?
+- role: user
+  text: Well, you know how I'm always traveling to try different foods, right? I've
+    been to maybe... fifteen countries now? And Japanese cuisine is something I really
+    wanted to experience authentically. Not just sushi, but like, real ramen shops
+    and izakayas.
+- role: ai
+  text: That's such a great reason to travel! Did you have any memorable food experiences
+    in Tokyo?
+- role: user
+  text: Oh my god, yes! There was this tiny yakitori place in Shinjuku... no English
+    menu, just locals. The owner was so friendly even though my Japanese is terrible.
+    And the tsukemen I had in Shibuya was just... I can't even describe it. Way better
+    than anything I've tried back home.
+- role: ai
+  text: Those hole-in-the-wall places are often the best! It sounds like you really
+    immersed yourself in the food culture. Are you already planning your next trip?
+- role: user
+  text: Actually, yeah! I'm thinking either Vietnam or Peru next. I've heard the street
+    food in Hanoi is incredible, but then again, I really want to try authentic ceviche
+    in Lima. This is always my problem - too many places, not enough vacation days!
+gold_labels:
+  categories:
+  - keyword: travel
+    is_news_relevant: false
+    keyword_type: category
+    iab_category_id: '653'
+    mention_type: explicit
+  - keyword: food & drink
+    is_news_relevant: false
+    keyword_type: category
+    mention_type: implicit
+    iab_category_id: '210'
+  entities:
+  - keyword: tokyo
+    is_news_relevant: false
+    keyword_type: entity
+    mention_type: explicit
+notes: Tests multiple categories plus entity extraction from travel context.

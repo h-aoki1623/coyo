@@ -25,6 +25,7 @@ import {
 import { t } from '@/i18n';
 import { getFirebaseErrorMessage, isSignInCancelled } from '@/services/firebase-error';
 import { registerTokenGetter } from '@/services/token-provider';
+import { useSuggestionsStore } from '@/stores/suggestions-store';
 
 interface AuthState {
   /** Firebase user object (null when signed out) */
@@ -78,6 +79,13 @@ export const useAuthStore = create<AuthState>((set, _get) => ({
           // Session sync failure is non-critical; get_current_user will
           // create the record lazily on the next API call as a fallback.
         });
+        // Prefetch home suggestions so the Home screen has data ready by
+        // the time the user lands on it. The splash screen waits on this
+        // promise (capped at SPLASH_PREFETCH_TIMEOUT_MS in `useSplashGate`)
+        // so users see a fully-populated Home rather than an empty Home
+        // that pops in suggestions a moment later. Defensive .catch in case
+        // prefetch is ever refactored to reject.
+        useSuggestionsStore.getState().prefetch().catch(() => {});
       } else {
         set({
           user: null,
@@ -86,6 +94,7 @@ export const useAuthStore = create<AuthState>((set, _get) => ({
           isInitialized: true,
           isLoading: false,
         });
+        useSuggestionsStore.getState().reset();
       }
     });
 

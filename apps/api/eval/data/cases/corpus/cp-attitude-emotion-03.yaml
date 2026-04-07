@@ -1,0 +1,28 @@
+id: cp-attitude-emotion-03
+source: corpus
+domain: attitude_emotion
+transcript:
+- role: user
+  text: Hey John . I have some great news .
+- role: ai
+  text: What happened ?
+- role: user
+  text: I got a job offer from Dell .
+- role: ai
+  text: That's great . I thought you said you didn't get the job .
+- role: user
+  text: I thought I did bad on the interview , but I guess I was wrong . I'm so happy
+    right now .
+- role: ai
+  text: I bet . That's great news . I'm very happy for you .
+- role: user
+  text: Thanks . I feel like celebrating . Let's go have a beer . It's on me .
+- role: ai
+  text: Sounds good .
+gold_labels:
+  categories: []
+  entities: []
+notes: No categories extracted as the conversation is about
+  personal job news rather than expressing interest in technology or business topics.
+  Other terms like 'John' and generic job/celebration mentions don't meet extraction
+  criteria.

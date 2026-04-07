@@ -1,0 +1,50 @@
+id: gen-tech-ai-04
+source: generated
+domain: tech-ai
+transcript:
+- role: user
+  text: Oh man, I've been playing so much Nintendo lately! I just got the new Zelda
+    game and it's absolutely incredible. Have you played Tears of the Kingdom?
+- role: ai
+  text: I've heard amazing things about it! How are you finding it compared to Breath
+    of the Wild? Is it as good as everyone says?
+- role: user
+  text: It's even better, honestly! Like, they took everything from Breath of the
+    Wild and just... made it perfect. The building mechanics are insane - I spent
+    three hours yesterday just making crazy contraptions. I built this flying machine
+    that actually works!
+- role: ai
+  text: That sounds so creative! I love games that let you experiment like that. What's
+    been your favorite part so far?
+- role: user
+  text: Hmm, probably the sky islands. They're so beautiful and mysterious, you know?
+    And the puzzles are really clever. Although sometimes I get stuck and have to
+    look up guides online... but that's part of the fun, right?
+- role: ai
+  text: Absolutely! Getting stuck and then figuring it out is so satisfying. Are you
+    trying to complete everything, or just enjoying the main story?
+gold_labels:
+  categories:
+  - keyword: video gaming
+    is_news_relevant: true
+    keyword_type: category
+    iab_category_id: '680'
+    mention_type: explicit
+  entities:
+  - keyword: nintendo
+    is_news_relevant: true
+    keyword_type: entity
+    mention_type: explicit
+  - keyword: zelda
+    is_news_relevant: true
+    keyword_type: entity
+    mention_type: implicit
+  - keyword: tears of the kingdom
+    is_news_relevant: true
+    keyword_type: entity
+    mention_type: explicit
+  - keyword: breath of the wild
+    is_news_relevant: true
+    keyword_type: entity
+    mention_type: explicit
+notes: Tests gaming category and company entity extraction.

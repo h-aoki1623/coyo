@@ -1,0 +1,23 @@
+id: cp-relationship-03
+source: corpus
+domain: relationship
+transcript:
+- role: user
+  text: What a wonderful party ! I had a good time . How about you ?
+- role: ai
+  text: I enjoyed myself , too .
+- role: user
+  text: Shall I give you a ride home ?
+- role: ai
+  text: Yes , if it's not too much of a trouble .
+- role: user
+  text: It's no trouble at all because your house is on the way to my place .
+- role: ai
+  text: That's great . Let's go !
+gold_labels:
+  categories: []
+  entities: []
+notes: This conversation is about social interaction after a party and offering a
+  ride home. No specific interests, hobbies, or named entities are mentioned. The
+  discussion is purely about logistics and polite social exchange, with no indication
+  of genuine interest in any particular subject matter.

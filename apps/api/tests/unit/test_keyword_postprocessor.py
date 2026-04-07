@@ -8,10 +8,12 @@ import pytest
 
 from coyo.services.iab_taxonomy import IABMatchResult
 from coyo.services.keyword_postprocessor import (
+    IABClassification,
     KeywordPostprocessor,
     ProcessedKeyword,
     RawKeyword,
 )
+from coyo.services.synonym_judge import SynonymJudgment
 
 
 def _make_raw(
@@ -37,6 +39,7 @@ def mock_embedding_service() -> AsyncMock:
 def mock_iab_service() -> MagicMock:
     svc = MagicMock()
     svc.ensure_embeddings = AsyncMock()
+    svc.find_by_name.return_value = None
     return svc
 
 
@@ -44,8 +47,10 @@ def mock_iab_service() -> MagicMock:
 def mock_settings() -> MagicMock:
     settings = MagicMock()
     settings.keyword_dedup_threshold = 0.90
+    settings.keyword_dedup_candidate_threshold = 0.40
     settings.keyword_normalize_threshold = 0.92
     settings.keyword_validate_threshold = 0.75
+    settings.llm_interest_model = "gpt-4o-mini"
     return settings
 
 
@@ -61,7 +66,9 @@ class TestProcessA:
     """Process A: Deduplicate new keywords against each other."""
 
     def test_deduplicates_similar_keywords_keeps_shorter(
-        self, processor: KeywordPostprocessor, mock_settings: MagicMock,
+        self,
+        processor: KeywordPostprocessor,
+        mock_settings: MagicMock,
     ) -> None:
         keywords = [
             _make_raw("artificial intelligence"),
@@ -91,7 +98,9 @@ class TestProcessA:
         assert len(result_emb) == 2
 
     def test_no_dedup_when_all_below_threshold(
-        self, processor: KeywordPostprocessor, mock_settings: MagicMock,
+        self,
+        processor: KeywordPostprocessor,
+        mock_settings: MagicMock,
     ) -> None:
         keywords = [
             _make_raw("technology"),
@@ -115,7 +124,9 @@ class TestProcessA:
         assert len(result_emb) == 3
 
     def test_single_keyword_passes_through(
-        self, processor: KeywordPostprocessor, mock_settings: MagicMock,
+        self,
+        processor: KeywordPostprocessor,
+        mock_settings: MagicMock,
     ) -> None:
         keywords = [_make_raw("tech")]
         embeddings = [[1.0, 0.0]]
@@ -131,82 +142,157 @@ class TestProcessA:
 
 
 class TestProcessB:
-    """Process B: IAB validation for categories, pass-through for entities."""
+    """Process B: IAB validation for categories via LLM, pass-through for entities."""
 
-    def test_normalizes_category_to_iab_name(
-        self, processor: KeywordPostprocessor, mock_iab_service: MagicMock,
+    @pytest.mark.asyncio()
+    async def test_normalizes_category_to_iab_name(
+        self,
+        processor: KeywordPostprocessor,
+        mock_iab_service: MagicMock,
     ) -> None:
         keywords = [_make_raw("tech stuff", keyword_type="category")]
         embeddings = [[1.0, 0.0, 0.0]]
 
-        mock_iab_service.match.return_value = IABMatchResult(
+        mock_iab_service.format_for_prompt.return_value = "ID | Name\n1.10 | Auto Technology"
+
+        llm_result = IABClassification(
             action="normalize",
-            iab_id="1.10",
+            iab_category_id="1.10",
             iab_name="Auto Technology",
-            similarity=0.95,
         )
 
-        result_kw, result_emb = processor._process_b(keywords, embeddings)
+        with patch(
+            "coyo.services.keyword_postprocessor.OpenAIClient",
+        ) as mock_llm_cls:
+            mock_llm = MagicMock()
+            mock_llm.structured = AsyncMock(return_value=llm_result)
+            mock_llm_cls.return_value = mock_llm
+
+            result_kw, result_emb = await processor._process_b(keywords, embeddings)
 
         assert len(result_kw) == 1
         assert result_kw[0].keyword == "auto technology"  # lowercased
         assert result_kw[0].iab_category_id == "1.10"
         assert result_kw[0].keyword_type == "category"
 
-    def test_validates_category_without_normalization(
-        self, processor: KeywordPostprocessor, mock_iab_service: MagicMock,
+    @pytest.mark.asyncio()
+    async def test_validates_category_keeps_original_keyword(
+        self,
+        processor: KeywordPostprocessor,
+        mock_iab_service: MagicMock,
     ) -> None:
-        keywords = [_make_raw("custom tech", keyword_type="category")]
+        keywords = [_make_raw("f1", keyword_type="category")]
         embeddings = [[1.0, 0.0, 0.0]]
 
-        mock_iab_service.match.return_value = IABMatchResult(
+        mock_iab_service.format_for_prompt.return_value = "ID | Name\n1.21 | Auto Racing"
+
+        llm_result = IABClassification(
             action="valid",
-            iab_id=None,
-            iab_name=None,
-            similarity=0.80,
+            iab_category_id="1.21",
+            iab_name="Auto Racing",
         )
 
-        result_kw, _emb = processor._process_b(keywords, embeddings)
+        with patch(
+            "coyo.services.keyword_postprocessor.OpenAIClient",
+        ) as mock_llm_cls:
+            mock_llm = MagicMock()
+            mock_llm.structured = AsyncMock(return_value=llm_result)
+            mock_llm_cls.return_value = mock_llm
+
+            result_kw, _emb = await processor._process_b(keywords, embeddings)
 
         assert len(result_kw) == 1
-        assert result_kw[0].keyword == "custom tech"
+        assert result_kw[0].keyword == "f1"
         assert result_kw[0].iab_category_id is None
 
-    def test_rejects_invalid_category(
-        self, processor: KeywordPostprocessor, mock_iab_service: MagicMock,
+    @pytest.mark.asyncio()
+    async def test_deletes_invalid_category(
+        self,
+        processor: KeywordPostprocessor,
+        mock_iab_service: MagicMock,
     ) -> None:
         keywords = [_make_raw("gibberish xyz", keyword_type="category")]
         embeddings = [[1.0, 0.0, 0.0]]
 
-        mock_iab_service.match.return_value = IABMatchResult(
-            action="invalid",
-            iab_id=None,
-            iab_name=None,
-            similarity=0.30,
-        )
+        mock_iab_service.format_for_prompt.return_value = "ID | Name\n1 | Automotive"
 
-        result_kw, result_emb = processor._process_b(keywords, embeddings)
+        llm_result = IABClassification(action="delete")
+
+        with patch(
+            "coyo.services.keyword_postprocessor.OpenAIClient",
+        ) as mock_llm_cls:
+            mock_llm = MagicMock()
+            mock_llm.structured = AsyncMock(return_value=llm_result)
+            mock_llm_cls.return_value = mock_llm
+
+            result_kw, result_emb = await processor._process_b(keywords, embeddings)
 
         assert len(result_kw) == 0
         assert len(result_emb) == 0
 
-    def test_entities_pass_through_without_iab_validation(
-        self, processor: KeywordPostprocessor, mock_iab_service: MagicMock,
+    @pytest.mark.asyncio()
+    async def test_entities_pass_through_without_llm_call(
+        self,
+        processor: KeywordPostprocessor,
+        mock_iab_service: MagicMock,
     ) -> None:
         keywords = [_make_raw("Elon Musk", keyword_type="entity")]
         embeddings = [[1.0, 0.0, 0.0]]
 
-        result_kw, _emb = processor._process_b(keywords, embeddings)
+        mock_iab_service.format_for_prompt.return_value = "ID | Name\n1 | Automotive"
+
+        with patch(
+            "coyo.services.keyword_postprocessor.OpenAIClient",
+        ) as mock_llm_cls:
+            mock_llm = MagicMock()
+            mock_llm.structured = AsyncMock()
+            mock_llm_cls.return_value = mock_llm
+
+            result_kw, _emb = await processor._process_b(keywords, embeddings)
 
         assert len(result_kw) == 1
         assert result_kw[0].keyword == "Elon Musk"
         assert result_kw[0].keyword_type == "entity"
         assert result_kw[0].iab_category_id is None
-        # IAB match should NOT be called for entities
-        mock_iab_service.match.assert_not_called()
+        # LLM should NOT be called for entities
+        mock_llm.structured.assert_not_called()
 
-    def test_mixed_categories_and_entities(
-        self, processor: KeywordPostprocessor, mock_iab_service: MagicMock,
+    @pytest.mark.asyncio()
+    async def test_falls_back_to_embedding_on_llm_failure(
+        self,
+        processor: KeywordPostprocessor,
+        mock_iab_service: MagicMock,
+    ) -> None:
+        keywords = [_make_raw("sports", keyword_type="category")]
+        embeddings = [[1.0, 0.0, 0.0]]
+
+        mock_iab_service.format_for_prompt.return_value = "ID | Name\n17 | Sports"
+        mock_iab_service.match.return_value = IABMatchResult(
+            action="normalize",
+            iab_id="17",
+            iab_name="Sports",
+            similarity=0.95,
+        )
+
+        with patch(
+            "coyo.services.keyword_postprocessor.OpenAIClient",
+        ) as mock_llm_cls:
+            mock_llm = MagicMock()
+            mock_llm.structured = AsyncMock(side_effect=RuntimeError("LLM down"))
+            mock_llm_cls.return_value = mock_llm
+
+            result_kw, _emb = await processor._process_b(keywords, embeddings)
+
+        assert len(result_kw) == 1
+        assert result_kw[0].keyword == "sports"
+        assert result_kw[0].iab_category_id == "17"
+        mock_iab_service.match.assert_called_once()
+
+    @pytest.mark.asyncio()
+    async def test_mixed_categories_and_entities(
+        self,
+        processor: KeywordPostprocessor,
+        mock_iab_service: MagicMock,
     ) -> None:
         keywords = [
             _make_raw("tech", keyword_type="category"),
@@ -214,101 +300,249 @@ class TestProcessB:
         ]
         embeddings = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]
 
-        mock_iab_service.match.return_value = IABMatchResult(
+        mock_iab_service.format_for_prompt.return_value = "ID | Name\n2 | Technology"
+
+        llm_result = IABClassification(
             action="valid",
-            iab_id=None,
-            iab_name=None,
-            similarity=0.80,
+            iab_category_id="2",
+            iab_name="Technology",
         )
 
-        result_kw, _emb = processor._process_b(keywords, embeddings)
+        with patch(
+            "coyo.services.keyword_postprocessor.OpenAIClient",
+        ) as mock_llm_cls:
+            mock_llm = MagicMock()
+            mock_llm.structured = AsyncMock(return_value=llm_result)
+            mock_llm_cls.return_value = mock_llm
+
+            result_kw, _emb = await processor._process_b(keywords, embeddings)
 
         assert len(result_kw) == 2
-        # Entity passes through, category validated
-        assert mock_iab_service.match.call_count == 1
+        # LLM called once for category, not for entity
+        assert mock_llm.structured.call_count == 1
+
+
+def _make_processed(keyword: str) -> ProcessedKeyword:
+    return ProcessedKeyword(
+        keyword=keyword,
+        keyword_type="category",
+        is_news_relevant=True,
+        summary=None,
+        iab_category_id=None,
+        merge_target=None,
+    )
 
 
 class TestProcessC:
-    """Process C: Deduplicate against existing DB keywords."""
+    """Process C: Deduplicate against existing DB keywords (hybrid LLM)."""
 
-    def test_merges_when_similar_to_existing(
-        self, processor: KeywordPostprocessor, mock_settings: MagicMock,
+    @pytest.mark.asyncio()
+    async def test_auto_merges_above_dedup_threshold_without_llm(
+        self,
+        processor: KeywordPostprocessor,
+        mock_settings: MagicMock,
     ) -> None:
-        keywords = [
-            ProcessedKeyword(
-                keyword="tech",
-                keyword_type="category",
-                is_news_relevant=True,
-                summary=None,
-                iab_category_id=None,
-                merge_target=None,
-            ),
-        ]
+        """Similarity >= 0.90 should merge without invoking the LLM."""
+        keywords = [_make_processed("tech")]
         keyword_embeddings = [[1.0, 0.0, 0.0]]
         existing_keywords = ["technology"]
-        existing_embeddings = [[0.99, 0.1, 0.0]]  # very similar
+        existing_embeddings = [[0.99, 0.1, 0.0]]  # sim ~0.995
 
-        with patch(
-            "coyo.services.keyword_postprocessor.get_settings",
-            return_value=mock_settings,
+        with (
+            patch(
+                "coyo.services.keyword_postprocessor.get_settings",
+                return_value=mock_settings,
+            ),
+            patch(
+                "coyo.services.keyword_postprocessor.OpenAIClient",
+            ) as mock_llm_cls,
         ):
-            result = processor._process_c(
-                keywords, keyword_embeddings, existing_keywords, existing_embeddings,
+            mock_llm = MagicMock()
+            mock_llm.structured = AsyncMock()
+            mock_llm_cls.return_value = mock_llm
+
+            result = await processor._process_c(
+                keywords,
+                keyword_embeddings,
+                existing_keywords,
+                existing_embeddings,
             )
 
         assert len(result) == 1
         assert result[0].merge_target == "technology"
+        # No LLM call for the auto-merge path
+        assert mock_llm.structured.call_count == 0
 
-    def test_inserts_when_below_threshold(
-        self, processor: KeywordPostprocessor, mock_settings: MagicMock,
+    @pytest.mark.asyncio()
+    async def test_merges_via_llm_when_in_candidate_zone(
+        self,
+        processor: KeywordPostprocessor,
+        mock_settings: MagicMock,
     ) -> None:
-        keywords = [
-            ProcessedKeyword(
-                keyword="cooking",
-                keyword_type="category",
-                is_news_relevant=True,
-                summary=None,
-                iab_category_id=None,
-                merge_target=None,
+        """0.40 <= sim < 0.90: LLM says synonym → merge."""
+        keywords = [_make_processed("AI")]
+        keyword_embeddings = [[1.0, 0.0, 0.0]]
+        existing_keywords = ["artificial intelligence"]
+        existing_embeddings = [[0.6, 0.8, 0.0]]  # sim = 0.6 (candidate zone)
+
+        with (
+            patch(
+                "coyo.services.keyword_postprocessor.get_settings",
+                return_value=mock_settings,
             ),
-        ]
+            patch(
+                "coyo.services.keyword_postprocessor.OpenAIClient",
+            ) as mock_llm_cls,
+        ):
+            mock_llm = MagicMock()
+            mock_llm.structured = AsyncMock(
+                return_value=SynonymJudgment(
+                    is_synonym=True,
+                    reason="abbreviation",
+                ),
+            )
+            mock_llm_cls.return_value = mock_llm
+
+            result = await processor._process_c(
+                keywords,
+                keyword_embeddings,
+                existing_keywords,
+                existing_embeddings,
+            )
+
+        assert len(result) == 1
+        assert result[0].merge_target == "artificial intelligence"
+        assert mock_llm.structured.call_count == 1
+
+    @pytest.mark.asyncio()
+    async def test_no_merge_when_llm_rejects(
+        self,
+        processor: KeywordPostprocessor,
+        mock_settings: MagicMock,
+    ) -> None:
+        """Candidate zone but LLM says not a synonym → keep as new."""
+        keywords = [_make_processed("tennis")]
+        keyword_embeddings = [[1.0, 0.0, 0.0]]
+        existing_keywords = ["badminton"]
+        existing_embeddings = [[0.7, 0.71, 0.0]]  # candidate zone
+
+        with (
+            patch(
+                "coyo.services.keyword_postprocessor.get_settings",
+                return_value=mock_settings,
+            ),
+            patch(
+                "coyo.services.keyword_postprocessor.OpenAIClient",
+            ) as mock_llm_cls,
+        ):
+            mock_llm = MagicMock()
+            mock_llm.structured = AsyncMock(
+                return_value=SynonymJudgment(
+                    is_synonym=False,
+                    reason="different sports",
+                ),
+            )
+            mock_llm_cls.return_value = mock_llm
+
+            result = await processor._process_c(
+                keywords,
+                keyword_embeddings,
+                existing_keywords,
+                existing_embeddings,
+            )
+
+        assert len(result) == 1
+        assert result[0].merge_target is None
+        assert mock_llm.structured.call_count == 1
+
+    @pytest.mark.asyncio()
+    async def test_no_merge_below_candidate_threshold_skips_llm(
+        self,
+        processor: KeywordPostprocessor,
+        mock_settings: MagicMock,
+    ) -> None:
+        """Similarity < 0.40: keep as new without invoking the LLM."""
+        keywords = [_make_processed("cooking")]
         keyword_embeddings = [[1.0, 0.0, 0.0]]
         existing_keywords = ["sports"]
-        existing_embeddings = [[0.0, 1.0, 0.0]]  # orthogonal
+        existing_embeddings = [[0.0, 1.0, 0.0]]  # orthogonal, sim = 0
 
-        with patch(
-            "coyo.services.keyword_postprocessor.get_settings",
-            return_value=mock_settings,
+        with (
+            patch(
+                "coyo.services.keyword_postprocessor.get_settings",
+                return_value=mock_settings,
+            ),
+            patch(
+                "coyo.services.keyword_postprocessor.OpenAIClient",
+            ) as mock_llm_cls,
         ):
-            result = processor._process_c(
-                keywords, keyword_embeddings, existing_keywords, existing_embeddings,
+            mock_llm = MagicMock()
+            mock_llm.structured = AsyncMock()
+            mock_llm_cls.return_value = mock_llm
+
+            result = await processor._process_c(
+                keywords,
+                keyword_embeddings,
+                existing_keywords,
+                existing_embeddings,
+            )
+
+        assert len(result) == 1
+        assert result[0].merge_target is None
+        assert mock_llm.structured.call_count == 0
+
+    @pytest.mark.asyncio()
+    async def test_falls_back_to_no_merge_on_llm_failure(
+        self,
+        processor: KeywordPostprocessor,
+        mock_settings: MagicMock,
+    ) -> None:
+        """LLM error in candidate zone: safe default is no merge."""
+        keywords = [_make_processed("soccer")]
+        keyword_embeddings = [[1.0, 0.0, 0.0]]
+        existing_keywords = ["football"]
+        existing_embeddings = [[0.6, 0.8, 0.0]]  # candidate zone
+
+        with (
+            patch(
+                "coyo.services.keyword_postprocessor.get_settings",
+                return_value=mock_settings,
+            ),
+            patch(
+                "coyo.services.keyword_postprocessor.OpenAIClient",
+            ) as mock_llm_cls,
+        ):
+            mock_llm = MagicMock()
+            mock_llm.structured = AsyncMock(side_effect=RuntimeError("api down"))
+            mock_llm_cls.return_value = mock_llm
+
+            result = await processor._process_c(
+                keywords,
+                keyword_embeddings,
+                existing_keywords,
+                existing_embeddings,
             )
 
         assert len(result) == 1
         assert result[0].merge_target is None
 
-    def test_no_existing_keywords_passes_through(
-        self, processor: KeywordPostprocessor,
+    @pytest.mark.asyncio()
+    async def test_no_existing_keywords_passes_through(
+        self,
+        processor: KeywordPostprocessor,
     ) -> None:
-        keywords = [
-            ProcessedKeyword(
-                keyword="tech",
-                keyword_type="category",
-                is_news_relevant=True,
-                summary=None,
-                iab_category_id=None,
-                merge_target=None,
-            ),
-        ]
-        result = processor._process_c(keywords, [[1.0, 0.0]], [], [])
+        keywords = [_make_processed("tech")]
+        result = await processor._process_c(keywords, [[1.0, 0.0]], [], [])
 
         assert len(result) == 1
         assert result[0].merge_target is None
 
-    def test_empty_keywords_returns_empty(
-        self, processor: KeywordPostprocessor,
+    @pytest.mark.asyncio()
+    async def test_empty_keywords_returns_empty(
+        self,
+        processor: KeywordPostprocessor,
     ) -> None:
-        result = processor._process_c([], [], ["existing"], [[1.0, 0.0]])
+        result = await processor._process_c([], [], ["existing"], [[1.0, 0.0]])
         assert result == []
 
 
@@ -346,18 +580,27 @@ class TestFullPipeline:
             ],
         )
 
-        # IAB: "tech" category is valid
-        mock_iab_service.match.return_value = IABMatchResult(
+        # LLM: "tech" category is valid
+        mock_iab_service.format_for_prompt.return_value = "ID | Name\n2 | Technology"
+        llm_result = IABClassification(
             action="valid",
-            iab_id=None,
-            iab_name=None,
-            similarity=0.80,
+            iab_category_id="2",
+            iab_name="Technology",
         )
 
-        with patch(
-            "coyo.services.keyword_postprocessor.get_settings",
-            return_value=mock_settings,
+        with (
+            patch(
+                "coyo.services.keyword_postprocessor.get_settings",
+                return_value=mock_settings,
+            ),
+            patch(
+                "coyo.services.keyword_postprocessor.OpenAIClient",
+            ) as mock_llm_cls,
         ):
+            mock_llm = MagicMock()
+            mock_llm.structured = AsyncMock(return_value=llm_result)
+            mock_llm_cls.return_value = mock_llm
+
             result = await processor.process(new_keywords, existing)
 
         # tech should merge into "technology" (similar), Google should be new
@@ -382,14 +625,26 @@ class TestFullPipeline:
         mock_embedding_service.embed = AsyncMock(
             return_value=[[1.0, 0.0, 0.0]],
         )
-        mock_iab_service.match.return_value = IABMatchResult(
-            action="valid", iab_id=None, iab_name=None, similarity=0.80,
+        mock_iab_service.format_for_prompt.return_value = "ID | Name\n2 | Technology"
+        llm_result = IABClassification(
+            action="valid",
+            iab_category_id="2",
+            iab_name="Technology",
         )
 
-        with patch(
-            "coyo.services.keyword_postprocessor.get_settings",
-            return_value=mock_settings,
+        with (
+            patch(
+                "coyo.services.keyword_postprocessor.get_settings",
+                return_value=mock_settings,
+            ),
+            patch(
+                "coyo.services.keyword_postprocessor.OpenAIClient",
+            ) as mock_llm_cls,
         ):
+            mock_llm = MagicMock()
+            mock_llm.structured = AsyncMock(return_value=llm_result)
+            mock_llm_cls.return_value = mock_llm
+
             await processor.process(new_keywords, [])
 
         mock_iab_service.ensure_embeddings.assert_awaited_once_with(

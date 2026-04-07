@@ -1,0 +1,26 @@
+id: gen-ambiguous-02
+source: generated
+domain: ambiguous
+transcript:
+- role: user
+  text: I had an apple for lunch today, and wow, it was so delicious! Really crispy
+    and sweet.
+- role: ai
+  text: Oh that sounds refreshing! There's nothing quite like a perfectly crisp apple.
+    Did you have anything else with it?
+- role: user
+  text: No, just the apple. I was in a rush, you know... but it was actually pretty
+    filling.
+- role: ai
+  text: Sometimes simple is best! I find that a good apple can be surprisingly satisfying
+    on its own. How's your day been going otherwise?
+- role: user
+  text: Oh, it's been okay, I guess. Pretty normal day, nothing special happening.
+    What about you?
+- role: ai
+  text: Same here, just a regular day. The weather's been nice at least, which always
+    helps make things a bit better.
+gold_labels:
+  categories: []
+  entities: []
+notes: Tests that common noun 'apple' (fruit) is NOT extracted as an entity.

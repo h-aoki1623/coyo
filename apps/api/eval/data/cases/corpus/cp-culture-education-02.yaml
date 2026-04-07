@@ -1,0 +1,27 @@
+id: cp-culture-education-02
+source: corpus
+domain: culture_education
+transcript:
+- role: user
+  text: My German teacher thought it would be a good idea to have German pen friends
+    to write to in German .
+- role: ai
+  text: What a great idea ! Now you have a friendly audience to practice with !
+- role: user
+  text: The only thing is that my pen friend will be writing in English .
+- role: ai
+  text: Oh , he wants to practice his language skills , too .
+- role: user
+  text: That's right . And it's a B that I'll be writing too . Her name is Olga .
+- role: ai
+  text: Maybe Olga can introduce you to some of her friends who can write to you in
+    German and you can do the same for her with your friends to write her in English
+    .
+- role: user
+  text: That's a great idea ! Why didn't I think of that ?
+- role: ai
+  text: I don't know , but you know how to surround yourself with great friends !
+gold_labels:
+  categories: []
+  entities: []
+notes: Extracted 'language learning' as the user discusses practicing German with pen friends and mentions writing in English, indicating an interest in language learning. No specific entities mentioned.

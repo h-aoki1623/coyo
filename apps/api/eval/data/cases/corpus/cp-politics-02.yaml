@@ -1,0 +1,38 @@
+id: cp-politics-02
+source: corpus
+domain: politics
+transcript:
+- role: user
+  text: There's someone coming .
+- role: ai
+  text: It took them four minutes to get here . That was pretty fast .
+- role: user
+  text: Yes , it's fast . But four minutes is enough to do fifty thousand dollars
+    damage .
+- role: ai
+  text: I guess the fire wasn't in the tool shed after all.It looks like the back
+    of the house was burning .
+- role: user
+  text: I wonder if anyone can call the Ridleys about this . Do you know them well
+    ?
+- role: ai
+  text: Not really .
+- role: user
+  text: Do you know where they're vacationing ?
+- role: ai
+  text: I think they went to Mexico , but I'm not sure.It ' s a bad thing to return
+    home to.They ' ll come home from their trip , and they'll see half their house
+    burned .
+- role: user
+  text: Yes , but at least this way no one gets hurt.It ' s better to have a fire
+    in your house when you're not home . Don't you think ?
+- role: ai
+  text: Yes , I suppose . It's a dangerous thing if a fire starts when people are
+    sleeping .
+gold_labels:
+  categories: []
+  entities: []
+notes: The conversation is about a house fire incident. 'Mexico' is mentioned as a vacation destination but
+  only in passing. No categories extracted as the conversation doesn't show genuine
+  interest in fire safety, travel, or other broad topics - it's just discussing a
+  specific incident.

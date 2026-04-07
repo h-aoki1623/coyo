@@ -1,0 +1,47 @@
+id: gen-tech-ai-01
+source: generated
+domain: tech-ai
+transcript:
+- role: user
+  text: Hey! I've been really excited about all these AI developments lately. Have
+    you been following what's happening with generative AI?
+- role: ai
+  text: Oh absolutely! It's such an exciting time for AI technology. What aspects
+    have caught your attention the most?
+- role: user
+  text: Well, I've started using ChatGPT at work for, um, drafting emails and brainstorming
+    ideas. It's incredible how AI can understand context and give such helpful responses!
+    My productivity has like... doubled.
+- role: ai
+  text: That's fantastic! It really is a game-changer for workplace efficiency. Have
+    you experimented with any other AI tools besides ChatGPT?
+- role: user
+  text: Not yet, but I've been reading about OpenAI's recent developments - they just
+    announced some new features for GPT-4, right? The AI can now process images and
+    has better reasoning. It's mind-blowing how fast AI is advancing!
+- role: ai
+  text: Yes, the multimodal capabilities are really impressive! Being able to analyze
+    images opens up so many new possibilities. What do you think about the potential
+    impact on your field of work?
+- role: user
+  text: I think AI will transform everything! I work in marketing, and already we're
+    using AI for content creation, data analysis... everything really. Sometimes I
+    wonder if AI will eventually do most of our jobs, but I try to see it more as
+    a powerful assistant, you know?
+gold_labels:
+  categories:
+  - keyword: artificial intelligence
+    is_news_relevant: true
+    keyword_type: category
+    iab_category_id: '597'
+    mention_type: explicit
+  entities:
+  - keyword: openai
+    is_news_relevant: true
+    keyword_type: entity
+    mention_type: explicit
+  - keyword: chatgpt
+    is_news_relevant: true
+    keyword_type: entity
+    mention_type: explicit
+notes: 'Tests IAB normalization: ''AI'' should map to ''artificial intelligence''.'

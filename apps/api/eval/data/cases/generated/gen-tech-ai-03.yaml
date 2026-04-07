@@ -1,0 +1,51 @@
+id: gen-tech-ai-03
+source: generated
+domain: tech-ai
+transcript:
+- role: user
+  text: Hey! So I've been working on this really interesting project at my startup.
+    We're trying to migrate our whole infrastructure to AWS, but man, the scalability
+    issues are giving me headaches.
+- role: ai
+  text: Oh, that sounds challenging! AWS migration can be quite complex. What kind
+    of scalability problems are you running into?
+- role: user
+  text: Well, our app has these random traffic spikes, you know? Like, one minute
+    we have normal load, then suddenly boom - thousands of users. Our current setup
+    on AWS isn't handling the auto-scaling properly. I've been reading about Lambda
+    functions though... seems like it could help?
+- role: ai
+  text: Lambda could definitely be a good solution for those unpredictable spikes!
+    Have you looked into combining it with API Gateway? That's a pretty common pattern
+    for handling variable loads.
+- role: user
+  text: Yeah, actually! That's exactly what I was thinking. The serverless approach
+    is so cool - I mean, not just for work, but like, the whole concept fascinates
+    me. I've been playing around with it on my personal projects too. Built this little
+    bot that monitors crypto prices using Lambda.
+- role: ai
+  text: That's awesome that you're exploring it outside of work too! It really helps
+    to experiment with these technologies in different contexts. How's your team feeling
+    about the migration overall?
+- role: user
+  text: They're... well, some are excited, some are worried about the learning curve.
+    Our CTO is fully on board though. She's been pushing for better cloud architecture
+    since forever. I just hope we can get the costs under control - AWS can get expensive
+    fast if you're not careful!
+- role: ai
+  text: So true about the costs! Have you set up any billing alerts or looked into
+    Reserved Instances? Those can really help keep expenses manageable, especially
+    as you scale up.
+gold_labels:
+  categories:
+  - keyword: technology & computing
+    is_news_relevant: true
+    keyword_type: category
+    mention_type: implicit
+    iab_category_id: '596'
+  entities:
+  - keyword: aws
+    is_news_relevant: true
+    keyword_type: entity
+    mention_type: explicit
+notes: Tests extraction of technology category and company entity from work context.

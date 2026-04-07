@@ -4,8 +4,8 @@ from functools import lru_cache
 from typing import Literal, Self
 from urllib.parse import urlparse
 
-from pydantic import ConfigDict, model_validator
-from pydantic_settings import BaseSettings
+from pydantic import model_validator
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 _DEV_CORS_ORIGINS: tuple[str, ...] = ("http://localhost:8081", "http://localhost:19006")
 
@@ -40,6 +40,7 @@ class Settings(BaseSettings):
     keyword_normalize_threshold: float = 0.92
     keyword_validate_threshold: float = 0.75
     keyword_dedup_threshold: float = 0.90
+    keyword_dedup_candidate_threshold: float = 0.40
 
     # Cron
     cron_secret: str | None = None
@@ -53,7 +54,9 @@ class Settings(BaseSettings):
 
     # STT Config
     stt_model: Literal[
-        "whisper-1", "gpt-4o-transcribe", "gpt-4o-mini-transcribe",
+        "whisper-1",
+        "gpt-4o-transcribe",
+        "gpt-4o-mini-transcribe",
     ] = "gpt-4o-transcribe"
 
     # TTS Config
@@ -77,7 +80,11 @@ class Settings(BaseSettings):
     # Rate Limiting
     rate_limit_per_minute: int = 30
 
-    model_config = ConfigDict(env_file=".env", env_file_encoding="utf-8")
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore",
+    )
 
     @model_validator(mode="after")
     def validate_cloud_tasks_settings(self) -> Self:
@@ -129,4 +136,4 @@ def get_settings() -> Settings:
     Defers environment variable validation until first access,
     allowing module imports to succeed without a .env file.
     """
-    return Settings()  # type: ignore[call-arg]
+    return Settings()

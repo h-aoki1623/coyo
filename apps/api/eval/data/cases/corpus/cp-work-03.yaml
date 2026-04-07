@@ -1,0 +1,33 @@
+id: cp-work-03
+source: corpus
+domain: work
+transcript:
+- role: user
+  text: Hello ! Is this Mr . Chang ?
+- role: ai
+  text: Yes . Who is speaking ?
+- role: user
+  text: This is Kelly speaking . I am calling from London . How are you , Mr . Chang
+    ?
+- role: ai
+  text: Oh , Kelly , I couldn't recognize your voice . Well , I'm fine .
+- role: user
+  text: Mr . Chang , I just want to tell you that we are leaving London for Beijing
+    by flight CP 645 on Saturday morning . Could you meet us at the airport , please
+    ?
+- role: ai
+  text: Excuse me , I couldn't quite hear you . This line is crossed . Can you speak
+    louder , please ?
+- role: user
+  text: I will say it again ... Do you hear me now ?
+- role: ai
+  text: Much better . I will definitely go to the airport to meet you .
+- role: user
+  text: Thank you very much . Goodbye .
+- role: ai
+  text: Goodbye .
+gold_labels:
+  categories: []
+  entities: []
+notes: No categories extracted as this is basic tourist conversation without expressing deep interests
+  in topics like travel, tourism, or geography.

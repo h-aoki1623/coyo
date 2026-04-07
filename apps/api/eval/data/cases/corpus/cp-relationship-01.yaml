@@ -1,0 +1,16 @@
+id: cp-relationship-01
+source: corpus
+domain: relationship
+transcript:
+- role: ai
+  text: Bob , what are you thinking about ?
+- role: user
+  text: I'm looking forward to going to America .
+- role: ai
+  text: When do you go ?
+- role: user
+  text: Next week .
+gold_labels:
+  categories: []
+  entities: []
+notes: The conversation is about Bob looking forward to going to America next week. However, there are no specific interests, categories, or entities mentioned in the conversation that can be extracted according to the guidelines. The discussion is general and does not indicate a particular interest or entity related to relationships or any other category.

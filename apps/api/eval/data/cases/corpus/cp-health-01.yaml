@@ -1,0 +1,26 @@
+id: cp-health-01
+source: corpus
+domain: health
+transcript:
+- role: user
+  text: Okay , Doctor , tell it to me straight .
+- role: ai
+  text: If you want to live much longer you have to give up smoking .
+- role: user
+  text: I've tried before . Everything I've tried doesn't work .
+- role: ai
+  text: Maybe with the choice of life or death before you , you will find it easier
+    .
+- role: user
+  text: May I see that x-ray again ?
+- role: ai
+  text: See all these black areas ? That's tar built up in your Lungs .
+- role: user
+  text: And that is what's causing my shortness of breath .
+- role: ai
+  text: Look at it this way , when you quit , you will save money , time and your
+    life !
+gold_labels:
+  categories: []
+  entities: []
+notes: This conversation is about a health issue related to smoking. The user is discussing their struggle with quitting smoking and the health consequences they are facing. However, no specific interests, categories, or entities are mentioned in the conversation. The focus is on the general topic of smoking and health rather than any particular aspect that would indicate a specific interest or entity.

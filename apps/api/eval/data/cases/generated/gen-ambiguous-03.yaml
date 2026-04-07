@@ -1,0 +1,35 @@
+id: gen-ambiguous-03
+source: generated
+domain: ambiguous
+transcript:
+- role: user
+  text: Hey! So I've been really enjoying my car lately. It's pretty fast and, um,
+    I love taking it out on weekends when the roads are less crowded.
+- role: ai
+  text: That sounds amazing! There's something special about weekend drives, isn't
+    there? Do you have any favorite routes or places you like to drive to?
+- role: user
+  text: Yeah, definitely! I usually head out to the countryside roads... they're more
+    twisty and fun. Plus the scenery is nice. Sometimes I just drive without any destination
+    in mind, you know?
+- role: ai
+  text: Oh, I totally get that! Those winding countryside roads are perfect for enjoying
+    a good drive. How long have you been into cars and driving?
+- role: user
+  text: Hmm, probably since I got my license like five years ago? But I really started
+    appreciating it more recently. There's something relaxing about it... like, when
+    I'm stressed from work, a good drive just clears my head.
+- role: ai
+  text: That's such a great way to unwind! It's like your own form of meditation.
+    Do you ever go on longer road trips, or do you prefer keeping it to shorter weekend
+    drives?
+gold_labels:
+  categories:
+  - keyword: automotive
+    is_news_relevant: false
+    keyword_type: category
+    iab_category_id: '1'
+    mention_type: implicit
+  entities: []
+notes: Tests that generic car talk extracts a category but no entity without a specific
+  brand.

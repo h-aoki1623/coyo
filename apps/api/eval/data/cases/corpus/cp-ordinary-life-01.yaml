@@ -1,0 +1,21 @@
+id: cp-ordinary-life-01
+source: corpus
+domain: ordinary_life
+transcript:
+- role: user
+  text: So Dick , how about getting some coffee for tonight ?
+- role: ai
+  text: Coffee ? I don ’ t honestly like that kind of stuff .
+- role: user
+  text: Come on , you can at least try a little , besides your cigarette .
+- role: ai
+  text: What ’ s wrong with that ? Cigarette is the thing I go crazy for .
+- role: user
+  text: Not for me , Dick .
+gold_labels:
+  categories: []
+  entities: []
+notes: This is a casual conversation about personal preferences (coffee and cigarettes).
+  No genuine interests in broader topics are expressed. The conversation is about
+  daily habits rather than specific interests or hobbies. 'Dick' is used as a name
+  in dialogue but doesn't refer to a notable person with real-world identity.

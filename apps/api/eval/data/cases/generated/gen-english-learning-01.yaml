@@ -1,0 +1,38 @@
+id: gen-english-learning-01
+source: generated
+domain: english-learning
+transcript:
+- role: user
+  text: Hey, I've been reading about the subjunctive mood in English, but I'm really
+    confused. Like, when do you actually use it?
+- role: ai
+  text: Great question! The subjunctive mood can be tricky. It's used to express wishes,
+    hypothetical situations, or recommendations. For example, 'I wish I were taller'
+    uses the subjunctive 'were' instead of 'was'.
+- role: user
+  text: Oh, so that's why it sounds weird when people say 'I wish I was'? I always
+    wondered about that. Are there other examples?
+- role: ai
+  text: Exactly! Another common use is with verbs like 'suggest' or 'recommend.' For
+    instance, 'She suggested that he arrive early' - notice it's 'arrive' not 'arrives'.
+    The subjunctive drops the -s in third person.
+- role: user
+  text: Hmm, that's interesting. But wait, couldn't you also say 'She suggested that
+    he should arrive early'? Is that wrong?
+- role: ai
+  text: That's not wrong at all! In modern English, especially in casual speech, people
+    often use 'should' or just regular verb forms instead of the subjunctive. Both
+    are acceptable - it's just that the subjunctive sounds more formal.
+- role: user
+  text: That makes sense. So I guess the subjunctive is kind of... dying out in everyday
+    English?
+- role: ai
+  text: You're quite perceptive! Yes, it's becoming less common in casual conversation,
+    though it's still standard in formal writing and certain fixed expressions like
+    'If I were you' or 'God forbid'. Learning it helps you understand these phrases
+    and sound more sophisticated when needed.
+gold_labels:
+  categories: []
+  entities: []
+notes: Tests that grammar terms ('subjunctive mood', 'past participle') are NOT extracted.
+  English learning activities are not user interests.

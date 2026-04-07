@@ -1,0 +1,21 @@
+id: cp-relationship-02
+source: corpus
+domain: relationship
+transcript:
+- role: ai
+  text: What do you say to eating out , Maggie ?
+- role: user
+  text: Yeah , why not ? We haven't been out for dinner for quite a long time . A
+    new French restaurant has just opened in our neighborhood . We can go there .
+- role: ai
+  text: Do we need to book a table in advance ?
+- role: user
+  text: No need for that . It's not usually busy on weekdays .
+- role: ai
+  text: What time shall we go ?
+- role: user
+  text: Why not now ? I'm hungry .
+gold_labels:
+  categories: []
+  entities: []
+notes: The conversation is about Maggie and the AI discussing going out for dinner at a new French restaurant. However, there are no specific interests, categories, or entities mentioned in the conversation that can be extracted according to the guidelines. The discussion is general and does not indicate a particular interest or entity related to relationships or any other category.

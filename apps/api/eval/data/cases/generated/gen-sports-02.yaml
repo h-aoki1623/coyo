@@ -1,0 +1,44 @@
+id: gen-sports-02
+source: generated
+domain: sports
+transcript:
+- role: user
+  text: Hey! I just watched the Lakers game last night. It was crazy!
+- role: ai
+  text: Oh nice! I love basketball. How did the Lakers do? Was it a close game?
+- role: user
+  text: They won by 8 points! LeBron was amazing - he kept running these pick-and-roll
+    plays with AD, and the defense couldn't stop them at all.
+- role: ai
+  text: That's their signature move! When those two connect, it's almost unstoppable.
+    Did they have good ball movement overall?
+- role: user
+  text: Yeah, especially in the third quarter. They had like three or four fast breaks
+    in a row where they just... boom, down the court and scoring before the other
+    team could set up. It was so exciting to watch!
+- role: ai
+  text: Those momentum shifts can really change a game! Fast breaks are my favorite
+    part - the energy in the arena must have been electric. Are you planning to watch
+    their next game too?
+- role: user
+  text: Definitely! They play the Celtics on Friday. Should be a tough one though.
+- role: ai
+  text: Oh that'll be a great matchup! The Celtics have been playing really well this
+    season. It's always fun when two top teams face off like that.
+gold_labels:
+  categories:
+  - keyword: basketball
+    is_news_relevant: true
+    keyword_type: category
+    iab_category_id: '547'
+    mention_type: implicit
+  entities:
+  - keyword: nba
+    is_news_relevant: true
+    keyword_type: entity
+    mention_type: implicit
+  - keyword: lakers
+    is_news_relevant: true
+    keyword_type: entity
+    mention_type: implicit
+notes: Tests that 'pick and roll' and 'fast break' are NOT extracted as keywords.

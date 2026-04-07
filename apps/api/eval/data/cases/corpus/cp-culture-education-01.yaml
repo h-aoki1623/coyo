@@ -1,0 +1,26 @@
+id: cp-culture-education-01
+source: corpus
+domain: culture_education
+transcript:
+- role: user
+  text: You spoken English is pretty good . Please tell me your experience in learning
+    English .
+- role: ai
+  text: Uh , I don't know what to say . What do you want to know ?
+- role: user
+  text: What's your method of learning ?
+- role: ai
+  text: Let me think a minute . I think I always try to take every chance to practice
+    .
+- role: user
+  text: What if there is no chance ? I mean what if you don't have a partner , what
+    will you do ?
+- role: ai
+  text: Well , I talk to myself . That is , I play one role first , than the other
+    .
+- role: user
+  text: That's a good idea . You are really creative .
+gold_labels:
+  categories: []
+  entities: []
+notes: Extracted 'language learning' as the user explicitly asks about the AI's experience and method of learning English, indicating a clear interest in language learning. No specific entities mentioned.

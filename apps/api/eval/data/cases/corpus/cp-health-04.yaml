@@ -1,0 +1,27 @@
+id: cp-health-04
+source: corpus
+domain: health
+transcript:
+- role: user
+  text: What's the matter with me , Doctor ? I feel so tired these days .
+- role: ai
+  text: It's your blood pressure , I'm afraid . It's far too high .
+- role: user
+  text: And what's the cause of that ?
+- role: ai
+  text: Overwork-amongst other things . You can't work 24 hours a day . You ' Ve got
+    to slow down .
+- role: user
+  text: But I can't just slow down .
+- role: ai
+  text: You've got to , I'm afraid . And look at this . You weigh 200 stones . That's
+    too much for a man of your size .
+- role: user
+  text: You mean I've got to lose weight ?
+- role: ai
+  text: Yes . You've got to cut down on bread and potatoes and take more exercise
+    .
+gold_labels:
+  categories: []
+  entities: []
+notes: This conversation is about a health issue related to high blood pressure and weight. The user is discussing their symptoms and the doctor's advice on lifestyle changes. However, no specific interests, categories, or entities are mentioned in the conversation. The focus is on general health advice rather than any particular aspect that would indicate a specific interest or entity.

@@ -1,0 +1,20 @@
+id: cp-finance-04
+source: corpus
+domain: finance
+transcript:
+- role: ai
+  text: First National Bank .
+- role: user
+  text: Hi , I have a checking account with you .
+- role: ai
+  text: How can I help you ?
+- role: user
+  text: I need to see if check number 212 has cleared yet .
+- role: ai
+  text: What's your name and account number ?
+gold_labels:
+  categories: []
+  entities: []
+notes: No categories extracted as the conversation is a routine banking inquiry 
+  without any expression of interest in financial topics. No specific entities 
+  mentioned - the user only provides generic references to their account and check number.

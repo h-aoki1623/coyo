@@ -1,0 +1,34 @@
+id: cp-relationship-04
+source: corpus
+domain: relationship
+transcript:
+- role: ai
+  text: What's your favorite magazine ?
+- role: user
+  text: Off hand , I'd say the Reader's Digests is my favorite .
+- role: ai
+  text: What kind of magazine is it ?
+- role: user
+  text: It's instructive and inspiring .
+- role: ai
+  text: Really ? It is a weekly , isn't it ?
+- role: user
+  text: No , it's a semimonthly .
+- role: ai
+  text: Does it enjoy popularity among the young generation ?
+- role: user
+  text: Yes , it's so popular that it's sold out as soon as it reaches the bookstores
+    .
+- role: ai
+  text: Oh , I think I should try to read one .
+gold_labels:
+  categories: []
+  entities:
+  - keyword: reader's digest
+    is_news_relevant: false
+    keyword_type: entity
+    mention_type: explicit
+notes: Extracted 'reader's digest' as a specific magazine/publication entity. No categories
+  extracted as this is a general conversation about a magazine's format and popularity
+  rather than expressing interest in specific topics. Reader's Digest is not news-relevant
+  as it's a general interest magazine that doesn't generate regular news coverage.
