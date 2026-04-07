@@ -105,8 +105,11 @@ def print_eval_c_summary(result: EvalCResult) -> None:
     print()
     print("## Evaluation C -- Process C Dedup Accuracy")
     print()
+    threshold_line = f"Dedup threshold: {result.threshold_used:.2f}"
+    if result.candidate_threshold_used is not None:
+        threshold_line += f" | Candidate threshold: {result.candidate_threshold_used:.2f}"
     print(
-        f"Threshold: {result.threshold_used:.2f} | "
+        f"{threshold_line} | "
         f"Merge pairs: {result.merge_pair_count} | "
         f"Split pairs: {result.split_pair_count}"
     )

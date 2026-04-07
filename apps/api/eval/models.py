@@ -276,6 +276,8 @@ class PairResult(BaseModel):
     expected_merge: bool
     actual_merge: bool
     correct: bool
+    llm_invoked: bool = False
+    llm_reason: str | None = None
 
 
 class EvalCResult(BaseModel):
@@ -283,6 +285,7 @@ class EvalCResult(BaseModel):
 
     timestamp: str
     threshold_used: float
+    candidate_threshold_used: float | None = None
     false_merge_rate: float
     false_split_rate: float
     merge_pair_count: int
