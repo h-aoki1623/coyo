@@ -66,9 +66,7 @@ class ConversationService:
             # 00:00 UTC (09:00 JST). Ownership via user_has_suggestion is
             # sufficient to prevent IDOR, and stale suggestions are cleaned
             # up separately by the cron job.
-            has_access = await suggestion_repo.user_has_suggestion(
-                user_id, topic_suggestion_id
-            )
+            has_access = await suggestion_repo.user_has_suggestion(user_id, topic_suggestion_id)
             if not has_access:
                 raise NotFoundError("TopicSuggestion", str(topic_suggestion_id))
             topic = "suggested"
