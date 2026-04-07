@@ -3,6 +3,7 @@
 ## Prerequisites
 
 - Python 3.12+
+- [uv](https://docs.astral.sh/uv/) (`curl -LsSf https://astral.sh/uv/install.sh | sh`) — Python package manager
 - Node.js 20+
 - Docker (Docker Desktop, OrbStack, or Colima)
 - Maestro CLI (for E2E tests): `curl -Ls "https://get.maestro.mobile.dev" | bash`
@@ -26,9 +27,9 @@ make docker-up    # Postgres 16 + Redis 7 via Docker Compose
 
 ```bash
 cd apps/api
-python -m venv .venv
+uv venv
 source .venv/bin/activate
-pip install -e ".[dev]"
+uv pip install -e ".[dev]"
 make -C ../.. migrate   # Run database migrations
 ```
 

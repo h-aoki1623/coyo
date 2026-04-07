@@ -19,7 +19,7 @@
 # Design decisions:
 #   - COPY, not symlink: worktree can freely modify deps (e.g., npm install
 #     a new package) without affecting the main repo
-#   - npm ci / pip install: derived artifacts are regenerated from lock files,
+#   - npm ci / uv pip install: derived artifacts are regenerated from manifests,
 #     so "losing" them on worktree cleanup is fine
 #   - Existing files are never overwritten (protect manual edits)
 
@@ -118,6 +118,11 @@ _setup_node_modules() {
 _setup_venv() {
   local api_dir="$_WT_REPO_ROOT/apps/api"
 
+  if ! command -v uv >/dev/null 2>&1; then
+    _wt_err "uv is required but not installed. Install: curl -LsSf https://astral.sh/uv/install.sh | sh"
+    return 1
+  fi
+
   # Remove broken symlink from old setup
   if [[ -L "$api_dir/.venv" && ! -d "$api_dir/.venv" ]]; then
     _wt_warn "Removing broken .venv symlink."
@@ -141,10 +146,10 @@ _setup_venv() {
     rm -rf "$api_dir/.venv"
   fi
 
-  _wt_log "Creating Python venv and installing dependencies..."
+  _wt_log "Creating Python venv and installing dependencies (uv)..."
   cd "$api_dir"
-  python3 -m venv .venv
-  .venv/bin/pip install -e '.[dev]' 2>&1 | tail -3
+  uv venv
+  uv pip install -e '.[dev]' 2>&1 | tail -3
   _wt_log ".venv created."
 }
 
