@@ -40,6 +40,7 @@ class Settings(BaseSettings):
     keyword_normalize_threshold: float = 0.92
     keyword_validate_threshold: float = 0.75
     keyword_dedup_threshold: float = 0.90
+    keyword_dedup_candidate_threshold: float = 0.40
 
     # Cron
     cron_secret: str | None = None

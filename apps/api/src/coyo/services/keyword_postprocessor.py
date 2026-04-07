@@ -19,6 +19,10 @@ from coyo.config import get_settings
 from coyo.services.llm.base import ChatMessage, ChatOptions
 from coyo.services.llm.openai_client import OpenAIClient
 from coyo.services.similarity import find_best_match, find_duplicates
+from coyo.services.synonym_judge import (
+    build_synonym_system_message,
+    judge_synonym_pair,
+)
 
 if TYPE_CHECKING:
     from coyo.services.embedding import EmbeddingService
@@ -121,9 +125,7 @@ class KeywordPostprocessor:
         existing_embeddings = all_embeddings[len(new_texts) :]
 
         # Process A: Deduplicate new keywords against each other
-        deduped_keywords, deduped_embeddings = self._process_a(
-            new_keywords, new_embeddings
-        )
+        deduped_keywords, deduped_embeddings = self._process_a(new_keywords, new_embeddings)
 
         logger.info(
             "postprocessor_process_a",
@@ -139,12 +141,8 @@ class KeywordPostprocessor:
         )
 
         # Count Process B outcomes for logging
-        category_input = sum(
-            1 for kw in deduped_keywords if kw.keyword_type == "category"
-        )
-        category_output = sum(
-            1 for kw in validated_keywords if kw.keyword_type == "category"
-        )
+        category_input = sum(1 for kw in deduped_keywords if kw.keyword_type == "category")
+        category_output = sum(1 for kw in validated_keywords if kw.keyword_type == "category")
         normalized_count = sum(
             1
             for kw in validated_keywords
@@ -159,7 +157,7 @@ class KeywordPostprocessor:
         )
 
         # Process C: Deduplicate against existing DB keywords
-        result = self._process_c(
+        result = await self._process_c(
             validated_keywords,
             validated_embeddings,
             existing_keyword_texts,
@@ -303,16 +301,11 @@ class KeywordPostprocessor:
                 for i in llm_needed_indices
             ]
             llm_classifications = await asyncio.gather(*classification_tasks)
-            for idx, classification in zip(
-                llm_needed_indices, llm_classifications, strict=True
-            ):
+            for idx, classification in zip(llm_needed_indices, llm_classifications, strict=True):
                 llm_results[idx] = classification
 
         # Merge results in original order
-        classifications = [
-            exact_match_results.get(i) or llm_results[i]
-            for i in category_indices
-        ]
+        classifications = [exact_match_results.get(i) or llm_results[i] for i in category_indices]
 
         for idx, classification in zip(category_indices, classifications, strict=True):
             kw = keywords[idx]
@@ -400,7 +393,7 @@ class KeywordPostprocessor:
         else:
             return IABClassification(action="delete")
 
-    def _process_c(
+    async def _process_c(
         self,
         keywords: list[ProcessedKeyword],
         keyword_embeddings: list[list[float]],
@@ -409,20 +402,69 @@ class KeywordPostprocessor:
     ) -> list[ProcessedKeyword]:
         """Process C: Deduplicate against existing DB keywords.
 
-        If similarity >= threshold with an existing keyword, set merge_target.
-        Otherwise, the keyword is new.
+        Three-tier decision for each new keyword:
+        1. similarity >= keyword_dedup_threshold (0.90): auto-merge
+           (near-identical strings don't need LLM confirmation).
+        2. keyword_dedup_candidate_threshold <= similarity < 0.90:
+           ask the LLM to confirm whether the pair are synonyms.
+        3. similarity < candidate_threshold: keyword is new.
+
+        LLM calls for candidate-zone pairs run in parallel via
+        ``asyncio.gather``. On LLM failure the safe default is to not merge
+        (keyword stays new).
         """
         if not existing_keyword_texts or not keywords:
             return list(keywords)
 
         settings = get_settings()
-        result: list[ProcessedKeyword] = []
+        dedup_threshold = settings.keyword_dedup_threshold
+        candidate_threshold = settings.keyword_dedup_candidate_threshold
 
-        for kw, emb in zip(keywords, keyword_embeddings, strict=True):
+        # First pass: compute best embedding match per keyword, bucket into
+        # auto-merge / candidate / no-merge. No LLM calls yet.
+        best_matches: list[tuple[int, float]] = []
+        candidate_indices: list[int] = []
+        for emb in keyword_embeddings:
             best_idx, best_sim = find_best_match(emb, existing_embeddings)
+            best_matches.append((best_idx, best_sim))
 
-            if best_sim >= settings.keyword_dedup_threshold:
-                # Merge into existing keyword
+        for i, (_idx, sim) in enumerate(best_matches):
+            if candidate_threshold <= sim < dedup_threshold:
+                candidate_indices.append(i)
+
+        # Second pass: judge all candidate-zone pairs in parallel.
+        llm_judgments: dict[int, bool] = {}
+        if candidate_indices:
+            llm = OpenAIClient(model=settings.llm_interest_model)
+            system_message = build_synonym_system_message()
+            tasks = [
+                judge_synonym_pair(
+                    llm,
+                    system_message,
+                    keywords[i].keyword,
+                    existing_keyword_texts[best_matches[i][0]],
+                )
+                for i in candidate_indices
+            ]
+            judgments = await asyncio.gather(*tasks)
+            for idx, judgment in zip(candidate_indices, judgments, strict=True):
+                # None (LLM failure) falls through as False = do not merge.
+                llm_judgments[idx] = bool(judgment is not None and judgment.is_synonym)
+
+        # Third pass: assemble results.
+        result: list[ProcessedKeyword] = []
+        for i, kw in enumerate(keywords):
+            best_idx, best_sim = best_matches[i]
+            best_existing = existing_keyword_texts[best_idx]
+
+            if best_sim >= dedup_threshold:
+                should_merge = True
+            elif best_sim >= candidate_threshold:
+                should_merge = llm_judgments.get(i, False)
+            else:
+                should_merge = False
+
+            if should_merge:
                 result.append(
                     ProcessedKeyword(
                         keyword=kw.keyword,
@@ -430,7 +472,7 @@ class KeywordPostprocessor:
                         is_news_relevant=kw.is_news_relevant,
                         summary=kw.summary,
                         iab_category_id=kw.iab_category_id,
-                        merge_target=existing_keyword_texts[best_idx],
+                        merge_target=best_existing,
                     )
                 )
             else:
