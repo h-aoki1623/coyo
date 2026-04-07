@@ -30,6 +30,13 @@ jobs:
         with:
           python-version: '3.12'
 
+      # SHA-pinned to v3.2.4 for supply-chain safety. Refresh with the SHA from
+      # https://github.com/astral-sh/setup-uv/releases when bumping the version.
+      - uses: astral-sh/setup-uv@caf0cab7a618c569241d31dcd442f54681755d39  # v3.2.4
+        with:
+          version: "0.7.19"
+          enable-cache: true
+
       # Authenticate to GCP via Workload Identity Federation (no service account keys)
       - id: auth
         uses: google-github-actions/auth@v2
@@ -54,7 +61,7 @@ jobs:
       - name: Check pending migrations
         id: migration-check
         run: |
-          pip install -e "apps/api"
+          uv pip install --system -e "apps/api"
           cd apps/api
           if alembic check 2>&1 | grep -q "No new upgrade operations detected"; then
             echo "has_pending=false" >> $GITHUB_OUTPUT

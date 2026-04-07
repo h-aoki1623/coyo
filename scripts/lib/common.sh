@@ -243,14 +243,14 @@ ensure_backend() {
   # Verify venv
   if [[ ! -x "$API_DIR/.venv/bin/python" ]]; then
     err "Python venv not found at $API_DIR/.venv"
-    err "Create it with: cd $API_DIR && python3 -m venv .venv && .venv/bin/pip install -e '.[dev]'"
+    err "Create it with: cd $API_DIR && uv venv && uv pip install -e '.[dev]'"
     return 1
   fi
 
   local venv_python
   venv_python=$("$API_DIR/.venv/bin/python" -c "import sys; print(sys.executable)" 2>/dev/null || true)
   if [[ -z "$venv_python" ]]; then
-    err "Python venv is broken. Recreate with: cd $API_DIR && python3 -m venv .venv --clear && .venv/bin/pip install -e '.[dev]'"
+    err "Python venv is broken. Recreate with: cd $API_DIR && rm -rf .venv && uv venv && uv pip install -e '.[dev]'"
     return 1
   fi
 

@@ -112,9 +112,9 @@ gcloud secrets add-iam-policy-binding openai-api-key \
 cd apps/api
 
 # Create virtual environment and install dependencies
-python3 -m venv .venv
+uv venv
 source .venv/bin/activate
-pip install -e .
+uv pip install -e .
 
 # Run migrations against production database
 # NOTE: Use single quotes to avoid shell interpretation of special characters in password
