@@ -23,8 +23,82 @@ this repo enforces a **release-age cooldown** on new dependencies:
   `npm install` / `npm ci` will refuse to install packages younger than 7 days.
   This requires npm >= 11.10.0 (see Prerequisites above).
 
-A pre-commit / Claude Code hook will be added in a follow-up PR to block any
-direct bypass of these guardrails.
+### Claude Code hooks (speed bump, not a security boundary)
+
+For sessions that use Claude Code, two `PreToolUse` hooks (wired in
+`.claude/settings.json`) catch **accidental** invocations that would
+bypass the cooldown:
+
+- **`.claude/hooks/check-uv-install.sh`** — refuses Bash commands that
+  invoke `uv pip install` / `uv pip compile|sync|uninstall`, `uv add`,
+  `uv remove`, `uv lock`, `uv sync` (without `--frozen`),
+  `uv tool install|run|upgrade`, `uvx`, or `pip install`. Also refuses
+  `bash -c '...'` / `sh -c '...'` / `eval '...'` / `python -c '...'` when
+  the inner string mentions any of the above. Also refuses Bash file
+  mutations (`chmod`, `rm`, `mv`, `cp`, `sed -i`, `tee`, `ln`, `>`/`>>`)
+  that target any protected file, so the hook cannot be silently disabled
+  by `chmod -x .claude/hooks/check-uv-install.sh`.
+- **`.claude/hooks/check-protected-files.sh`** — refuses Edit/Write/MultiEdit
+  on the files that enforce the policy: `apps/mobile/.npmrc`,
+  `scripts/uv-install.sh`, `scripts/install-npm-pinned.sh`, and the two
+  hook scripts themselves. Symlink targets are resolved before matching.
+
+The sanctioned entry points are `make api-lock`, `make api-install`,
+`bash scripts/uv-install.sh`, `bash scripts/install-npm-pinned.sh`, and
+the no-resolution uv subcommands (`uv venv`, `uv run`, `uv sync --frozen`,
+`uv --version`).
+
+> **What these hooks are NOT:** a security boundary against a motivated
+> or compromised actor. Regex over a shell command string cannot reliably
+> understand variable expansion (`U=uv; $U pip install …`), string
+> concatenation, PATH shadowing, aliases, indirect interpreters, or
+> "edit `.claude/settings.json` to remove the hook entries". Real
+> supply-chain enforcement lives in `apps/api/uv.lock` + `uv sync --frozen`
+> everywhere (PR1a/1b), `apps/mobile/.npmrc` + `engine-strict=true`
+> (PR1b), the SHA-256 integrity check on the hook + wrapper scripts in
+> `.security/hook-hashes.sha256` (verified by CI), and code review on
+> `.claude/settings.json` changes.
+
+#### Updating a protected file legitimately
+
+To bump the pinned npm version, update the wrapper for a new uv release,
+or otherwise edit a protected file or run an off-list uv command for a
+one-off task:
+
+1. **Disable the hook for your session** by writing to
+   `.claude/settings.local.json` (gitignored, so the override stays on
+   your machine and never lands in a commit):
+   ```json
+   {
+     "hooks": {
+       "PreToolUse": []
+     }
+   }
+   ```
+2. **Make the edit / run the command.**
+3. **Re-run the smoke tests** to confirm nothing regressed:
+   ```bash
+   bash scripts/test/test-claude-hooks.sh
+   bash scripts/test/test-uv-install.sh
+   ```
+4. **Regenerate the integrity hashes** if you touched any of the protected
+   files (otherwise CI will fail with a hash mismatch):
+   ```bash
+   sha256sum .claude/hooks/check-uv-install.sh \
+             .claude/hooks/check-protected-files.sh \
+             scripts/uv-install.sh \
+             scripts/install-npm-pinned.sh \
+             scripts/test/test-claude-hooks.sh \
+             scripts/test/test-uv-install.sh \
+       > .security/hook-hashes.sha256
+   ```
+5. **Revert the local override** by deleting the `PreToolUse` entry from
+   `.claude/settings.local.json` (or removing the file entirely).
+
+Both hooks are smoke-tested by `scripts/test/test-claude-hooks.sh` and
+the wrapper by `scripts/test/test-uv-install.sh`, both of which run in CI
+on every PR. The integrity check (`sha256sum -c .security/hook-hashes.sha256`)
+runs in the same CI workflow.
 
 ## Environment Setup
 
