@@ -22,24 +22,36 @@ appId: to.coyo.app
       id: "home-greeting"
     timeout: 30000
 
-# Scroll to topic cards (suggestions may push them below the fold)
-# Scroll down to reveal topic cards (avoid sign-out button at bottom)
-- swipe:
-    start: "50%, 60%"
-    end: "50%, 30%"
-    duration: 500
-
-# Verify all 5 topic cards are visible via testID
-- assertVisible:
-    id: "topic-sports"
-- assertVisible:
-    id: "topic-business"
-- assertVisible:
-    id: "topic-politics"
-- assertVisible:
-    id: "topic-technology"
-- assertVisible:
-    id: "topic-entertainment"
+# Scroll to each topic card. With personalized + trending suggestions
+# now reliably populated above the fold, the fixed topic cards are pushed
+# further down — sometimes the entire viewport. A fixed-distance swipe is
+# brittle here, so we use scrollUntilVisible to walk through every card
+# regardless of how tall the suggestions section happens to be.
+- scrollUntilVisible:
+    element:
+      id: "topic-sports"
+    direction: DOWN
+    speed: 40
+- scrollUntilVisible:
+    element:
+      id: "topic-business"
+    direction: DOWN
+    speed: 40
+- scrollUntilVisible:
+    element:
+      id: "topic-politics"
+    direction: DOWN
+    speed: 40
+- scrollUntilVisible:
+    element:
+      id: "topic-technology"
+    direction: DOWN
+    speed: 40
+- scrollUntilVisible:
+    element:
+      id: "topic-entertainment"
+    direction: DOWN
+    speed: 40
 
 # Verify the history button is present via testID
 - assertVisible:

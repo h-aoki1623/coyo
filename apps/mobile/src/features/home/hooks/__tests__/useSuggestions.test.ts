@@ -90,4 +90,31 @@ describe('useSuggestions', () => {
 
     expect(mockGet).toHaveBeenCalledTimes(1);
   });
+
+  it('retries when HomeScreen mounts after a failed first-launch prefetch', async () => {
+    // Simulate the production bug: on cold start, the prefetch kicked off
+    // from auth-store fails (e.g., Firebase token not yet warm, or
+    // /api/auth/session hasn't created the backend user row yet, so
+    // /api/topics/suggestions 401s).
+    mockGet.mockRejectedValueOnce(new Error('401 Unauthorized'));
+    await useSuggestionsStore.getState().prefetch();
+
+    // Sanity check: the failed prefetch left the store empty.
+    expect(useSuggestionsStore.getState().suggestions).toEqual({
+      personal: [],
+      trending: [],
+    });
+
+    // Now the HomeScreen mounts. The hook MUST trigger a retry and populate
+    // the store — not sit on the empty state forever because `isReady`
+    // flipped to true on the failed attempt.
+    mockGet.mockResolvedValueOnce({ data: mockResponse });
+
+    const { result } = renderHook(() => useSuggestions());
+
+    await waitFor(() => {
+      expect(result.current.suggestions).toEqual(mockResponse);
+    });
+    expect(mockGet).toHaveBeenCalledTimes(2);
+  });
 });
