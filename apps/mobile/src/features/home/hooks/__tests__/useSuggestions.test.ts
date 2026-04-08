@@ -36,7 +36,10 @@ const mockResponse: TopicSuggestionsResponse = {
 
 describe('useSuggestions', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    // Use mockReset (not clearAllMocks) so queued mockResolvedValueOnce /
+    // mockRejectedValueOnce implementations from a prior test that timed
+    // out cannot leak into the next test.
+    mockGet.mockReset();
     useSuggestionsStore.getState().reset();
   });
 
@@ -116,5 +119,66 @@ describe('useSuggestions', () => {
       expect(result.current.suggestions).toEqual(mockResponse);
     });
     expect(mockGet).toHaveBeenCalledTimes(2);
+  });
+
+  it('retries when HomeScreen mounts DURING an inflight prefetch that later fails', async () => {
+    // Production regression: on a slow cold-start, App.tsx's splash gate
+    // releases (either because SPLASH_PREFETCH_TIMEOUT_MS fires or
+    // because `isReady` flipped to true) while auth-store's prefetch is
+    // still in flight. HomeScreen mounts, the hook sees isLoading=true
+    // and skips the retry. The inflight prefetch then resolves as a
+    // failure (empty/401/etc.). The hook MUST detect the transition
+    // from loading→failed and retry exactly once — it must NOT sit on
+    // the empty state until the user kills and relaunches the app.
+    let failFirstPrefetch: (err: Error) => void = () => {};
+    mockGet.mockImplementationOnce(
+      () =>
+        new Promise((_, reject) => {
+          failFirstPrefetch = reject;
+        }),
+    );
+
+    // Kick off the initial prefetch (mirrors auth-store.initialize).
+    // Do NOT await — the test point is that HomeScreen mounts WHILE
+    // the request is still in flight.
+    const initialPrefetch = useSuggestionsStore.getState().prefetch();
+    expect(useSuggestionsStore.getState().isLoading).toBe(true);
+
+    // HomeScreen mounts with isLoading=true. The hook must not retry
+    // yet, but it must arm itself to retry once the inflight settles.
+    const { result } = renderHook(() => useSuggestions());
+    expect(mockGet).toHaveBeenCalledTimes(1);
+
+    // Now the inflight prefetch fails. The next call should succeed.
+    mockGet.mockResolvedValueOnce({ data: mockResponse });
+    failFirstPrefetch(new Error('401 Unauthorized'));
+    await initialPrefetch;
+
+    // The hook must observe isLoading→false while hasLoaded is still
+    // false, and trigger exactly one retry.
+    await waitFor(() => {
+      expect(result.current.suggestions).toEqual(mockResponse);
+    });
+    expect(mockGet).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not retry more than once per mount when the retry itself fails', async () => {
+    // Bound the retry: even if the retry fails too, the hook must
+    // stop — a persistently failing backend must not be hammered on
+    // every state transition.
+    mockGet.mockRejectedValue(new Error('Network error'));
+
+    const { result } = renderHook(() => useSuggestions());
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    // Give the effect plenty of time to (incorrectly) fire another retry.
+    await new Promise((r) => setTimeout(r, 50));
+
+    // Exactly one call from the hook's mount-time fetch. No retry storm.
+    expect(mockGet).toHaveBeenCalledTimes(1);
+    expect(result.current.suggestions).toEqual({ personal: [], trending: [] });
   });
 });
