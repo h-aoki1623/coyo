@@ -147,11 +147,8 @@ make docker-reset && make migrate
 **Symptom**: Module not found or wrong Python version.
 
 ```bash
-cd apps/api
-rm -rf .venv
-uv venv
-source .venv/bin/activate
-uv pip install -e ".[dev]"
+rm -rf apps/api/.venv
+make api-install
 ```
 
 ### TypeScript type mismatches

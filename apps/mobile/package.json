@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "main": "index.ts",
+  "engines": {
+    "npm": ">=11.10.0"
+  },
   "scripts": {
     "start": "expo start --dev-client",
     "android": "expo run:android",

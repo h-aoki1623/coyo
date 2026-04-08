@@ -21,11 +21,22 @@ ENV UV_LINK_MODE=copy \
     UV_PYTHON_DOWNLOADS=never \
     VIRTUAL_ENV=/app/.venv
 
-COPY pyproject.toml ./
+COPY pyproject.toml uv.lock ./
 COPY src/ ./src/
 
-RUN uv venv "$VIRTUAL_ENV" \
-    && uv pip install --no-cache .
+# Belt-and-braces: refuse to build an image from an uv.lock that lacks the
+# supply-chain cooldown marker. This catches accidental lockfile regeneration
+# without the scripts/uv-install.sh wrapper.
+RUN grep -q '^exclude-newer = ' uv.lock \
+    || (echo "ERROR: uv.lock is missing [options] exclude-newer. Regenerate with 'make api-lock'." >&2 && exit 1)
+
+# Install production deps from the lockfile.
+#   --frozen       forbid any network resolution (lockfile is authoritative)
+#   --no-dev       skip the [dev] extras (pytest/ruff are not needed in prod)
+#   --no-editable  install as real packages rather than .pth-based editable,
+#                  so the runtime image does not depend on /app/src layout
+#   --no-cache     avoid leaking uv's download cache into the image
+RUN uv sync --frozen --no-dev --no-editable --no-cache
 
 # Stage 2: Runtime
 FROM python:3.12-slim AS runtime

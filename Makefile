@@ -1,4 +1,33 @@
-.PHONY: dev-mobile dev-api dev-ios dev-android dev-both dev-stop lint lint-mobile lint-api test test-mobile test-api e2e e2e-ios e2e-android migrate migrate-new docker-up docker-down docker-reset generate-api-types db-clean-users eval-a eval-b eval-c eval-all
+.PHONY: dev-mobile dev-api dev-ios dev-android dev-both dev-stop lint lint-mobile lint-api test test-mobile test-api e2e e2e-ios e2e-android migrate migrate-new docker-up docker-down docker-reset generate-api-types db-clean-users eval-a eval-b eval-c eval-all api-lock api-install
+
+# Python dependency management (uv-based, with release-age cooldown)
+#
+# api-install   Install API dependencies from uv.lock into apps/api/.venv.
+#               Use this for environment setup. No network resolution: deps
+#               are restored verbatim from the lockfile, so the supply-chain
+#               cooldown that was applied at lock time is preserved.
+#
+# api-lock      Regenerate apps/api/uv.lock with the cooldown applied
+#               (versions younger than UV_COOLDOWN_DAYS days are excluded).
+#               Use this whenever you add, remove, or upgrade a dependency.
+#
+# Why two targets:
+#   - install is fast and deterministic; lock is slow and rewrites uv.lock
+#   - the supply-chain cooldown only matters at lock time
+#
+# Both targets are the only sanctioned way for humans (and Claude Code) to
+# touch uv. The .claude/hooks/check-uv-install.sh hook (PR2) will block any
+# direct `uv pip install` / `uv lock` / `pip install` invocation.
+api-lock:
+	cd apps/api && ../../scripts/uv-install.sh lock
+
+api-install:
+	@if [ apps/api/pyproject.toml -nt apps/api/uv.lock ]; then \
+	  echo "ERROR: apps/api/pyproject.toml is newer than apps/api/uv.lock"; \
+	  echo "       Run 'make api-lock' first to regenerate the lockfile with the cooldown."; \
+	  exit 1; \
+	fi
+	cd apps/api && uv sync --frozen --extra dev
 
 # Infrastructure
 docker-up:

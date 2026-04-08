@@ -111,20 +111,16 @@ gcloud secrets add-iam-policy-binding openai-api-key \
 ```bash
 cd apps/api
 
-# Create virtual environment and install dependencies
-uv venv
-source .venv/bin/activate
-uv pip install -e .
+# Install dependencies from the lockfile (supply-chain cooldown baked in).
+# --no-dev skips pytest/ruff/etc. which production doesn't need.
+uv sync --frozen --no-dev
 
-# Run migrations against production database
+# Run migrations against production database via `uv run` (auto-picks up .venv)
 # NOTE: Use single quotes to avoid shell interpretation of special characters in password
 DATABASE_URL='postgresql+asyncpg://<user>:<password>@<host>:6543/<database>?ssl=require' \
 REDIS_URL='redis://localhost:6379' \
 OPENAI_API_KEY='dummy' \
-alembic upgrade head
-
-# Deactivate when done
-deactivate
+uv run alembic upgrade head
 ```
 
 ### 2.2 Build and Deploy

@@ -5,8 +5,26 @@
 - Python 3.12+
 - [uv](https://docs.astral.sh/uv/) (`curl -LsSf https://astral.sh/uv/install.sh | sh`) — Python package manager
 - Node.js 20+
+- **npm >= 11.10.0** (`npm install -g npm@11.10.0`) — required for the `min-release-age` supply-chain cooldown in `apps/mobile/.npmrc`
 - Docker (Docker Desktop, OrbStack, or Colima)
 - Maestro CLI (for E2E tests): `curl -Ls "https://get.maestro.mobile.dev" | bash`
+
+## Supply-chain defense (MUST)
+
+To reduce exposure to malicious package releases (e.g., the 2025 axios hijack),
+this repo enforces a **release-age cooldown** on new dependencies:
+
+- **Python**: `apps/api/uv.lock` is generated with a 7-day cooldown via
+  `scripts/uv-install.sh`. Never run `uv pip install` / `uv add` / `uv lock`
+  directly — use the Makefile targets instead:
+  - `make api-lock`    — regenerate `uv.lock` (use when adding / upgrading deps)
+  - `make api-install` — install deps from the lockfile into `apps/api/.venv`
+- **JavaScript / Mobile**: `apps/mobile/.npmrc` sets `min-release-age=7d`.
+  `npm install` / `npm ci` will refuse to install packages younger than 7 days.
+  This requires npm >= 11.10.0 (see Prerequisites above).
+
+A pre-commit / Claude Code hook will be added in a follow-up PR to block any
+direct bypass of these guardrails.
 
 ## Environment Setup
 
@@ -26,11 +44,19 @@ make docker-up    # Postgres 16 + Redis 7 via Docker Compose
 ### 3. Backend (FastAPI)
 
 ```bash
-cd apps/api
-uv venv
-source .venv/bin/activate
-uv pip install -e ".[dev]"
-make -C ../.. migrate   # Run database migrations
+make api-install        # uv sync --frozen from apps/api/uv.lock (with dev extras)
+make migrate            # Run database migrations
+```
+
+To add, remove, or upgrade a Python dependency:
+
+```bash
+# 1. Edit apps/api/pyproject.toml
+# 2. Regenerate the lockfile (applies the 7-day cooldown)
+make api-lock
+# 3. Re-sync your venv to pick up the new versions
+make api-install
+# 4. Commit both pyproject.toml AND uv.lock
 ```
 
 ### 4. Mobile (React Native / Expo)
