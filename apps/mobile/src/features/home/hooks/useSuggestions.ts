@@ -26,7 +26,6 @@ export function useSuggestions() {
     // runs exactly once per mount regardless of state changes while we wait.
     // The empty dep array is intentional: re-running on state changes would
     // create an infinite retry loop against a persistently failing backend.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     const state = useSuggestionsStore.getState();
     if (!state.hasLoaded && !state.isLoading) {
       state.prefetch();
