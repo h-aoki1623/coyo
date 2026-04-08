@@ -1,13 +1,22 @@
 #!/bin/bash
 # EAS Build pre-install hook
-# Decodes Base64-encoded Firebase config files from EAS Secrets
-# for preview and production builds.
+# 1. Upgrades npm so the `min-release-age` cooldown in apps/mobile/.npmrc
+#    is honored during the subsequent dependency install.
+# 2. Decodes Base64-encoded Firebase config files from EAS Secrets
+#    for preview and production builds.
 #
 # Required EAS Secrets (Base64-encoded):
 #   GOOGLE_SERVICES_JSON_BASE64  — google-services.json for Android
 #   GOOGLE_SERVICES_PLIST_BASE64 — GoogleService-Info.plist for iOS
 
 set -euo pipefail
+
+# Supply-chain defense: install an integrity-verified npm@11.10.0 from the
+# shared helper. A pinned SHA-512 guards against npm registry compromise,
+# and the helper hard-asserts the upgrade actually took effect before
+# returning. Without this, `npm ci` (run later by EAS) could silently fall
+# back to an older npm that ignores `min-release-age` in .npmrc.
+bash ../../scripts/install-npm-pinned.sh
 
 FIREBASE_DIR="./firebase/production"
 

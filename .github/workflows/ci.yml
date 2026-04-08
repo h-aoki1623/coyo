@@ -7,12 +7,16 @@ on:
       - 'apps/**'
       - '.github/workflows/ci.yml'
       - 'Makefile'
+      - 'scripts/uv-install.sh'
+      - 'scripts/test/**'
   push:
     branches: [develop]
     paths:
       - 'apps/**'
       - '.github/workflows/ci.yml'
       - 'Makefile'
+      - 'scripts/uv-install.sh'
+      - 'scripts/test/**'
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -38,6 +42,17 @@ jobs:
               - 'apps/mobile/**'
               - '.github/workflows/ci.yml'
 
+  wrapper-tests:
+    name: Supply-chain wrapper tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # SHA-pinned to v3.2.4 for supply-chain safety.
+      - uses: astral-sh/setup-uv@caf0cab7a618c569241d31dcd442f54681755d39  # v3.2.4
+        with:
+          version: "0.7.19"
+      - run: bash scripts/test/test-uv-install.sh
+
   lint-api:
     name: Lint API
     needs: changes
@@ -57,10 +72,9 @@ jobs:
         with:
           version: "0.7.19"
           enable-cache: true
-          # No uv.lock yet (introduced in PR1b); key the cache off pyproject.toml.
-          cache-dependency-glob: "apps/api/pyproject.toml"
-      - run: uv pip install --system "ruff>=0.9"
-      - run: ruff check src/
+          cache-dependency-glob: "apps/api/uv.lock"
+      - run: uv sync --frozen --extra dev
+      - run: uv run ruff check src/
 
   lint-mobile:
     name: Lint Mobile
@@ -77,6 +91,12 @@ jobs:
           node-version: 20
           cache: npm
           cache-dependency-path: apps/mobile/package-lock.json
+      # npm >= 11.10 is required for the `min-release-age` cooldown set in
+      # apps/mobile/.npmrc. Use the shared integrity-verified installer so a
+      # compromised registry cannot serve a backdoored npm that disables the
+      # cooldown before `npm ci` reads .npmrc.
+      - name: Install pinned npm (integrity-verified)
+        run: ../../scripts/install-npm-pinned.sh
       - run: npm ci
       - run: npx eslint src/
 
@@ -104,10 +124,9 @@ jobs:
         with:
           version: "0.7.19"
           enable-cache: true
-          # No uv.lock yet (introduced in PR1b); key the cache off pyproject.toml.
-          cache-dependency-glob: "apps/api/pyproject.toml"
-      - run: uv pip install --system -e ".[dev]"
-      - run: pytest --tb=short
+          cache-dependency-glob: "apps/api/uv.lock"
+      - run: uv sync --frozen --extra dev
+      - run: uv run pytest --tb=short
 
   test-mobile:
     name: Test Mobile
@@ -124,5 +143,11 @@ jobs:
           node-version: 20
           cache: npm
           cache-dependency-path: apps/mobile/package-lock.json
+      # npm >= 11.10 is required for the `min-release-age` cooldown set in
+      # apps/mobile/.npmrc. Use the shared integrity-verified installer so a
+      # compromised registry cannot serve a backdoored npm that disables the
+      # cooldown before `npm ci` reads .npmrc.
+      - name: Install pinned npm (integrity-verified)
+        run: ../../scripts/install-npm-pinned.sh
       - run: npm ci
       - run: npx jest --ci --coverage

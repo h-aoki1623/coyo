@@ -33,6 +33,7 @@ coyo/
 - Python 3.12+
 - [uv](https://docs.astral.sh/uv/) (`curl -LsSf https://astral.sh/uv/install.sh | sh`)
 - Node.js 20+
+- npm >= 11.10.0 (`npm install -g npm@11.10.0`) — required for the supply-chain cooldown set in `apps/mobile/.npmrc`
 - Docker (Docker Desktop, OrbStack, or Colima)
 
 ### 1. Start Infrastructure
@@ -44,18 +45,28 @@ make docker-up          # Start Postgres + Redis
 ### 2. Backend
 
 ```bash
-cd apps/api
-uv venv
-source .venv/bin/activate
-uv pip install -e ".[dev]"
-cp ../../.env.example .env  # Edit OPENAI_API_KEY with your real key
-make -C ../.. migrate       # Run database migrations
-uvicorn src.coyo.main:app --reload
+cp apps/api/.env.example apps/api/.env  # Edit OPENAI_API_KEY with your real key
+make api-install        # uv sync --frozen from apps/api/uv.lock
+make migrate            # Run database migrations
+make dev-api            # uvicorn --reload
+```
+
+When adding, removing, or upgrading a Python dependency:
+
+```bash
+# Edit apps/api/pyproject.toml, then regenerate the lockfile with the
+# supply-chain cooldown applied, and re-sync your venv.
+make api-lock
+make api-install
 ```
 
 ### 3. Mobile
 
 ```bash
+# One-time: upgrade npm so the min-release-age cooldown in apps/mobile/.npmrc
+# is honored. engine-strict=true makes `npm install` hard-fail on older npm.
+npm install -g npm@11.10.0
+
 cd apps/mobile
 npm install
 npx expo start --dev-client
