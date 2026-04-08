@@ -36,8 +36,7 @@ jobs:
         with:
           version: "0.7.19"
           enable-cache: true
-          # No uv.lock yet (introduced in PR1b); key the cache off pyproject.toml.
-          cache-dependency-glob: "apps/api/pyproject.toml"
+          cache-dependency-glob: "apps/api/uv.lock"
 
       # Authenticate to GCP via Workload Identity Federation (no service account keys)
       - id: auth
@@ -60,12 +59,15 @@ jobs:
           echo "IMAGE=${IMAGE}" >> $GITHUB_ENV
 
       # Run database migrations
+      # Install from lockfile (supply-chain cooldown baked in) into a venv
+      # inside apps/api, then invoke alembic via `uv run` so the venv is
+      # picked up automatically.
       - name: Check pending migrations
         id: migration-check
+        working-directory: apps/api
         run: |
-          uv pip install --system -e "apps/api"
-          cd apps/api
-          if alembic check 2>&1 | grep -q "No new upgrade operations detected"; then
+          uv sync --frozen --no-dev
+          if uv run alembic check 2>&1 | grep -q "No new upgrade operations detected"; then
             echo "has_pending=false" >> $GITHUB_OUTPUT
             echo "No pending migrations"
           else
@@ -79,7 +81,8 @@ jobs:
 
       - name: Run migrations
         if: steps.migration-check.outputs.has_pending == 'true'
-        run: cd apps/api && alembic upgrade head
+        working-directory: apps/api
+        run: uv run alembic upgrade head
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           REDIS_URL: "memory://"

@@ -146,10 +146,12 @@ _setup_venv() {
     rm -rf "$api_dir/.venv"
   fi
 
-  _wt_log "Creating Python venv and installing dependencies (uv)..."
-  cd "$api_dir"
-  uv venv
-  uv pip install -e '.[dev]' 2>&1 | tail -3
+  _wt_log "Creating Python venv and installing dependencies (make api-install)..."
+  # Go through the sanctioned Makefile entry point so there is exactly ONE
+  # allowlisted path for venv installation. This keeps Claude Code's
+  # supply-chain hook (PR2) from needing a second exception for
+  # setup-worktree.sh.
+  (cd "$_WT_REPO_ROOT" && make api-install) 2>&1 | tail -3
   _wt_log ".venv created."
 }
 

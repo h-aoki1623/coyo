@@ -31,10 +31,11 @@ After creating a worktree, run the following setup before making any changes:
 cd <worktree>
 npm install
 
-# 2. Backend: create independent .venv
-cd <worktree>/apps/api
-uv venv && uv pip install -e ".[dev]"
-cp <main-repo>/apps/api/.env .env   # Copy, not symlink
+# 2. Backend: create independent .venv from the lockfile
+#    (supply-chain cooldown is baked into apps/api/uv.lock)
+cd <worktree>
+make api-install
+cp <main-repo>/apps/api/.env apps/api/.env   # Copy, not symlink
 
 # 3. Mobile: create independent node_modules
 cd <worktree>/apps/mobile
