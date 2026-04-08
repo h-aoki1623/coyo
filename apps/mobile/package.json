@@ -13,7 +13,8 @@
     "lint": "eslint src/",
     "test": "jest",
     "typecheck": "tsc --noEmit",
-    "postinstall": "patch-package"
+    "postinstall": "patch-package",
+    "eas-build-pre-install": "bash ./eas-build-pre-install.sh"
   },
   "dependencies": {
     "@expo-google-fonts/noto-sans-jp": "^0.4.3",
