@@ -19,7 +19,7 @@ this repo enforces a **release-age cooldown** on new dependencies:
   directly — use the Makefile targets instead:
   - `make api-lock`    — regenerate `uv.lock` (use when adding / upgrading deps)
   - `make api-install` — install deps from the lockfile into `apps/api/.venv`
-- **JavaScript / Mobile**: `apps/mobile/.npmrc` sets `min-release-age=7d`.
+- **JavaScript / Mobile**: `apps/mobile/.npmrc` sets `min-release-age=7` (days).
   `npm install` / `npm ci` will refuse to install packages younger than 7 days.
   This requires npm >= 11.10.0 (see Prerequisites above).
 
