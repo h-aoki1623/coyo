@@ -1,0 +1,6 @@
+a372bfe34e95da56aea69fe789692ec0c3027eac6c29bb967356d939eb7c1480  .claude/hooks/check-uv-install.sh
+ab3e942c6ee38271e51b83b0d881e21e0a4607b4afe3d5cbfdea9308c1304745  .claude/hooks/check-protected-files.sh
+8329945d91a58b298e969d1619e0c525efb9537703060bba71b8a1493ef41fe6  scripts/uv-install.sh
+1b74dda7003ccd2d39981e6f3f85a4f5044d7339e27bc3e068ad4d687b80b6e3  scripts/install-npm-pinned.sh
+4554d5e84aebc74389877f8df2e8d99820d9519000339adcc7b930563deea0e5  scripts/test/test-claude-hooks.sh
+bf5661dab74159cc64cd5354ea28e8f83517141f7e5d7ae99027efa5a0491cdc  scripts/test/test-uv-install.sh
