@@ -16,6 +16,30 @@ jest.mock('@/services/firebase-auth', () => ({
   getIdToken: jest.fn(),
 }));
 
+// Mock api client so we can assert request ordering during initialize().
+const mockApiPost = jest.fn();
+jest.mock('@/api/client', () => ({
+  apiClient: {
+    post: (...args: unknown[]) => mockApiPost(...args),
+    get: jest.fn(),
+    delete: jest.fn(),
+    postStream: jest.fn(),
+  },
+}));
+
+// Mock suggestions store so we can assert prefetch ordering relative to
+// the session-sync POST.
+const mockSuggestionsPrefetch = jest.fn();
+const mockSuggestionsReset = jest.fn();
+jest.mock('@/stores/suggestions-store', () => ({
+  useSuggestionsStore: {
+    getState: () => ({
+      prefetch: mockSuggestionsPrefetch,
+      reset: mockSuggestionsReset,
+    }),
+  },
+}));
+
 import {
   configureGoogleSignIn,
   onAuthStateChanged,
@@ -72,6 +96,11 @@ describe('useAuthStore', () => {
   beforeEach(() => {
     resetStore();
     jest.clearAllMocks();
+    // Default: session sync resolves immediately so initialize() and
+    // sign-up flows don't block. Tests that care about timing override
+    // this with their own implementation.
+    mockApiPost.mockResolvedValue({ data: null });
+    mockSuggestionsPrefetch.mockResolvedValue(undefined);
   });
 
   describe('initial state', () => {
@@ -169,6 +198,77 @@ describe('useAuthStore', () => {
       await Promise.resolve();
 
       expect(useAuthStore.getState().isEmailVerified).toBe(false);
+    });
+
+    it('awaits /api/auth/session before kicking off the suggestions prefetch', async () => {
+      // Regression guard for the first-launch empty-Home bug. Firing the
+      // suggestions prefetch in parallel with the session-sync POST caused
+      // a new user's /api/topics/suggestions request to hit the backend
+      // before the user row was committed, returning empty. This test
+      // locks in the ordering fix in auth-store.initialize().
+      const callOrder: string[] = [];
+      let resolveSession: () => void = () => {};
+      mockApiPost.mockImplementation((path: string) => {
+        callOrder.push(`post:${path}`);
+        return new Promise<{ data: unknown }>((resolve) => {
+          resolveSession = () => resolve({ data: null });
+        });
+      });
+      mockSuggestionsPrefetch.mockImplementation(() => {
+        callOrder.push('prefetch');
+        return Promise.resolve();
+      });
+
+      const mockUser = createMockUser({ emailVerified: true });
+      mockOnAuthStateChanged.mockImplementation((callback) => {
+        callback(mockUser);
+        return jest.fn();
+      });
+      useAuthStore.getState().initialize();
+
+      // After initialize(), only the session POST should be observed —
+      // prefetch must NOT have been called yet because session hasn't
+      // resolved.
+      await Promise.resolve();
+      expect(callOrder).toEqual(['post:/api/auth/session']);
+      expect(mockSuggestionsPrefetch).not.toHaveBeenCalled();
+
+      // Resolve the session sync; the prefetch should now fire.
+      resolveSession();
+      await Promise.resolve();
+      await Promise.resolve();
+      expect(callOrder).toEqual(['post:/api/auth/session', 'prefetch']);
+      expect(mockSuggestionsPrefetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('skips prefetch if the user signed out while session sync was in flight', async () => {
+      // Defensive guard: if the user taps Sign Out during the `await`, the
+      // isAuthenticated flag flips back to false via a second callback.
+      // The first callback must NOT kick off a prefetch for a signed-out
+      // user after its await resolves.
+      let resolveSession: () => void = () => {};
+      mockApiPost.mockImplementation(
+        () =>
+          new Promise<{ data: unknown }>((resolve) => {
+            resolveSession = () => resolve({ data: null });
+          }),
+      );
+
+      const mockUser = createMockUser({ emailVerified: true });
+      mockOnAuthStateChanged.mockImplementation((callback) => {
+        callback(mockUser);
+        return jest.fn();
+      });
+      useAuthStore.getState().initialize();
+      await Promise.resolve();
+
+      // Simulate sign-out landing on the store before session resolves.
+      useAuthStore.setState({ isAuthenticated: false, user: null });
+
+      resolveSession();
+      await Promise.resolve();
+      await Promise.resolve();
+      expect(mockSuggestionsPrefetch).not.toHaveBeenCalled();
     });
   });
 

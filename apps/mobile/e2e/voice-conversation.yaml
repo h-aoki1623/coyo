@@ -30,17 +30,14 @@ appId: to.coyo.app
       id: "home-greeting"
     timeout: 30000
 
-# Scroll to the Sports topic card (may be below the fold when suggestions are shown)
-# Scroll down to reveal topic cards (avoid sign-out button at bottom)
-- swipe:
-    start: "50%, 60%"
-    end: "50%, 30%"
-    duration: 500
-
-- extendedWaitUntil:
-    visible:
+# Scroll to the Sports topic card. With suggestions now reliably populated
+# above the fold (see suggestions-store.ts), Sports may be pushed further
+# down — use scrollUntilVisible instead of a fixed swipe distance.
+- scrollUntilVisible:
+    element:
       id: "topic-sports"
-    timeout: 5000
+    direction: DOWN
+    speed: 40
 
 - tapOn:
     id: "topic-sports"

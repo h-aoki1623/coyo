@@ -42,6 +42,7 @@ describe('useSuggestionsStore', () => {
       const state = useSuggestionsStore.getState();
       expect(state.suggestions).toEqual({ personal: [], trending: [] });
       expect(state.isReady).toBe(false);
+      expect(state.hasLoaded).toBe(false);
       expect(state.isLoading).toBe(false);
     });
   });
@@ -56,21 +57,26 @@ describe('useSuggestionsStore', () => {
       const state = useSuggestionsStore.getState();
       expect(state.suggestions).toEqual(sampleResponse);
       expect(state.isReady).toBe(true);
+      expect(state.hasLoaded).toBe(true);
       expect(state.isLoading).toBe(false);
     });
 
-    it('marks as ready even when fetch fails', async () => {
+    it('marks as ready but NOT loaded when fetch fails (so the hook can retry)', async () => {
       mockGet.mockRejectedValue(new Error('network'));
 
       await useSuggestionsStore.getState().prefetch();
 
       const state = useSuggestionsStore.getState();
       expect(state.suggestions).toEqual({ personal: [], trending: [] });
+      // isReady flips so the splash gate can release — we never want to
+      // strand the user on the splash because the API is down.
       expect(state.isReady).toBe(true);
+      // hasLoaded stays false so `useSuggestions` retries on mount.
+      expect(state.hasLoaded).toBe(false);
       expect(state.isLoading).toBe(false);
     });
 
-    it('marks as ready when API returns an error envelope (no data)', async () => {
+    it('marks as ready but NOT loaded when API returns an error envelope (no data)', async () => {
       mockGet.mockResolvedValue({
         error: { code: 'INTERNAL_ERROR', message: 'oops' },
       });
@@ -80,6 +86,23 @@ describe('useSuggestionsStore', () => {
       const state = useSuggestionsStore.getState();
       expect(state.suggestions).toEqual({ personal: [], trending: [] });
       expect(state.isReady).toBe(true);
+      expect(state.hasLoaded).toBe(false);
+    });
+
+    it('preserves hasLoaded and cached data across a subsequent failing refetch', async () => {
+      // First call succeeds and populates the cache.
+      mockGet.mockResolvedValueOnce({ data: sampleResponse });
+      await useSuggestionsStore.getState().prefetch();
+      expect(useSuggestionsStore.getState().hasLoaded).toBe(true);
+
+      // A later refetch failure must NOT invalidate the previously loaded
+      // cache — users should continue to see the data they already had.
+      mockGet.mockRejectedValueOnce(new Error('network'));
+      await useSuggestionsStore.getState().prefetch();
+
+      const state = useSuggestionsStore.getState();
+      expect(state.suggestions).toEqual(sampleResponse);
+      expect(state.hasLoaded).toBe(true);
     });
 
     it('reuses an in-flight request instead of firing twice', async () => {
@@ -111,6 +134,7 @@ describe('useSuggestionsStore', () => {
       const state = useSuggestionsStore.getState();
       expect(state.suggestions).toEqual({ personal: [], trending: [] });
       expect(state.isReady).toBe(false);
+      expect(state.hasLoaded).toBe(false);
       expect(state.isLoading).toBe(false);
     });
 
