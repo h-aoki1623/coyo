@@ -200,52 +200,16 @@ describe('useAuthStore', () => {
       expect(useAuthStore.getState().isEmailVerified).toBe(false);
     });
 
-    it('awaits /api/auth/session before kicking off the suggestions prefetch', async () => {
-      // Regression guard for the first-launch empty-Home bug. Firing the
-      // suggestions prefetch in parallel with the session-sync POST caused
-      // a new user's /api/topics/suggestions request to hit the backend
-      // before the user row was committed, returning empty. This test
-      // locks in the ordering fix in auth-store.initialize().
-      const callOrder: string[] = [];
-      let resolveSession: () => void = () => {};
-      mockApiPost.mockImplementation((path: string) => {
-        callOrder.push(`post:${path}`);
-        return new Promise<{ data: unknown }>((resolve) => {
-          resolveSession = () => resolve({ data: null });
-        });
-      });
-      mockSuggestionsPrefetch.mockImplementation(() => {
-        callOrder.push('prefetch');
-        return Promise.resolve();
-      });
-
-      const mockUser = createMockUser({ emailVerified: true });
-      mockOnAuthStateChanged.mockImplementation((callback) => {
-        callback(mockUser);
-        return jest.fn();
-      });
-      useAuthStore.getState().initialize();
-
-      // After initialize(), only the session POST should be observed —
-      // prefetch must NOT have been called yet because session hasn't
-      // resolved.
-      await Promise.resolve();
-      expect(callOrder).toEqual(['post:/api/auth/session']);
-      expect(mockSuggestionsPrefetch).not.toHaveBeenCalled();
-
-      // Resolve the session sync; the prefetch should now fire.
-      resolveSession();
-      await Promise.resolve();
-      await Promise.resolve();
-      expect(callOrder).toEqual(['post:/api/auth/session', 'prefetch']);
-      expect(mockSuggestionsPrefetch).toHaveBeenCalledTimes(1);
-    });
-
-    it('skips prefetch if the user signed out while session sync was in flight', async () => {
-      // Defensive guard: if the user taps Sign Out during the `await`, the
-      // isAuthenticated flag flips back to false via a second callback.
-      // The first callback must NOT kick off a prefetch for a signed-out
-      // user after its await resolves.
+    it('fires /api/auth/session and suggestions prefetch in parallel', async () => {
+      // Previously we awaited the session POST before calling prefetch()
+      // to avoid a new-user race (concurrent find_or_create_by_auth_uid
+      // INSERTs). That turned out to be unnecessary — the backend
+      // repository catches the IntegrityError and converges on the
+      // winning row — and the serial await cost ~800ms on first
+      // cold-start launch, causing the splash gate to time out before
+      // suggestions finished loading. This test locks in the parallel
+      // dispatch so a future refactor doesn't quietly reintroduce the
+      // serial path.
       let resolveSession: () => void = () => {};
       mockApiPost.mockImplementation(
         () =>
@@ -260,15 +224,16 @@ describe('useAuthStore', () => {
         return jest.fn();
       });
       useAuthStore.getState().initialize();
+
+      // Both calls must be observed after the very first microtask,
+      // BEFORE the session POST has resolved.
       await Promise.resolve();
+      expect(mockApiPost).toHaveBeenCalledWith('/api/auth/session');
+      expect(mockSuggestionsPrefetch).toHaveBeenCalledTimes(1);
 
-      // Simulate sign-out landing on the store before session resolves.
-      useAuthStore.setState({ isAuthenticated: false, user: null });
-
+      // Cleanly resolve the pending session so subsequent tests don't
+      // inherit a dangling unresolved promise.
       resolveSession();
-      await Promise.resolve();
-      await Promise.resolve();
-      expect(mockSuggestionsPrefetch).not.toHaveBeenCalled();
     });
   });
 
