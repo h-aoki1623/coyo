@@ -32,12 +32,14 @@ import structlog
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from coyo.config import get_settings
+from coyo.repositories.conversation import ConversationRepository
 from coyo.repositories.turn import TurnRepository
 from coyo.services.correction import CorrectionService
 from coyo.services.llm.base import ChatMessage, ChatOptions, TextChunk, WebSearchStarted
 from coyo.services.llm.openai_client import OpenAIClient
 from coyo.services.memory_context import MemoryContextService
 from coyo.services.stt import STTService
+from coyo.services.theme_context import build_theme_context
 from coyo.services.tts import TTSService
 from coyo.services.web_search_filter import is_filler_turn, strip_citations
 
@@ -93,6 +95,7 @@ class TurnOrchestrator:
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
         self._turn_repo = TurnRepository(session)
+        self._conversation_repo = ConversationRepository(session)
         self._stt = STTService()
         self._tts = TTSService()
         self._correction = CorrectionService(session)
@@ -133,7 +136,9 @@ class TurnOrchestrator:
         )
         stt_prompt = self._format_stt_prompt(previous_turns, topic)
         user_text = await self._stt.transcribe(
-            audio_data, filename=audio_filename, prompt=stt_prompt,
+            audio_data,
+            filename=audio_filename,
+            prompt=stt_prompt,
         )
         yield _make_event("stt_result", {"text": user_text})
 
@@ -150,7 +155,10 @@ class TurnOrchestrator:
 
         # -- Step 3: Build conversation history and stream LLM reply ------
         messages = await self._build_messages(
-            conversation_id, user_text, user_id=user_id, topic=topic,
+            conversation_id,
+            user_text,
+            user_id=user_id,
+            topic=topic,
         )
         full_ai_text = ""
 
@@ -261,9 +269,26 @@ class TurnOrchestrator:
         else:
             system_prompt = _GREETING_SYSTEM_PROMPT.format(topic=topic)
 
-        memory_context = await MemoryContextService.build_context(
-            self._session, user_id,
-        )
+        # Build the theme-aware memory snapshot once per conversation and
+        # persist it on the Conversation row. The turn path will read it
+        # back as-is so the system prompt is byte-stable across turns
+        # (crucial for OpenAI/Anthropic prompt-cache hits).
+        conversation = await self._conversation_repo.get_by_id(conversation_id)
+        memory_context: str | None = None
+        if conversation is not None:
+            theme = await build_theme_context(conversation, self._session)
+            memory_context = await MemoryContextService.build_context(
+                self._session,
+                user_id,
+                theme=theme,
+            )
+            # Empty string sentinel: snapshot computed but no memory.
+            text_to_store = memory_context if memory_context is not None else ""
+            await self._conversation_repo.set_memory_context_text(
+                conversation.id,
+                text_to_store,
+            )
+
         if memory_context:
             system_prompt = system_prompt + "\n\n" + memory_context
 
@@ -341,8 +366,9 @@ class TurnOrchestrator:
         topic_label = topic if topic != "suggested" else "a trending news topic"
         system_prompt = _CONVERSATION_SYSTEM_PROMPT.format(topic=topic_label)
 
-        memory_context = await MemoryContextService.build_context(
-            self._session, user_id,
+        memory_context = await self._read_or_compute_memory_snapshot(
+            conversation_id=conversation_id,
+            user_id=user_id,
         )
         if memory_context:
             system_prompt = system_prompt + "\n\n" + memory_context
@@ -362,6 +388,57 @@ class TurnOrchestrator:
         # Add current user message
         messages.append(ChatMessage(role="user", content=current_user_text))
         return messages
+
+    async def _read_or_compute_memory_snapshot(
+        self,
+        *,
+        conversation_id: uuid.UUID,
+        user_id: uuid.UUID,
+    ) -> str | None:
+        """Return the memory context snapshot for the given conversation.
+
+        Reads ``Conversation.memory_context_text`` (set by the greeting
+        path). When the snapshot is missing — only happens in eval/dev
+        flows that bypass the greeting — computes a fresh snapshot and
+        writes it via the race-safe conditional UPDATE so concurrent
+        turns end up with byte-identical prompts.
+
+        Returns ``None`` when the snapshot is the empty-string sentinel
+        (computed but no memory available).
+        """
+        conversation = await self._conversation_repo.get_by_id(conversation_id)
+        if conversation is None:
+            return None
+
+        # Targeted refresh — never call session.refresh(conversation)
+        # without column list, which would clobber unsaved attributes.
+        self._session.expire(
+            conversation,
+            ["memory_context_text", "memory_context_built_at"],
+        )
+        await self._session.refresh(
+            conversation,
+            ["memory_context_text", "memory_context_built_at"],
+        )
+
+        snapshot = conversation.memory_context_text
+        if snapshot is not None:
+            return snapshot or None  # "" sentinel → no injection
+
+        # Lazy compute path. The greeting path normally pre-fills this,
+        # so we only get here in eval/dev or unusual flows.
+        theme = await build_theme_context(conversation, self._session)
+        memory_context = await MemoryContextService.build_context(
+            self._session,
+            user_id,
+            theme=theme,
+        )
+        text = memory_context if memory_context is not None else ""
+        winner = await self._conversation_repo.try_set_memory_context_text_if_null(
+            conversation.id,
+            text,
+        )
+        return winner or None
 
     async def _load_correction_items(
         self,

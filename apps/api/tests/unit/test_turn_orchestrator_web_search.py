@@ -7,10 +7,10 @@ import pytest
 
 from coyo.services.llm.base import TextChunk, WebSearchStarted
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _make_mock_turn(turn_id=None, role="user", text="hello", sequence=1):
     """Create a mock Turn object."""
@@ -63,7 +63,13 @@ class TestTurnOrchestratorWebSearch:
             patch("coyo.services.turn_orchestrator.CorrectionService") as mock_corr_cls,
             patch("coyo.services.turn_orchestrator.OpenAIClient") as mock_llm_cls,
             patch("coyo.services.turn_orchestrator.TurnRepository") as mock_repo_cls,
+            patch("coyo.services.turn_orchestrator.ConversationRepository") as mock_conv_repo_cls,
         ):
+            # Conversation repository — return None so the snapshot
+            # helper short-circuits and the legacy path injects nothing.
+            mock_conv_repo = AsyncMock()
+            mock_conv_repo.get_by_id = AsyncMock(return_value=None)
+            mock_conv_repo_cls.return_value = mock_conv_repo
             # STT
             mock_stt = AsyncMock()
             mock_stt.transcribe = AsyncMock(return_value="yeah")
@@ -169,9 +175,7 @@ class TestTurnOrchestratorWebSearch:
         self, orchestrator, conversation_id, user_id
     ):
         """Non-filler turns that don't trigger web search still work correctly."""
-        orchestrator._mock_stt.transcribe = AsyncMock(
-            return_value="Tell me about your hobby"
-        )
+        orchestrator._mock_stt.transcribe = AsyncMock(return_value="Tell me about your hobby")
 
         async def mock_chat_with_tools(messages, options=None):
             yield TextChunk(text="I enjoy reading books.")
@@ -197,9 +201,7 @@ class TestTurnOrchestratorWebSearch:
         assert done_events[0]["data"]["text"] == "I enjoy reading books."
 
     @pytest.mark.unit
-    async def test_filler_turn_full_text_accumulated(
-        self, orchestrator, conversation_id, user_id
-    ):
+    async def test_filler_turn_full_text_accumulated(self, orchestrator, conversation_id, user_id):
         """Filler turn accumulates full AI text from chat() chunks."""
         orchestrator._mock_stt.transcribe = AsyncMock(return_value="ok")
 
@@ -226,9 +228,7 @@ class TestTurnOrchestratorWebSearch:
         self, orchestrator, conversation_id, user_id
     ):
         """Non-filler turn accumulates full AI text from TextChunk events only."""
-        orchestrator._mock_stt.transcribe = AsyncMock(
-            return_value="What is the weather today?"
-        )
+        orchestrator._mock_stt.transcribe = AsyncMock(return_value="What is the weather today?")
 
         async def mock_chat_with_tools(messages, options=None):
             yield WebSearchStarted()

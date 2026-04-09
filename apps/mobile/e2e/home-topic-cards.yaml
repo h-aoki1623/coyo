@@ -53,12 +53,19 @@ appId: to.coyo.app
     direction: DOWN
     speed: 40
 
-# Verify the history button is present via testID
-- assertVisible:
-    id: "history-button"
-
-# Verify the TOPICS section label
-- assertVisible: "TOPICS"
-
 # Capture evidence of all topic cards
 - takeScreenshot: "home-topic-cards-all"
+
+# Scroll back to the top of the screen to verify the TOPICS section label
+# and the history button are both accessible from the header. The previous
+# scrollUntilVisible steps walked the user all the way down to the
+# entertainment card, pushing the fixed-position header (history button)
+# and the TOPICS section label out of the viewport.
+- scrollUntilVisible:
+    element:
+      id: "history-button"
+    direction: UP
+    speed: 40
+- assertVisible:
+    id: "history-button"
+- assertVisible: "TOPICS"
