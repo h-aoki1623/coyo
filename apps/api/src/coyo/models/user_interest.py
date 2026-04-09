@@ -6,6 +6,7 @@ import uuid
 from datetime import datetime
 
 import sqlalchemy as sa
+from pgvector.sqlalchemy import Vector  # type: ignore[import-untyped]
 from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, String, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
@@ -87,4 +88,8 @@ class UserInterest(Base):
         DateTime(timezone=True),
         server_default=func.now(),
         nullable=False,
+    )
+    embedding: Mapped[list[float] | None] = mapped_column(
+        Vector(1536),
+        nullable=True,
     )

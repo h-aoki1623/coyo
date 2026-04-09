@@ -263,6 +263,16 @@ def mock_settings():
     mock.cloud_tasks_queue = None
     mock.cloud_run_service_url = None
     mock.cloud_tasks_service_account = None
+    mock.embedding_model = "text-embedding-3-small"
+    mock.embedding_dim = 1536
+    mock.memory_theme_alpha = 0.6
+    mock.memory_theme_beta = 0.3
+    mock.memory_theme_gamma = 0.1
+    mock.memory_summary_alpha = 0.7
+    mock.memory_summary_beta = 0.3
+    mock.memory_summary_half_life_days = 14
+    mock.memory_k_interest = 10
+    mock.memory_k_summary = 5
 
     with patch("coyo.config.get_settings", return_value=mock):
         yield mock
@@ -324,7 +334,9 @@ def mock_openai_client():
 
     # Chat completions mock (non-streaming)
     completion_message = MagicMock()
-    completion_message.content = '{"has_errors": false, "corrected_text": "test", "explanation": "", "items": []}'
+    completion_message.content = (
+        '{"has_errors": false, "corrected_text": "test", "explanation": "", "items": []}'
+    )
     completion_choice = MagicMock()
     completion_choice.message = completion_message
     completion_response = MagicMock()

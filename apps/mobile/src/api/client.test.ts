@@ -50,11 +50,11 @@ describe('apiClient', () => {
 
       expect(global.fetch).toHaveBeenCalledWith(
         'http://localhost:8000/api/test',
-        {
+        expect.objectContaining({
           headers: {
             'Content-Type': 'application/json',
           },
-        },
+        }),
       );
     });
 
@@ -128,13 +128,13 @@ describe('apiClient', () => {
 
       expect(global.fetch).toHaveBeenCalledWith(
         'http://localhost:8000/api/conversations',
-        {
+        expect.objectContaining({
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify(requestBody),
-        },
+        }),
       );
       expect(result).toEqual({ data: responseData });
     });
@@ -176,12 +176,12 @@ describe('apiClient', () => {
 
       expect(global.fetch).toHaveBeenCalledWith(
         'http://localhost:8000/api/conversations/conv-1',
-        {
+        expect.objectContaining({
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
           },
-        },
+        }),
       );
     });
 
@@ -243,6 +243,154 @@ describe('apiClient', () => {
 
       const url = (global.fetch as jest.Mock).mock.calls[0][0];
       expect(url).toBe('http://localhost:8000/api/health');
+    });
+  });
+
+  describe('timeout', () => {
+    // Simulate an aborted fetch: listen for the AbortSignal and reject
+    // with a DOMException-like AbortError when it fires.
+    function mockAbortableFetch(latencyMs: number, response?: Response) {
+      (global.fetch as jest.Mock).mockImplementation(
+        (_url: string, init: RequestInit) =>
+          new Promise((resolve, reject) => {
+            const signal = init.signal;
+            const timer = setTimeout(() => {
+              if (response) resolve(response);
+              else resolve(createMockResponse({ ok: true }));
+            }, latencyMs);
+            if (signal) {
+              signal.addEventListener('abort', () => {
+                clearTimeout(timer);
+                const err = new Error('The operation was aborted.');
+                err.name = 'AbortError';
+                reject(err);
+              });
+            }
+          }),
+      );
+    }
+
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('passes an AbortSignal to fetch so the request can be cancelled', async () => {
+      mockAbortableFetch(100, createMockResponse({ ok: true }));
+
+      const p = apiClient.get('/api/test');
+      await jest.advanceTimersByTimeAsync(100);
+      await p;
+
+      const init = (global.fetch as jest.Mock).mock.calls[0][1];
+      expect(init.signal).toBeInstanceOf(AbortSignal);
+    });
+
+    it('returns a TIMEOUT_ERROR envelope when GET exceeds the default 15s timeout', async () => {
+      mockAbortableFetch(20_000);
+
+      const promise = apiClient.get('/api/slow');
+      // Fire the 15s abort timer.
+      await jest.advanceTimersByTimeAsync(15_000);
+      const result = await promise;
+
+      expect(result).toEqual({
+        error: {
+          code: 'TIMEOUT_ERROR',
+          message: 'Request timed out after 15000ms',
+        },
+      });
+    });
+
+    it('returns a TIMEOUT_ERROR envelope when POST exceeds the default 15s timeout', async () => {
+      mockAbortableFetch(20_000);
+
+      const promise = apiClient.post('/api/slow', { foo: 'bar' });
+      await jest.advanceTimersByTimeAsync(15_000);
+      const result = await promise;
+
+      expect(result).toEqual({
+        error: {
+          code: 'TIMEOUT_ERROR',
+          message: 'Request timed out after 15000ms',
+        },
+      });
+    });
+
+    it('returns a TIMEOUT_ERROR envelope when DELETE exceeds the default 10s timeout', async () => {
+      mockAbortableFetch(20_000);
+
+      const promise = apiClient.delete('/api/slow');
+      await jest.advanceTimersByTimeAsync(10_000);
+      const result = await promise;
+
+      expect(result).toEqual({
+        error: {
+          code: 'TIMEOUT_ERROR',
+          message: 'Request timed out after 10000ms',
+        },
+      });
+    });
+
+    it('honours a per-call timeoutMs override', async () => {
+      mockAbortableFetch(20_000);
+
+      const promise = apiClient.get('/api/slow', { timeoutMs: 500 });
+      await jest.advanceTimersByTimeAsync(500);
+      const result = await promise;
+
+      expect(result).toEqual({
+        error: {
+          code: 'TIMEOUT_ERROR',
+          message: 'Request timed out after 500ms',
+        },
+      });
+    });
+
+    it('does not abort when the response arrives before the timeout', async () => {
+      const mockData = { id: 'ok' };
+      mockAbortableFetch(100, createMockResponse(mockData));
+
+      const promise = apiClient.get('/api/fast');
+      await jest.advanceTimersByTimeAsync(100);
+      const result = await promise;
+
+      expect(result).toEqual({ data: mockData });
+    });
+
+    it('disables the timeout entirely when timeoutMs is 0', async () => {
+      const mockData = { id: 'eventually' };
+      mockAbortableFetch(30_000, createMockResponse(mockData));
+
+      const promise = apiClient.get('/api/eventually', { timeoutMs: 0 });
+      // Advance well past any default timeout; the request must still
+      // be allowed to complete.
+      await jest.advanceTimersByTimeAsync(30_000);
+      const result = await promise;
+
+      expect(result).toEqual({ data: mockData });
+    });
+
+    it('postStream does not apply a timeout (SSE is long-lived)', async () => {
+      // postStream calls fetch directly without fetchWithTimeout, so no
+      // AbortSignal is attached. We just assert fetch was called without
+      // a signal to lock in this contract.
+      (global.fetch as jest.Mock).mockResolvedValue(createMockResponse(null));
+      const formData = new FormData();
+
+      await apiClient.postStream('/api/stream', formData);
+
+      const init = (global.fetch as jest.Mock).mock.calls[0][1];
+      expect(init.signal).toBeUndefined();
+    });
+
+    it('re-throws non-abort errors so callers can distinguish them', async () => {
+      (global.fetch as jest.Mock).mockRejectedValue(new Error('boom'));
+
+      await expect(apiClient.get('/api/broken')).rejects.toThrow('boom');
     });
   });
 });

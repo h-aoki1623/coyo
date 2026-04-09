@@ -6,7 +6,7 @@ import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, String, func
+from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, String, Text, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -84,6 +84,21 @@ class Conversation(BaseModel):
         server_default="false",
         default=False,
         comment="Whether memory has been extracted from this conversation",
+    )
+    memory_context_text: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True,
+        default=None,
+        comment=(
+            "Snapshot of injected memory context, computed once per "
+            "conversation. NULL = not yet computed; '' = computed but "
+            "no memory available."
+        ),
+    )
+    memory_context_built_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+        default=None,
     )
 
     # Relationships

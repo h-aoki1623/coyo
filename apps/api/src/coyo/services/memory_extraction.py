@@ -10,6 +10,7 @@ from sqlalchemy import select, update
 
 from coyo.config import get_settings
 from coyo.db import get_session_factory
+from coyo.exceptions import ExternalServiceError
 from coyo.models.conversation import Conversation
 from coyo.models.topic_suggestion import TopicSuggestion
 from coyo.models.turn import Turn
@@ -332,6 +333,20 @@ def _keyword_matches(keyword: str, text: str) -> bool:
     return bool(re.search(pattern, text.lower()))
 
 
+def compose_summary_text(
+    source_keyword: str | None,
+    topic_title: str,
+    summary: str,
+) -> str:
+    """Build the text used to embed a ConversationSummary.
+
+    Mirrors the structure of theme text built by ``build_theme_context``
+    so cosine similarity captures topical alignment, not stylistic noise.
+    """
+    head = source_keyword or topic_title
+    return f"{head}\n{summary}"
+
+
 def trim_to_word_boundary(text: str, *, max_chars: int = _MAX_SUMMARY_LENGTH) -> str:
     """Trim text to max_chars at a word boundary."""
     if len(text) <= max_chars:
@@ -530,7 +545,15 @@ class MemoryExtractionService:
         summary_text: str,
         user_id: uuid.UUID,
     ) -> None:
-        """Save the conversation summary with topic title."""
+        """Save the conversation summary with topic title and embedding.
+
+        The embedding is computed from a composed string that mirrors what
+        will be matched against the conversation theme later (theme + body).
+        Embedding failures bubble up via ExternalServiceError so the broader
+        memory extraction pipeline retries (Cloud Tasks at-least-once).
+        """
+        from coyo.services.embedding import get_embedding_service
+
         topic_title = "Free conversation"
         source_keyword: str | None = None
 
@@ -540,6 +563,11 @@ class MemoryExtractionService:
                 topic_title = suggestion.title
                 source_keyword = suggestion.source_keyword
 
+        compose_text = compose_summary_text(source_keyword, topic_title, summary_text)
+        embedding_service = get_embedding_service()
+        embeddings = await embedding_service.embed([compose_text])
+        embedding = embeddings[0] if embeddings else None
+
         repo = ConversationSummaryRepository(session)
         await repo.create(
             conversation_id=conversation.id,
@@ -547,6 +575,7 @@ class MemoryExtractionService:
             topic_title=topic_title,
             source_keyword=source_keyword,
             summary=summary_text,
+            embedding=embedding,
         )
 
     @staticmethod
@@ -631,7 +660,9 @@ class MemoryExtractionService:
         )
         processed = await postprocessor.process(raw_keywords, existing_keyword_texts)
 
-        # Upsert processed keywords
+        # Upsert processed keywords. The embedding is reused from the
+        # KeywordPostprocessor batch (already paid for during dedup) and
+        # is persisted on the INSERT path only — see InterestRepository.
         seen_keywords: set[str] = set()
         for kw in processed:
             target = kw.merge_target or kw.keyword
@@ -645,6 +676,7 @@ class MemoryExtractionService:
                     current_conv_idx=current_conv_idx,
                     summary=kw.summary if kw.merge_target is None else None,
                     iab_category_id=kw.iab_category_id,
+                    embedding=kw.embedding if kw.merge_target is None else None,
                 )
 
         return seen_keywords
@@ -701,7 +733,32 @@ class MemoryExtractionService:
                 )
                 if response.summary:
                     trimmed = trim_to_word_boundary(response.summary)
-                    await interest_repo.update_summary(user_id, interest.keyword, trimmed)
+                    # Re-embed only when the summary text actually changes,
+                    # so we never recompute embeddings for total_mentions
+                    # bumps. Same flush as the summary update.
+                    new_embedding: list[float] | None = None
+                    if not is_semantically_same(interest.summary or "", trimmed):
+                        from coyo.services.embedding import get_embedding_service
+
+                        embedding_service = get_embedding_service()
+                        try:
+                            vectors = await embedding_service.embed(
+                                [f"{interest.keyword}: {trimmed}"]
+                            )
+                            new_embedding = vectors[0] if vectors else None
+                        except ExternalServiceError:
+                            logger.warning(
+                                "interest_summary_embed_failed",
+                                keyword=interest.keyword,
+                                user_id=str(user_id),
+                            )
+                            new_embedding = None
+                    await interest_repo.update_summary(
+                        user_id,
+                        interest.keyword,
+                        trimmed,
+                        embedding=new_embedding,
+                    )
             except Exception:
                 logger.exception(
                     "interest_summary_regeneration_failed",

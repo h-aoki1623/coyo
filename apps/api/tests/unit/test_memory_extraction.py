@@ -1,6 +1,7 @@
 """Unit tests for the MemoryExtractionService."""
 
 import uuid
+from collections.abc import Generator
 from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -12,17 +13,37 @@ from coyo.models.conversation import Conversation
 from coyo.models.conversation_summary import ConversationSummary
 from coyo.models.turn import Turn
 from coyo.models.user import User
-from coyo.models.user_interest import UserInterest
 from coyo.models.user_profile_attribute import UserProfileAttribute
 from coyo.services.memory_extraction import (
+    KeywordItem,
     MemoryExtractionResult,
     MemoryExtractionService,
     MemoryItem,
-    KeywordItem,
     is_semantically_same,
     trim_to_word_boundary,
 )
 
+
+@pytest.fixture(autouse=True)
+def _mock_embedding_service() -> Generator[MagicMock, None, None]:
+    """Stub ``get_embedding_service`` so tests never hit the real OpenAI API.
+
+    ``memory_extraction`` lazily imports ``get_embedding_service`` inside
+    ``_save_conversation_summary`` and ``_regenerate_interest_summaries``;
+    patching the source module here covers both call sites. Returns a
+    1536-dim zero vector regardless of input length.
+    """
+    fake_service = MagicMock()
+
+    async def _embed(texts: list[str]) -> list[list[float]]:
+        return [[0.0] * 1536 for _ in texts]
+
+    fake_service.embed = AsyncMock(side_effect=_embed)
+    with patch(
+        "coyo.services.embedding.get_embedding_service",
+        return_value=fake_service,
+    ):
+        yield fake_service
 
 # ---------------------------------------------------------------------------
 # Helper function tests

@@ -23,6 +23,7 @@ dependencies = [
     "slowapi>=0.1.9",
     "google-cloud-tasks>=2.16",
     "google-auth>=2.29",
+    "pgvector>=0.3",
 ]
 
 [project.optional-dependencies]
@@ -78,6 +79,16 @@ module = [
     "yaml",
 ]
 ignore_missing_imports = true
+
+# Test files are informal: fixtures use MagicMock/AsyncMock whose return
+# types are hard to annotate precisely, and many tests are pytest-style
+# functions without return annotations. Source code stays strict.
+[[tool.mypy.overrides]]
+module = ["tests.*"]
+disallow_untyped_defs = false
+disallow_untyped_calls = false
+disallow_incomplete_defs = false
+check_untyped_defs = false
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

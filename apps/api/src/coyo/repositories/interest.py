@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import math
+import uuid  # noqa: TC003 — dataclass field annotation needs runtime symbol
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
@@ -13,8 +14,6 @@ from sqlalchemy.exc import IntegrityError
 from coyo.models.user_interest import UserInterest
 
 if TYPE_CHECKING:
-    import uuid
-
     from sqlalchemy.ext.asyncio import AsyncSession
 
 # 2-layer weight model parameters
@@ -36,6 +35,20 @@ class InterestWithWeight:
     last_mentioned_conv_idx: int
     summary: str | None
     iab_category_id: str | None = None
+
+
+@dataclass(frozen=True)
+class InterestEmbeddingRow:
+    """Lean projection of an interest row used for theme retrieval."""
+
+    user_id: uuid.UUID
+    keyword: str
+    summary: str | None
+    iab_category_id: str | None
+    embedding: list[float]
+    total_mentions: int
+    short_term_stored: float
+    last_mentioned_conv_idx: int
 
 
 def compute_effective_weight(
@@ -72,13 +85,18 @@ class InterestRepository:
         current_conv_idx: int,
         summary: str | None = None,
         iab_category_id: str | None = None,
+        embedding: list[float] | None = None,
     ) -> UserInterest:
         """Insert or update an interest keyword with 2-layer model logic.
 
         On insert: sets initial values and summary if provided,
-            sets needs_summary_update = False.
+            sets needs_summary_update = False. ``embedding`` is persisted
+            on the INSERT path only — never on subsequent mention bumps,
+            because changing the embedding without changing the summary
+            would invalidate cosine matches.
         On update: applies decay to short_term, then boosts.
-            Does NOT update summary; sets needs_summary_update = True instead.
+            Does NOT update summary or embedding; sets
+            needs_summary_update = True instead.
         """
         keyword = keyword.lower().strip()
         stmt = select(UserInterest).where(
@@ -100,6 +118,7 @@ class InterestRepository:
                 summary=summary,
                 needs_summary_update=False,
                 iab_category_id=iab_category_id,
+                embedding=embedding,
             )
             self._session.add(interest)
             try:
@@ -114,14 +133,10 @@ class InterestRepository:
                     )
                 )
                 interest = result.scalar_one()
-                self._apply_mention(
-                    interest, is_news_relevant, current_conv_idx, iab_category_id
-                )
+                self._apply_mention(interest, is_news_relevant, current_conv_idx, iab_category_id)
                 await self._session.flush()
         else:
-            self._apply_mention(
-                interest, is_news_relevant, current_conv_idx, iab_category_id
-            )
+            self._apply_mention(interest, is_news_relevant, current_conv_idx, iab_category_id)
             await self._session.flush()
 
         return interest
@@ -233,8 +248,16 @@ class InterestRepository:
         user_id: uuid.UUID,
         keyword: str,
         summary: str,
+        *,
+        embedding: list[float] | None = None,
     ) -> None:
-        """Update interest summary, set summary_updated_at=now(), needs_summary_update=False."""
+        """Update interest summary; optionally update embedding atomically.
+
+        Sets summary_updated_at=now(), needs_summary_update=False.
+        ``embedding`` should be provided whenever the new summary text is
+        substantially different from the previous one so that future
+        theme-retrieval queries match the latest semantics.
+        """
         keyword = keyword.lower().strip()
         stmt = select(UserInterest).where(
             UserInterest.user_id == user_id,
@@ -247,4 +270,72 @@ class InterestRepository:
             interest.summary = summary
             interest.summary_updated_at = datetime.now(UTC)
             interest.needs_summary_update = False
+            if embedding is not None:
+                interest.embedding = embedding
             await self._session.flush()
+
+    async def get_all_with_embeddings(
+        self,
+        user_id: uuid.UUID,
+        *,
+        limit: int = 2000,
+    ) -> list[InterestEmbeddingRow]:
+        """Fetch lean interest rows for theme-relevant retrieval.
+
+        Selects only columns needed for ranking — avoids loading the
+        full ORM entity (and its TOAST-stored ``updated_at`` etc.) which
+        would dominate latency for users with hundreds of interests.
+
+        Returns rows with ``embedding IS NOT NULL`` only. Rows missing an
+        embedding (backfill not yet run, or older insert) are silently
+        excluded — callers fall back to ``get_top_interests`` to top up.
+
+        ``limit`` caps the number of candidate rows fetched per call as a
+        DoS guard. Rows are ordered by ``last_mentioned_conv_idx DESC``
+        so the most recently active interests are kept when the cap is
+        reached.
+        """
+        stmt = (
+            select(
+                UserInterest.user_id,
+                UserInterest.keyword,
+                UserInterest.summary,
+                UserInterest.iab_category_id,
+                UserInterest.embedding,
+                UserInterest.total_mentions,
+                UserInterest.short_term_stored,
+                UserInterest.last_mentioned_conv_idx,
+            )
+            .where(
+                UserInterest.user_id == user_id,
+                UserInterest.embedding.is_not(None),
+            )
+            .order_by(
+                UserInterest.last_mentioned_conv_idx.desc(),
+                UserInterest.keyword.asc(),  # tiebreaker → byte-stable
+            )
+            .limit(limit)
+        )
+        result = await self._session.execute(stmt)
+        rows: list[InterestEmbeddingRow] = []
+        for row in result.all():
+            embedding = row.embedding
+            # pgvector returns numpy arrays; normalize to list[float] for the
+            # cosine_similarity helper, which is dialect-agnostic.
+            if embedding is None:
+                continue
+            if not isinstance(embedding, list):
+                embedding = list(embedding)
+            rows.append(
+                InterestEmbeddingRow(
+                    user_id=row.user_id,
+                    keyword=row.keyword,
+                    summary=row.summary,
+                    iab_category_id=row.iab_category_id,
+                    embedding=embedding,
+                    total_mentions=row.total_mentions,
+                    short_term_stored=row.short_term_stored,
+                    last_mentioned_conv_idx=row.last_mentioned_conv_idx,
+                )
+            )
+        return rows

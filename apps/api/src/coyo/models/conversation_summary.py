@@ -5,6 +5,7 @@ from __future__ import annotations
 import uuid
 
 import sqlalchemy as sa
+from pgvector.sqlalchemy import Vector  # type: ignore[import-untyped]
 from sqlalchemy import ForeignKey, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
@@ -49,4 +50,8 @@ class ConversationSummary(BaseModel):
     summary: Mapped[str] = mapped_column(
         Text,
         nullable=False,
+    )
+    embedding: Mapped[list[float] | None] = mapped_column(
+        Vector(1536),
+        nullable=True,
     )

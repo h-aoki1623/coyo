@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
@@ -22,14 +22,6 @@ import { useSuggestionsStore } from '@/stores/suggestions-store';
 
 ExpoSplashScreen.preventAutoHideAsync();
 
-/**
- * Maximum time we keep the native splash visible while waiting for the
- * suggestions prefetch to settle. If the API is slow or unreachable, the
- * gate falls through so the user is never stuck on the splash. Tuned to
- * cover a typical mobile network round-trip without feeling sluggish.
- */
-const SPLASH_PREFETCH_TIMEOUT_MS = 2500;
-
 export default function App() {
   const [fontsLoaded, fontError] = useFonts({
     NotoSansJP_400Regular,
@@ -46,7 +38,6 @@ export default function App() {
   const isEmailVerified = useAuthStore((s) => s.isEmailVerified);
   const user = useAuthStore((s) => s.user);
   const suggestionsReady = useSuggestionsStore((s) => s.isReady);
-  const [prefetchTimedOut, setPrefetchTimedOut] = useState(false);
 
   // Initialize Firebase auth listener once. Returns the unsubscribe so the
   // listener is cleaned up if App ever unmounts (Fast Refresh in dev).
@@ -55,35 +46,28 @@ export default function App() {
     return unsubscribe;
   }, []);
 
-  // Whether the user is heading to the Home screen — only then do we need to
-  // wait for the suggestions prefetch. Unauthenticated users go to the auth
-  // flow, which has no prefetch dependency.
+  // Whether the user is heading to the Home screen — only then do we need
+  // to wait for the suggestions prefetch. Unauthenticated users go to the
+  // auth flow, which has no prefetch dependency.
   const providerId = user?.providerData?.[0]?.providerId;
   const isHomeBound =
     isInitialized &&
     isAuthenticated &&
     (isEmailVerified || providerId !== 'password');
 
-  // Fallback timeout: if the prefetch hasn't settled within the budget, give
-  // up waiting and let Home render. Reset whenever the gate condition is no
-  // longer relevant so a future sign-in waits again.
-  useEffect(() => {
-    if (!isHomeBound) {
-      setPrefetchTimedOut(false);
-      return undefined;
-    }
-    if (suggestionsReady) {
-      return undefined;
-    }
-    const id = setTimeout(
-      () => setPrefetchTimedOut(true),
-      SPLASH_PREFETCH_TIMEOUT_MS,
-    );
-    return () => clearTimeout(id);
-  }, [isHomeBound, suggestionsReady]);
-
+  // The splash gate waits for the suggestions prefetch to settle. We used
+  // to have a 2.5s fallback timeout here, but it was too aggressive on
+  // cold starts with a warm-up LLM / cold Cloud Run instance — the splash
+  // would release while the prefetch was still in flight and the user
+  // would see an empty Home with suggestions popping in seconds later.
+  //
+  // We rely on `isReady` alone now. It is set in the `finally` block of
+  // `suggestionsStore.prefetch()` on BOTH success and failure paths, and
+  // `apiClient` has a per-request AbortController timeout (15s by default)
+  // so a genuinely hung request will still eventually mark `isReady` —
+  // the splash will never stall indefinitely.
   const fontsReady = fontsLoaded || Boolean(fontError);
-  const homeReady = !isHomeBound || suggestionsReady || prefetchTimedOut;
+  const homeReady = !isHomeBound || suggestionsReady;
   const appReady = fontsReady && isInitialized && homeReady;
 
   // Hide the OS splash screen exactly once, after the very first frame of
