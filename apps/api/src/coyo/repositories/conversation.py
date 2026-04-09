@@ -3,6 +3,7 @@
 import uuid
 from datetime import datetime
 
+import sqlalchemy as sa
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from coyo.models.conversation import Conversation
@@ -67,6 +68,79 @@ class ConversationRepository:
         conversation.status = status
         await self._session.flush()
         return conversation
+
+    async def set_memory_context_text(
+        self,
+        conversation_id: uuid.UUID,
+        text: str,
+    ) -> None:
+        """Unconditionally write the memory context snapshot.
+
+        Used by the greeting path, where the conversation row already
+        exists and no other writer is racing. Writes BOTH columns
+        atomically via SQLAlchemy Core to avoid ORM cache surprises.
+        """
+        stmt = (
+            sa.update(Conversation)
+            .where(Conversation.id == conversation_id)
+            .values(
+                memory_context_text=text,
+                memory_context_built_at=sa.func.now(),
+            )
+        )
+        await self._session.execute(stmt)
+        await self._session.flush()
+
+    async def try_set_memory_context_text_if_null(
+        self,
+        conversation_id: uuid.UUID,
+        text: str,
+    ) -> str:
+        """Race-safe lazy snapshot write for the turn path.
+
+        Atomically sets ``memory_context_text`` and
+        ``memory_context_built_at`` only when the column is currently
+        NULL. If another concurrent caller wins the race, this method
+        re-SELECTs and returns the winner's value so the caller's prompt
+        is byte-identical to the persisted snapshot.
+
+        The caller is responsible for refreshing any ORM-cached attribute
+        on the ``Conversation`` object after this returns.
+        """
+        stmt = (
+            sa.update(Conversation)
+            .where(
+                Conversation.id == conversation_id,
+                Conversation.memory_context_text.is_(None),
+            )
+            .values(
+                memory_context_text=text,
+                memory_context_built_at=sa.func.now(),
+            )
+            .returning(Conversation.memory_context_text)
+        )
+        result = await self._session.execute(stmt)
+        row = result.one_or_none()
+        if row is not None:
+            await self._session.flush()
+            return str(row[0])
+
+        # We lost the race — re-SELECT the winner's value.
+        winner_stmt = sa.select(Conversation.memory_context_text).where(
+            Conversation.id == conversation_id,
+        )
+        winner_result = await self._session.execute(winner_stmt)
+        winner_row = winner_result.one_or_none()
+        if winner_row is None:
+            # Conversation row vanished between UPDATE and SELECT (delete
+            # race). Fall back to the caller's text — the snapshot is
+            # best-effort and the prompt is still valid.
+            return text
+        winner_value = winner_row[0]
+        # ``""`` is the explicit "computed but no memory" sentinel and
+        # must be returned as-is. Only true NULL means "row exists but
+        # not yet computed", which can't happen on this code path.
+        return "" if winner_value is None else str(winner_value)
 
     async def update_on_end(
         self,

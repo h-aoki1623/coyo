@@ -33,6 +33,8 @@ class EmbeddingService:
             return []
 
         try:
+            settings = get_settings()
+            expected_dim = settings.embedding_dim
             all_embeddings: list[list[float]] = []
             for i in range(0, len(texts), _BATCH_SIZE):
                 batch = texts[i : i + _BATCH_SIZE]
@@ -40,8 +42,17 @@ class EmbeddingService:
                     model=self._model,
                     input=batch,
                 )
-                all_embeddings.extend(item.embedding for item in response.data)
+                for item in response.data:
+                    vec = item.embedding
+                    if len(vec) != expected_dim:
+                        raise ExternalServiceError(
+                            "OpenAI Embeddings",
+                            (f"dim mismatch: got {len(vec)}, expected {expected_dim}"),
+                        )
+                    all_embeddings.append(vec)
             return all_embeddings
+        except ExternalServiceError:
+            raise
         except Exception as exc:
             raise ExternalServiceError("OpenAI Embeddings", str(exc)) from exc
 

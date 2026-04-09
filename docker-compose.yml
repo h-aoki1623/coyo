@@ -1,6 +1,10 @@
 services:
   postgres:
-    image: postgres:16-alpine
+    # pgvector/pgvector:pg16 = official pgvector image built on top of
+    # postgres:16. Required for the theme-aware memory feature
+    # (vector(1536) columns + CREATE EXTENSION vector). Production
+    # (Supabase) has pgvector preinstalled.
+    image: pgvector/pgvector:pg16
     container_name: coyo-postgres
     environment:
       POSTGRES_USER: coyo

@@ -35,6 +35,18 @@ class Settings(BaseSettings):
 
     # Embedding Config
     embedding_model: str = "text-embedding-3-small"
+    embedding_dim: int = 1536
+
+    # Theme-relevant memory retrieval
+    memory_theme_alpha: float = 0.7  # weight on semantic similarity for interests
+    memory_theme_beta: float = 0.3  # weight on effective_weight for interests
+    memory_summary_alpha: float = 0.7  # weight on semantic similarity for summaries
+    memory_summary_beta: float = 0.3  # weight on recency decay for summaries
+    memory_summary_half_life_days: int = 14
+    memory_k_interest: int = 10
+    memory_k_summary: int = 5
+    # DoS guard: hard cap on per-user candidate fetch for theme ranking.
+    memory_candidate_fetch_limit: int = 2000
 
     # Keyword Post-Processing Thresholds
     keyword_normalize_threshold: float = 0.92

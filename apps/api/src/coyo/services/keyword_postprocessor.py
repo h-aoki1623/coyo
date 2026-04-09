@@ -89,6 +89,7 @@ class ProcessedKeyword:
     summary: str | None
     iab_category_id: str | None
     merge_target: str | None  # existing DB keyword to merge into
+    embedding: list[float] | None = None  # carried forward from dedup pass
 
 
 class KeywordPostprocessor:
@@ -268,6 +269,7 @@ class KeywordPostprocessor:
                         summary=kw.summary,
                         iab_category_id=None,
                         merge_target=None,
+                        embedding=embeddings[i],
                     )
                 )
                 result_embeddings.append(embeddings[i])
@@ -320,6 +322,7 @@ class KeywordPostprocessor:
                         summary=kw.summary,
                         iab_category_id=classification.iab_category_id,
                         merge_target=None,
+                        embedding=emb,
                     )
                 )
                 result_embeddings.append(emb)
@@ -332,6 +335,7 @@ class KeywordPostprocessor:
                         summary=kw.summary,
                         iab_category_id=None,
                         merge_target=None,
+                        embedding=emb,
                     )
                 )
                 result_embeddings.append(emb)
@@ -465,6 +469,8 @@ class KeywordPostprocessor:
                 should_merge = False
 
             if should_merge:
+                # Merge target already has its own embedding (from its
+                # original insert) — do not overwrite via the upsert path.
                 result.append(
                     ProcessedKeyword(
                         keyword=kw.keyword,
@@ -473,9 +479,22 @@ class KeywordPostprocessor:
                         summary=kw.summary,
                         iab_category_id=kw.iab_category_id,
                         merge_target=best_existing,
+                        embedding=None,
                     )
                 )
             else:
-                result.append(kw)
+                # New keyword — carry the embedding so the upsert call
+                # site can persist it on the INSERT path.
+                result.append(
+                    ProcessedKeyword(
+                        keyword=kw.keyword,
+                        keyword_type=kw.keyword_type,
+                        is_news_relevant=kw.is_news_relevant,
+                        summary=kw.summary,
+                        iab_category_id=kw.iab_category_id,
+                        merge_target=None,
+                        embedding=keyword_embeddings[i],
+                    )
+                )
 
         return result
