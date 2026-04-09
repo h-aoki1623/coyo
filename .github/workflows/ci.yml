@@ -65,6 +65,25 @@ jobs:
       - uses: actions/checkout@v4
       - run: bash scripts/test/test-claude-hooks.sh
 
+  lockfile-cooldown:
+    name: Lockfile cooldown guard
+    runs-on: ubuntu-latest
+    # Mirrors the Dockerfile guard at apps/api/Dockerfile:30 so a PR that
+    # regenerates apps/api/uv.lock without going through `make api-lock`
+    # (which injects --exclude-newer via scripts/uv-install.sh) is caught
+    # on develop instead of failing the Cloud Run deploy on merge to main.
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify apps/api/uv.lock has exclude-newer cooldown
+        run: |
+          if ! grep -q '^exclude-newer = ' apps/api/uv.lock; then
+            echo "ERROR: apps/api/uv.lock is missing [options] exclude-newer." >&2
+            echo "       Regenerate the lockfile with 'make api-lock' so the" >&2
+            echo "       supply-chain release-age cooldown is recorded." >&2
+            exit 1
+          fi
+          echo "OK: $(grep '^exclude-newer = ' apps/api/uv.lock)"
+
   lint-api:
     name: Lint API
     needs: changes
