@@ -130,7 +130,10 @@ class TopicGenerationService:
         self._llm = OpenAIClient(model=settings.llm_topic_model)
 
     async def generate_common_topics(self) -> int:
-        """Generate common trending topics for today.
+        """Generate common topics for today from global top keywords.
+
+        Uses the most popular user-interest keywords across all users.
+        Falls back to LLM trending search when no keywords exist (cold start).
 
         Returns the number of topics successfully generated.
         """
@@ -142,28 +145,79 @@ class TopicGenerationService:
             logger.info("topics_already_generated", date=str(today), count=len(existing))
             return len(existing)
 
-        # Use web search to find trending topics
         logger.info("topic_generation_start")
+
+        # Try interest-keyword-driven generation first
+        top_keywords = await self._interest_repo.get_global_top_keywords(
+            limit=_MAX_TOPICS,
+        )
+
+        if top_keywords:
+            return await self._generate_common_from_keywords(
+                top_keywords, today
+            )
+
+        # Cold start: no user keywords yet, fall back to LLM trending search
+        logger.info("common_topics_cold_start_fallback")
+        return await self._generate_common_from_trending(today)
+
+    async def _generate_common_from_keywords(
+        self, keywords: list[str], today: date
+    ) -> int:
+        """Generate common topics by searching news for each keyword."""
+        count = 0
+        for keyword in keywords:
+            topic = await self._fetch_personal_topic(keyword, today)
+            if topic is None:
+                logger.warning(
+                    "common_keyword_topic_fetch_failed",
+                    keyword=keyword[:50],
+                )
+                continue
+            try:
+                async with self._session.begin_nested():
+                    await self._repo.create_suggestion(
+                        title=topic.title,
+                        summary=topic.summary,
+                        source_keyword=keyword,
+                        article_content=topic.article_content,
+                        article_url=None,
+                        pool_type="common",
+                        generated_date=today,
+                    )
+                count += 1
+            except IntegrityError:
+                logger.warning(
+                    "topic_save_error", keyword=keyword[:50]
+                )
+
+        await self._session.commit()
+        logger.info("topic_generation_done", count=count, source="keywords")
+        return count
+
+    async def _generate_common_from_trending(self, today: date) -> int:
+        """Cold-start fallback: generate common topics via LLM trending search."""
         result = await self._fetch_topics()
 
         count = 0
         for item in result.topics[:_MAX_TOPICS]:
             try:
-                await self._repo.create_suggestion(
-                    title=item.title,
-                    summary=item.summary,
-                    source_keyword=item.source_keyword,
-                    article_content=item.article_content,
-                    article_url=None,
-                    pool_type="common",
-                    generated_date=today,
-                )
+                async with self._session.begin_nested():
+                    await self._repo.create_suggestion(
+                        title=item.title,
+                        summary=item.summary,
+                        source_keyword=item.source_keyword,
+                        article_content=item.article_content,
+                        article_url=None,
+                        pool_type="common",
+                        generated_date=today,
+                    )
                 count += 1
             except IntegrityError:
-                logger.exception("topic_save_error", title=item.title)
+                logger.warning("topic_save_error", title=item.title)
 
         await self._session.commit()
-        logger.info("topic_generation_done", count=count)
+        logger.info("topic_generation_done", count=count, source="trending")
         return count
 
     async def assign_to_users(self) -> int:

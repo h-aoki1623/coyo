@@ -82,6 +82,7 @@ class ConversationService:
             user_id=user_id,
             time_limit_seconds=time_limit_seconds,
             topic_suggestion_id=topic_suggestion_id,
+            topic=topic,
         )
         await self._session.commit()
         return conversation
