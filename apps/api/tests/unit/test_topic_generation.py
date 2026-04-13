@@ -8,8 +8,7 @@ import pytest
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from coyo.services.topic_generation import TopicGenerationService, TopicSearchResult
-
+from coyo.services.topic_generation import TopicGenerationService
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -55,6 +54,15 @@ class TestGenerateCommonTopics:
         return repo
 
     @pytest.fixture
+    def mock_interest_repo(self):
+        """Create a mock InterestRepository."""
+        repo = AsyncMock()
+        repo.get_global_top_keywords = AsyncMock(
+            return_value=["tennis", "baseball", "politics"]
+        )
+        return repo
+
+    @pytest.fixture
     def mock_llm(self):
         """Create a mock OpenAIClient that returns valid topic JSON via chat_with_tools."""
         from coyo.services.llm.base import TextChunk
@@ -69,17 +77,27 @@ class TestGenerateCommonTopics:
         return mock
 
     @pytest.fixture
-    def service(self, db_session: AsyncSession, mock_repo, mock_llm):
+    def service(self, db_session: AsyncSession, mock_repo, mock_interest_repo, mock_llm):
         """Create a TopicGenerationService with mocked dependencies."""
         svc = TopicGenerationService.__new__(TopicGenerationService)
         svc._session = db_session
         svc._repo = mock_repo
+        svc._interest_repo = mock_interest_repo
         svc._llm = mock_llm
         return svc
 
     @pytest.mark.unit
-    async def test_generates_topics_and_returns_count(self, service, mock_repo):
-        count = await service.generate_common_topics()
+    async def test_generates_topics_from_keywords_and_returns_count(
+        self, service, mock_repo
+    ):
+        """Uses top keywords from user interests to generate topics."""
+        from coyo.services.topic_generation import PersonalTopicItem
+
+        mock_topic = PersonalTopicItem(
+            title="Test", summary="Test", article_content="Content"
+        )
+        with patch.object(service, "_fetch_personal_topic", return_value=mock_topic):
+            count = await service.generate_common_topics()
         assert count == 3
         assert mock_repo.create_suggestion.call_count == 3
 
@@ -94,14 +112,11 @@ class TestGenerateCommonTopics:
         mock_repo.create_suggestion.assert_not_called()
 
     @pytest.mark.unit
-    async def test_limits_to_max_topics(self, service, mock_repo, mock_llm):
-        """Even if LLM returns more than 3 topics, only 3 are created."""
-        from coyo.services.llm.base import TextChunk
-
-        async def many_topics(messages, options=None):
-            yield TextChunk(text=_make_topic_json(5))
-
-        mock_llm.chat_with_tools = many_topics
+    async def test_falls_back_to_trending_when_no_keywords(
+        self, service, mock_repo, mock_interest_repo, mock_llm
+    ):
+        """Falls back to LLM trending search when no keywords exist."""
+        mock_interest_repo.get_global_top_keywords = AsyncMock(return_value=[])
         count = await service.generate_common_topics()
         assert count == 3
         assert mock_repo.create_suggestion.call_count == 3
@@ -109,6 +124,8 @@ class TestGenerateCommonTopics:
     @pytest.mark.unit
     async def test_handles_save_error_gracefully(self, service, mock_repo):
         """If one topic fails to save with IntegrityError, others still proceed."""
+        from coyo.services.topic_generation import PersonalTopicItem
+
         call_count = 0
 
         async def create_with_error(**kwargs):
@@ -119,17 +136,28 @@ class TestGenerateCommonTopics:
             return _make_suggestion_mock()
 
         mock_repo.create_suggestion = create_with_error
-        count = await service.generate_common_topics()
+        mock_topic = PersonalTopicItem(
+            title="Test", summary="Test", article_content="Content"
+        )
+        with patch.object(service, "_fetch_personal_topic", return_value=mock_topic):
+            count = await service.generate_common_topics()
         assert count == 2  # 1st and 3rd succeed
 
     @pytest.mark.unit
-    async def test_calls_create_suggestion_with_correct_args(self, service, mock_repo):
-        await service.generate_common_topics()
+    async def test_calls_create_suggestion_with_keyword_as_source(
+        self, service, mock_repo
+    ):
+        """source_keyword should be the interest keyword, not LLM-generated."""
+        from coyo.services.topic_generation import PersonalTopicItem
+
+        mock_topic = PersonalTopicItem(
+            title="Tennis News", summary="Latest", article_content="Content"
+        )
+        with patch.object(service, "_fetch_personal_topic", return_value=mock_topic):
+            await service.generate_common_topics()
         first_call = mock_repo.create_suggestion.call_args_list[0]
         kwargs = first_call.kwargs
-        assert kwargs["title"] == "Topic 0"
-        assert kwargs["summary"] == "Summary 0"
-        assert kwargs["source_keyword"] == "kw0"
+        assert kwargs["source_keyword"] == "tennis"
         assert kwargs["pool_type"] == "common"
         assert kwargs["generated_date"] == date.today()
 
