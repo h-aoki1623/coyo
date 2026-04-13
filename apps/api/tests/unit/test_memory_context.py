@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from coyo.models.conversation_summary import ConversationSummary
 from coyo.models.user import User
-from coyo.models.user_profile_attribute import UserProfileAttribute
+from coyo.models.user_attribute import UserAttribute
 from coyo.models.user_profile_summary import UserProfileSummary
 from coyo.repositories.conversation_summary import (
     ConversationSummaryEmbeddingRow,
@@ -68,7 +68,7 @@ class TestBuildContext:
         db_session.add(profile_summary)
 
         # Create profile attribute
-        attr = UserProfileAttribute(
+        attr = UserAttribute(
             user_id=test_user.id,
             key="job_industry",
             value="Software Engineer",
@@ -314,13 +314,13 @@ class TestFormatMemoryBlock:
         """Attributes should be formatted with key, value, and confidence."""
         attrs = [
             MagicMock(
-                spec=UserProfileAttribute,
+                spec=UserAttribute,
                 key="job_industry",
                 value="Software Engineer",
                 confidence=0.9,
             ),
             MagicMock(
-                spec=UserProfileAttribute,
+                spec=UserAttribute,
                 key="hometown_or_location",
                 value="Tokyo",
                 confidence=0.8,

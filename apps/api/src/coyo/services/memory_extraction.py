@@ -294,7 +294,7 @@ _PROFILE_SUMMARY_PROMPT = """\
 You are synthesizing a user profile for a personalized English conversation app.
 
 [User's background attributes]
-{user_profile_attributes}
+{user_attributes}
 
 [User's top interests with summaries]
 {interests_with_summaries}
@@ -799,7 +799,7 @@ class MemoryExtractionService:
             convs_text = "(no recent conversations)"
 
         prompt = _PROFILE_SUMMARY_PROMPT.format(
-            user_profile_attributes=attrs_text,
+            user_attributes=attrs_text,
             interests_with_summaries=interests_text,
             recent_conversations=convs_text,
         )

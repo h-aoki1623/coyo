@@ -10,8 +10,8 @@ from coyo.models.correction import CorrectionItem, TurnCorrection
 from coyo.models.topic_suggestion import TopicSuggestion, UserTopicSuggestion
 from coyo.models.turn import Turn
 from coyo.models.user import User, UserSettings
+from coyo.models.user_attribute import UserAttribute
 from coyo.models.user_interest import UserInterest
-from coyo.models.user_profile_attribute import UserProfileAttribute
 from coyo.models.user_profile_summary import UserProfileSummary
 
 __all__ = [
@@ -23,8 +23,8 @@ __all__ = [
     "Turn",
     "TurnCorrection",
     "User",
+    "UserAttribute",
     "UserInterest",
-    "UserProfileAttribute",
     "UserProfileSummary",
     "UserSettings",
     "UserTopicSuggestion",

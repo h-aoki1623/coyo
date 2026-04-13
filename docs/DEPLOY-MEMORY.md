@@ -21,7 +21,7 @@ The memory feature adds user personalization to conversations by:
         │                                      │
         │                              ┌───────┼───────┐
         │                              ▼       ▼       ▼
-        │                     [user_interests] [user_profile_attributes] [conversation_summaries]
+        │                     [user_interests] [user_attributes] [conversation_summaries]
         │                              │
         │                     (every 5th conversation)
         │                              │
@@ -38,7 +38,7 @@ The memory feature adds user personalization to conversations by:
 [Load memory context] ──▶ [Inject into system prompt]
         │
         ├── user_profile_summary (narrative)
-        ├── user_profile_attributes (4 background items)
+        ├── user_attributes (4 background items)
         ├── user_interests top 20 (with summaries)
         └── conversation_summaries last 5
 ```
@@ -86,7 +86,7 @@ Merge the PR to `main`. The existing `deploy-api.yml` GitHub Actions workflow ha
 
 1. **Build** Docker image → push to Artifact Registry
 2. **Migrate** — `alembic upgrade head` creates:
-   - `user_profile_attributes` table
+   - `user_attributes` table
    - `user_profile_summaries` table
    - `conversation_summaries` table
    - New columns on `user_interests` (summary, summary_updated_at, needs_summary_update)
@@ -178,7 +178,7 @@ gcloud tasks queues describe memory-extraction \
    WHERE summary IS NOT NULL LIMIT 10;
 
    -- Profile attributes extracted (if user shared background info)
-   SELECT * FROM user_profile_attributes ORDER BY created_at DESC LIMIT 10;
+   SELECT * FROM user_attributes ORDER BY created_at DESC LIMIT 10;
    ```
 5. Start a new conversation and verify the AI references prior context naturally
 
