@@ -27,15 +27,24 @@ import asyncio
 import logging
 import sys
 import uuid
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Final, Literal
 
 import sqlalchemy as sa
+from pgvector.sqlalchemy import Vector  # type: ignore[import-untyped]
+from sqlalchemy import bindparam
 
 from coyo.db import get_session_factory
 from coyo.services.embedding import get_embedding_service
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
+
+# Module-level constant so the dim stays in sync with the column type
+# defined in alembic/versions/0010_add_memory_embeddings.py. Changing
+# the embedding model requires a new migration + backfill, so hardcoding
+# is safer than reading from settings at import time (a settings drift
+# would silently produce vectors the column rejects at runtime).
+_EMBEDDING_DIM: Final[int] = 1536
 
 logging.basicConfig(
     level=logging.INFO,
@@ -106,12 +115,19 @@ async def _update_interest_embeddings(
     rows: list[dict[str, object]],
     embeddings: list[list[float]],
 ) -> None:
-    """Write embeddings back, matching on the composite (user_id, keyword)."""
+    """Write embeddings back, matching on the composite (user_id, keyword).
+
+    The ``:embedding`` bind parameter is typed with ``Vector(1536)`` so
+    SQLAlchemy / asyncpg encode the Python ``list[float]`` via pgvector's
+    registered codec. Without this, asyncpg sees an unknown parameter
+    type and tries to encode the list as text, which raises
+    ``DataError: expected str, got list``.
+    """
     await session.execute(sa.text("SET LOCAL statement_timeout = '60s'"))
     stmt = sa.text(
         "UPDATE user_interests SET embedding = :embedding "
         "WHERE user_id = :user_id AND keyword = :keyword"
-    )
+    ).bindparams(bindparam("embedding", type_=Vector(_EMBEDDING_DIM)))
     for row, vec in zip(rows, embeddings, strict=True):
         await session.execute(
             stmt,
@@ -128,9 +144,15 @@ async def _update_summary_embeddings(
     rows: list[dict[str, object]],
     embeddings: list[list[float]],
 ) -> None:
-    """Write embeddings back, matching on the conversation summary id."""
+    """Write embeddings back, matching on the conversation summary id.
+
+    See ``_update_interest_embeddings`` for why the ``:embedding`` bind
+    parameter needs an explicit ``Vector(1536)`` type annotation.
+    """
     await session.execute(sa.text("SET LOCAL statement_timeout = '60s'"))
-    stmt = sa.text("UPDATE conversation_summaries SET embedding = :embedding WHERE id = :id")
+    stmt = sa.text(
+        "UPDATE conversation_summaries SET embedding = :embedding WHERE id = :id"
+    ).bindparams(bindparam("embedding", type_=Vector(_EMBEDDING_DIM)))
     for row, vec in zip(rows, embeddings, strict=True):
         row_id = row["id"]
         if isinstance(row_id, str):
