@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Literal
 
 import structlog
@@ -15,6 +16,7 @@ from coyo.models.conversation import Conversation
 from coyo.models.topic_suggestion import TopicSuggestion
 from coyo.models.turn import Turn
 from coyo.models.user import User
+from coyo.models.user_interest import UserInterest
 from coyo.repositories.conversation_summary import ConversationSummaryRepository
 from coyo.repositories.interest import InterestRepository
 from coyo.repositories.profile_attribute import ProfileAttributeRepository
@@ -35,6 +37,24 @@ _MAX_KEYWORD_LENGTH = 100
 _MAX_SUMMARY_LENGTH = 200
 _CONFIDENCE_THRESHOLD = 0.5
 _BATCH_INTERVAL = 5
+
+
+@dataclass(frozen=True)
+class _IABMapping:
+    """Maps a fixed topic key to its IAB Content Taxonomy v3.1 Tier 1 category."""
+
+    keyword: str  # IAB category name (lowercased)
+    iab_id: str  # IAB category ID
+
+
+# Fixed topic key → IAB Content Taxonomy v3.1 Tier 1
+_FIXED_TOPIC_IAB: dict[str, _IABMapping] = {
+    "sports": _IABMapping(keyword="sports", iab_id="483"),
+    "business": _IABMapping(keyword="business and finance", iab_id="52"),
+    "technology": _IABMapping(keyword="technology & computing", iab_id="596"),
+    "politics": _IABMapping(keyword="politics", iab_id="386"),
+    "entertainment": _IABMapping(keyword="entertainment", iab_id="JLBCU7"),
+}
 
 
 # ---------------------------------------------------------------------------
@@ -471,7 +491,7 @@ class MemoryExtractionService:
 
         # 7. Upsert interests (categories + entities) via post-processing pipeline
         seen_keywords = await MemoryExtractionService._upsert_interests(
-            session, user_id, extraction, current_conv_idx
+            session, user_id, extraction, current_conv_idx, conversation
         )
 
         # 8. Batch regeneration every N conversations
@@ -618,6 +638,7 @@ class MemoryExtractionService:
         user_id: uuid.UUID,
         extraction: MemoryExtractionResult,
         current_conv_idx: int,
+        conversation: Conversation,
     ) -> set[str]:
         """Upsert interest keywords via the post-processing pipeline."""
         from coyo.services.embedding import get_embedding_service
@@ -679,7 +700,88 @@ class MemoryExtractionService:
                     embedding=kw.embedding if kw.merge_target is None else None,
                 )
 
+        # --- Topic keyword injection (post-pipeline) ---
+        await MemoryExtractionService._upsert_topic_keyword(
+            session, repo, user_id, current_conv_idx, conversation, seen_keywords
+        )
+
         return seen_keywords
+
+    @staticmethod
+    async def _upsert_topic_keyword(
+        session: AsyncSession,
+        repo: InterestRepository,
+        user_id: uuid.UUID,
+        current_conv_idx: int,
+        conversation: Conversation,
+        seen_keywords: set[str],
+    ) -> None:
+        """Upsert the conversation's topic keyword as a user interest.
+
+        Runs after the postprocessor pipeline. Skips if the keyword was
+        already extracted by the LLM (present in seen_keywords).
+        """
+        topic_kw, topic_iab_id = await MemoryExtractionService._resolve_topic_keyword(
+            session, conversation
+        )
+        if not topic_kw or topic_kw in seen_keywords:
+            return
+
+        # Determine is_news_relevant from existing interest, default True
+        is_news_relevant = True
+        existing_stmt = select(UserInterest).where(
+            UserInterest.user_id == user_id,
+            UserInterest.keyword == topic_kw,
+        )
+        result = await session.execute(existing_stmt)
+        existing_interest = result.scalar_one_or_none()
+        if existing_interest is not None:
+            is_news_relevant = existing_interest.is_news_relevant
+
+        # Compute embedding only for brand-new keywords
+        embedding: list[float] | None = None
+        if existing_interest is None:
+            from coyo.services.embedding import get_embedding_service
+
+            embedding_service = get_embedding_service()
+            vectors = await embedding_service.embed([topic_kw])
+            embedding = vectors[0] if vectors else None
+
+        seen_keywords.add(topic_kw)
+        await repo.upsert_interest(
+            user_id=user_id,
+            keyword=topic_kw,
+            keyword_type="category",
+            is_news_relevant=is_news_relevant,
+            current_conv_idx=current_conv_idx,
+            summary=None,
+            iab_category_id=topic_iab_id,
+            embedding=embedding,
+        )
+
+    @staticmethod
+    async def _resolve_topic_keyword(
+        session: AsyncSession,
+        conversation: Conversation,
+    ) -> tuple[str | None, str | None]:
+        """Resolve topic keyword and IAB category ID from a conversation.
+
+        Returns (keyword, iab_category_id) tuple:
+        - Suggested topic → (source_keyword, None)
+        - Fixed topic → (IAB category name, IAB ID) via _FIXED_TOPIC_IAB
+        - No topic → (None, None)
+        """
+        if conversation.topic_suggestion_id is not None:
+            suggestion = await session.get(
+                TopicSuggestion, conversation.topic_suggestion_id
+            )
+            if suggestion is not None:
+                return suggestion.source_keyword.lower().strip(), None
+        elif conversation.topic is not None and conversation.topic != "suggested":
+            mapping = _FIXED_TOPIC_IAB.get(conversation.topic.lower().strip())
+            if mapping is not None:
+                return mapping.keyword, mapping.iab_id
+        return None, None
 
     @staticmethod
     async def _regenerate_interest_summaries(

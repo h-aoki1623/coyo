@@ -71,6 +71,12 @@ class Conversation(BaseModel):
         default=None,
         index=True,
     )
+    topic: Mapped[str | None] = mapped_column(
+        String(20),
+        nullable=True,
+        default=None,
+        comment="Topic key selected by user (sports, business, etc. or 'suggested')",
+    )
     interests_extracted: Mapped[bool] = mapped_column(
         Boolean,
         nullable=False,

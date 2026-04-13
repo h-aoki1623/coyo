@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 
 from coyo.models.user_interest import UserInterest
@@ -339,3 +339,28 @@ class InterestRepository:
                 )
             )
         return rows
+
+    async def get_global_top_keywords(
+        self,
+        *,
+        keyword_type: str = "category",
+        is_news_relevant: bool = True,
+        limit: int = 3,
+    ) -> list[str]:
+        """Get the most popular keywords across all users by user count.
+
+        Used by common topic generation to select keywords that are relevant
+        to the broadest audience.
+        """
+        stmt = (
+            select(UserInterest.keyword)
+            .where(
+                UserInterest.keyword_type == keyword_type,
+                UserInterest.is_news_relevant == is_news_relevant,
+            )
+            .group_by(UserInterest.keyword)
+            .order_by(func.count(func.distinct(UserInterest.user_id)).desc())
+            .limit(limit)
+        )
+        result = await self._session.execute(stmt)
+        return list(result.scalars().all())
