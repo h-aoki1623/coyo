@@ -24,7 +24,7 @@ The topic suggestion feature consists of two pipelines:
         │                                      │
         │                                      ▼
         │                            [Store in user_interests +
-        │                             user_profile_attributes +
+        │                             user_attributes +
         │                             conversation_summaries]
         │
 ========│=========== (daily at 06:00 JST) ==========================

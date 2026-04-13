@@ -1,4 +1,4 @@
-"""Repository for UserProfileAttribute data access."""
+"""Repository for UserAttribute data access."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 from sqlalchemy import delete, select
 from sqlalchemy.exc import IntegrityError
 
-from coyo.models.user_profile_attribute import UserProfileAttribute
+from coyo.models.user_attribute import UserAttribute
 
 if TYPE_CHECKING:
     import uuid
@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 
 
 class ProfileAttributeRepository:
-    """Encapsulates database operations for the UserProfileAttribute model."""
+    """Encapsulates database operations for the UserAttribute model."""
 
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
@@ -25,10 +25,10 @@ class ProfileAttributeRepository:
     async def get_all_for_user(
         self,
         user_id: uuid.UUID,
-    ) -> list[UserProfileAttribute]:
+    ) -> list[UserAttribute]:
         """Get all profile attributes for a user."""
-        stmt = select(UserProfileAttribute).where(
-            UserProfileAttribute.user_id == user_id,
+        stmt = select(UserAttribute).where(
+            UserAttribute.user_id == user_id,
         )
         result = await self._session.execute(stmt)
         return list(result.scalars().all())
@@ -37,11 +37,11 @@ class ProfileAttributeRepository:
         self,
         user_id: uuid.UUID,
         key: str,
-    ) -> UserProfileAttribute | None:
+    ) -> UserAttribute | None:
         """Get a specific profile attribute by key."""
-        stmt = select(UserProfileAttribute).where(
-            UserProfileAttribute.user_id == user_id,
-            UserProfileAttribute.key == key,
+        stmt = select(UserAttribute).where(
+            UserAttribute.user_id == user_id,
+            UserAttribute.key == key,
         )
         result = await self._session.execute(stmt)
         return result.scalar_one_or_none()
@@ -53,20 +53,20 @@ class ProfileAttributeRepository:
         key: str,
         value: str,
         confidence: float,
-    ) -> UserProfileAttribute:
+    ) -> UserAttribute:
         """Insert or update a profile attribute.
 
         On update, also updates the updated_at timestamp.
         """
-        stmt = select(UserProfileAttribute).where(
-            UserProfileAttribute.user_id == user_id,
-            UserProfileAttribute.key == key,
+        stmt = select(UserAttribute).where(
+            UserAttribute.user_id == user_id,
+            UserAttribute.key == key,
         )
         result = await self._session.execute(stmt)
         attr = result.scalar_one_or_none()
 
         if attr is None:
-            attr = UserProfileAttribute(
+            attr = UserAttribute(
                 user_id=user_id,
                 key=key,
                 value=value,
@@ -79,9 +79,9 @@ class ProfileAttributeRepository:
                 # Concurrent insert race — rollback and fall through to update
                 await self._session.rollback()
                 result = await self._session.execute(
-                    select(UserProfileAttribute).where(
-                        UserProfileAttribute.user_id == user_id,
-                        UserProfileAttribute.key == key,
+                    select(UserAttribute).where(
+                        UserAttribute.user_id == user_id,
+                        UserAttribute.key == key,
                     )
                 )
                 attr = result.scalar_one()
@@ -100,12 +100,12 @@ class ProfileAttributeRepository:
     async def delete(self, user_id: uuid.UUID, key: str) -> bool:
         """Delete a profile attribute. Returns True if deleted, False if not found."""
         stmt = (
-            delete(UserProfileAttribute)
+            delete(UserAttribute)
             .where(
-                UserProfileAttribute.user_id == user_id,
-                UserProfileAttribute.key == key,
+                UserAttribute.user_id == user_id,
+                UserAttribute.key == key,
             )
-            .returning(UserProfileAttribute.user_id)
+            .returning(UserAttribute.user_id)
         )
         result = await self._session.execute(stmt)
         await self._session.flush()

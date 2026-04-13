@@ -45,7 +45,7 @@ if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
 
     from coyo.models.conversation_summary import ConversationSummary
-    from coyo.models.user_profile_attribute import UserProfileAttribute
+    from coyo.models.user_attribute import UserAttribute
     from coyo.models.user_profile_summary import UserProfileSummary
     from coyo.services.theme_context import ThemeContext
 
@@ -428,7 +428,7 @@ def _dedupe_summaries_top_up(
 def _format_memory_block(
     *,
     profile_summary: UserProfileSummary | None,
-    profile_attrs: list[UserProfileAttribute],
+    profile_attrs: list[UserAttribute],
     top_interests: list[InterestWithWeight],
     recent_summaries: list[ConversationSummary],
 ) -> str:

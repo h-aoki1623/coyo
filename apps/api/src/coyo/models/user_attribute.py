@@ -1,4 +1,4 @@
-"""UserProfileAttribute ORM model for structured user profile facts."""
+"""UserAttribute ORM model for structured user profile facts."""
 
 from __future__ import annotations
 
@@ -13,18 +13,18 @@ from sqlalchemy.orm import Mapped, mapped_column
 from coyo.models.base import Base
 
 
-class UserProfileAttribute(Base):
+class UserAttribute(Base):
     """Stores a structured profile fact about a user.
 
     Each attribute is a key-value pair with a confidence score.
     Allowed keys: english_goal, job_industry, hometown_or_location, family_status.
     """
 
-    __tablename__ = "user_profile_attributes"
+    __tablename__ = "user_attributes"
     __table_args__ = (
         sa.CheckConstraint(
             "key IN ('english_goal', 'job_industry', 'hometown_or_location', 'family_status')",
-            name="ck_user_profile_attributes_key",
+            name="ck_user_attributes_key",
         ),
     )
 

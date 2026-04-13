@@ -13,7 +13,7 @@ from coyo.models.conversation import Conversation
 from coyo.models.conversation_summary import ConversationSummary
 from coyo.models.turn import Turn
 from coyo.models.user import User
-from coyo.models.user_profile_attribute import UserProfileAttribute
+from coyo.models.user_attribute import UserAttribute
 from coyo.services.memory_extraction import (
     KeywordItem,
     MemoryExtractionResult,
@@ -354,9 +354,9 @@ class TestExtractMemories:
                 db_session, conversation.id, test_user.id
             )
 
-        stmt = select(UserProfileAttribute).where(
-            UserProfileAttribute.user_id == test_user.id,
-            UserProfileAttribute.key == "job_industry",
+        stmt = select(UserAttribute).where(
+            UserAttribute.user_id == test_user.id,
+            UserAttribute.key == "job_industry",
         )
         result = await db_session.execute(stmt)
         attr = result.scalar_one_or_none()
@@ -370,7 +370,7 @@ class TestExtractMemories:
     ):
         """Existing attribute should be updated when new confidence is higher."""
         # Pre-create an attribute with lower confidence
-        attr = UserProfileAttribute(
+        attr = UserAttribute(
             user_id=test_user.id,
             key="job_industry",
             value="IT Worker",
@@ -421,9 +421,9 @@ class TestExtractMemories:
                 db_session, conversation.id, test_user.id
             )
 
-        stmt = select(UserProfileAttribute).where(
-            UserProfileAttribute.user_id == test_user.id,
-            UserProfileAttribute.key == "job_industry",
+        stmt = select(UserAttribute).where(
+            UserAttribute.user_id == test_user.id,
+            UserAttribute.key == "job_industry",
         )
         result = await db_session.execute(stmt)
         updated_attr = result.scalar_one()
@@ -435,7 +435,7 @@ class TestExtractMemories:
         self, db_session: AsyncSession, test_user: User
     ):
         """NOOP when value is semantically the same."""
-        attr = UserProfileAttribute(
+        attr = UserAttribute(
             user_id=test_user.id,
             key="job_industry",
             value="Software Engineer",
@@ -486,9 +486,9 @@ class TestExtractMemories:
                 db_session, conversation.id, test_user.id
             )
 
-        stmt = select(UserProfileAttribute).where(
-            UserProfileAttribute.user_id == test_user.id,
-            UserProfileAttribute.key == "job_industry",
+        stmt = select(UserAttribute).where(
+            UserAttribute.user_id == test_user.id,
+            UserAttribute.key == "job_industry",
         )
         result = await db_session.execute(stmt)
         unchanged_attr = result.scalar_one()
@@ -501,7 +501,7 @@ class TestExtractMemories:
         self, db_session: AsyncSession, test_user: User
     ):
         """NOOP when new confidence is lower than existing."""
-        attr = UserProfileAttribute(
+        attr = UserAttribute(
             user_id=test_user.id,
             key="job_industry",
             value="Software Engineer",
@@ -552,9 +552,9 @@ class TestExtractMemories:
                 db_session, conversation.id, test_user.id
             )
 
-        stmt = select(UserProfileAttribute).where(
-            UserProfileAttribute.user_id == test_user.id,
-            UserProfileAttribute.key == "job_industry",
+        stmt = select(UserAttribute).where(
+            UserAttribute.user_id == test_user.id,
+            UserAttribute.key == "job_industry",
         )
         result = await db_session.execute(stmt)
         unchanged_attr = result.scalar_one()
@@ -566,7 +566,7 @@ class TestExtractMemories:
         self, db_session: AsyncSession, test_user: User
     ):
         """DELETE when is_negation=True and attribute exists."""
-        attr = UserProfileAttribute(
+        attr = UserAttribute(
             user_id=test_user.id,
             key="family_status",
             value="Married",
@@ -618,9 +618,9 @@ class TestExtractMemories:
                 db_session, conversation.id, test_user.id
             )
 
-        stmt = select(UserProfileAttribute).where(
-            UserProfileAttribute.user_id == test_user.id,
-            UserProfileAttribute.key == "family_status",
+        stmt = select(UserAttribute).where(
+            UserAttribute.user_id == test_user.id,
+            UserAttribute.key == "family_status",
         )
         result = await db_session.execute(stmt)
         deleted_attr = result.scalar_one_or_none()

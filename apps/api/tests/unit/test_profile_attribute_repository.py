@@ -1,13 +1,11 @@
 """Unit tests for the ProfileAttributeRepository."""
 
-import uuid
-
 import pytest
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from coyo.models.user import User
-from coyo.models.user_profile_attribute import UserProfileAttribute
+from coyo.models.user_attribute import UserAttribute
 from coyo.repositories.profile_attribute import ProfileAttributeRepository
 
 
@@ -30,13 +28,13 @@ class TestGetAllForUser:
         """Should return all attributes for the user."""
         repo = ProfileAttributeRepository(db_session)
 
-        attr1 = UserProfileAttribute(
+        attr1 = UserAttribute(
             user_id=test_user.id,
             key="job_industry",
             value="IT",
             confidence=0.9,
         )
-        attr2 = UserProfileAttribute(
+        attr2 = UserAttribute(
             user_id=test_user.id,
             key="hometown_or_location",
             value="Tokyo",
@@ -72,9 +70,9 @@ class TestUpsert:
         assert result.confidence == 0.9
 
         # Verify it is in the database
-        stmt = select(UserProfileAttribute).where(
-            UserProfileAttribute.user_id == test_user.id,
-            UserProfileAttribute.key == "job_industry",
+        stmt = select(UserAttribute).where(
+            UserAttribute.user_id == test_user.id,
+            UserAttribute.key == "job_industry",
         )
         db_result = await db_session.execute(stmt)
         attr = db_result.scalar_one()
@@ -88,7 +86,7 @@ class TestUpsert:
         repo = ProfileAttributeRepository(db_session)
 
         # Create initial attribute
-        attr = UserProfileAttribute(
+        attr = UserAttribute(
             user_id=test_user.id,
             key="job_industry",
             value="IT",
@@ -109,9 +107,9 @@ class TestUpsert:
         assert result.confidence == 0.9
 
         # Verify only one record exists
-        stmt = select(UserProfileAttribute).where(
-            UserProfileAttribute.user_id == test_user.id,
-            UserProfileAttribute.key == "job_industry",
+        stmt = select(UserAttribute).where(
+            UserAttribute.user_id == test_user.id,
+            UserAttribute.key == "job_industry",
         )
         db_result = await db_session.execute(stmt)
         attrs = db_result.scalars().all()
@@ -129,7 +127,7 @@ class TestDelete:
         """Should return True when attribute is successfully deleted."""
         repo = ProfileAttributeRepository(db_session)
 
-        attr = UserProfileAttribute(
+        attr = UserAttribute(
             user_id=test_user.id,
             key="family_status",
             value="Married",
@@ -142,9 +140,9 @@ class TestDelete:
         assert result is True
 
         # Verify it is deleted
-        stmt = select(UserProfileAttribute).where(
-            UserProfileAttribute.user_id == test_user.id,
-            UserProfileAttribute.key == "family_status",
+        stmt = select(UserAttribute).where(
+            UserAttribute.user_id == test_user.id,
+            UserAttribute.key == "family_status",
         )
         db_result = await db_session.execute(stmt)
         assert db_result.scalar_one_or_none() is None
@@ -170,7 +168,7 @@ class TestGetByKey:
         """Should return the attribute when found."""
         repo = ProfileAttributeRepository(db_session)
 
-        attr = UserProfileAttribute(
+        attr = UserAttribute(
             user_id=test_user.id,
             key="job_industry",
             value="IT",
