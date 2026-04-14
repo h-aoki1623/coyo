@@ -138,9 +138,9 @@ SELECT pg_reload_conf();
 ## Related
 
 - Agent: `database-reviewer` - Full database review workflow
-- Skill: `clickhouse-io` - ClickHouse analytics patterns
 - Skill: `backend-patterns` - API and backend patterns
 
 ---
 
 *Based on [Supabase Agent Skills](https://github.com/supabase/agent-skills) (MIT License)*
+*Based on [Everything Claude Code](https://github.com/affaan-m/everything-claude-code) (MIT License)*
