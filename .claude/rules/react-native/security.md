@@ -1,3 +1,10 @@
+---
+paths:
+  - "**/*.ts"
+  - "**/*.tsx"
+  - "**/*.js"
+  - "**/*.jsx"
+---
 # React Native Security
 
 > This file extends [common/security.md](../common/security.md) and [typescript/security.md](../typescript/security.md) with React Native specific content.

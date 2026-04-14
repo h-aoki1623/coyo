@@ -1,3 +1,10 @@
+---
+paths:
+  - "**/*.ts"
+  - "**/*.tsx"
+  - "**/*.js"
+  - "**/*.jsx"
+---
 # React Native Patterns
 
 > This file extends [common/patterns.md](../common/patterns.md) and [typescript/patterns.md](../typescript/patterns.md) with React Native specific content.

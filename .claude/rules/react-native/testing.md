@@ -1,3 +1,10 @@
+---
+paths:
+  - "**/*.ts"
+  - "**/*.tsx"
+  - "**/*.js"
+  - "**/*.jsx"
+---
 # React Native Testing
 
 > This file extends [common/testing.md](../common/testing.md) and [typescript/testing.md](../typescript/testing.md) with React Native specific content.
@@ -54,12 +61,7 @@ function renderWithNavigation(component: React.ReactElement) {
 
 ## E2E Testing
 
-Use **Maestro** for end-to-end testing on simulators/emulators.
-
-- Playwright is for web only and does NOT apply to React Native
-- Use **mobile-e2e-tester** agent for mobile E2E tests
-- Maestro uses YAML-based declarative flows — no programming language required
-- Same flow files run on both iOS and Android
+Maestro flow syntax and platform test matrix. For execution rules, see `common/testing.md`.
 
 ### Basic Maestro Flow
 
@@ -77,19 +79,6 @@ appId: com.example.myapp
 - tapOn: "Sign In"
 - assertVisible: "Home"
 - takeScreenshot: "after-login"
-```
-
-### Running Maestro Tests
-
-```bash
-# Run a single flow
-maestro test e2e/flows/auth/login.yaml
-
-# Run all flows
-maestro test e2e/flows/
-
-# Interactive mode (build flows step-by-step)
-maestro studio
 ```
 
 ### Platform Test Matrix

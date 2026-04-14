@@ -492,3 +492,5 @@ Before ANY production deployment:
 ---
 
 **Remember**: Security is not optional. One vulnerability can compromise the entire platform. When in doubt, err on the side of caution.
+
+*Based on [Everything Claude Code](https://github.com/affaan-m/everything-claude-code) (MIT License)*
