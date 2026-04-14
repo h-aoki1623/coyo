@@ -30,21 +30,35 @@ appId: to.coyo.app
       id: "home-greeting"
     timeout: 30000
 
-# Scroll to the Sports topic card. With suggestions now reliably populated
-# above the fold (see suggestions-store.ts), Sports may be pushed further
-# down — use scrollUntilVisible instead of a fixed swipe distance.
+# Scroll to the Sports topic card. With suggestions populated above the
+# fold (see suggestions-store.ts), Sports is pushed further down. The
+# previous `scrollUntilVisible` raced the suggestions render: when the
+# trending section landed mid-scroll the element coordinates Maestro
+# resolved for `topic-sports` no longer matched its post-layout position,
+# and the tap landed on the sign-out button at the screen bottom (issue
+# #157). `waitForAnimationToEnd` after the scroll lets layout settle
+# before the tap is dispatched.
 - scrollUntilVisible:
     element:
       id: "topic-sports"
     direction: DOWN
     speed: 40
+    # Center the card in the viewport. iOS accessibility reports element
+    # bounds in screen coordinates, ignoring ScrollView clipping. Without
+    # `centerElement`, Maestro stops scrolling as soon as the card's
+    # rectangle intersects the screen — which on a narrow viewport leaves
+    # the card visually overlapping the sign-out button at the bottom,
+    # and the tap lands on Sign Out instead of Sports (issue #157).
+    centerElement: true
+- waitForAnimationToEnd
 
 - tapOn:
     id: "topic-sports"
+- waitForAnimationToEnd
 
 - extendedWaitUntil:
     visible:
-      text: "Coyo"
+      id: "end-conversation"
     timeout: 15000
 
 - assertVisible:
@@ -185,6 +199,17 @@ appId: to.coyo.app
     id: "go-home"
 
 - waitForAnimationToEnd
+
+# Home preserves the ScrollView's scroll position across navigation (the
+# HomeScreen component is kept mounted by the native stack). After the
+# Sports card was centered during scrollUntilVisible, the greeting is
+# now above the fold — scroll back to the top before asserting.
+- scrollUntilVisible:
+    element:
+      id: "home-greeting"
+    direction: UP
+    speed: 40
+    timeout: 10000
 
 - extendedWaitUntil:
     visible:

@@ -17,6 +17,12 @@ const ja = {
     trendingTopics: '注目トピック',
     otherTopics: 'その他',
     signOut: 'サインアウト',
+    signOutConfirm: {
+      title: 'サインアウトしますか?',
+      message: '練習を続けるには、再度サインインが必要です。',
+      cancel: 'キャンセル',
+      confirm: 'サインアウト',
+    },
   },
 
   // Topics
