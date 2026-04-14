@@ -17,6 +17,12 @@ const en = {
     trendingTopics: 'Trending Topics',
     otherTopics: 'Other Topics',
     signOut: 'Sign Out',
+    signOutConfirm: {
+      title: 'Sign out?',
+      message: 'You will need to sign in again to continue your practice.',
+      cancel: 'Cancel',
+      confirm: 'Sign Out',
+    },
   },
 
   // Topics
