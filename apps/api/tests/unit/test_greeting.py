@@ -13,8 +13,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from coyo.models.conversation import Conversation
 from coyo.models.turn import Turn
 from coyo.schemas.conversation import GreetingRequest
-from coyo.services.turn_orchestrator import TurnOrchestrator, _GREETING_SYSTEM_PROMPT
-
+from coyo.services.turn_orchestrator import (
+    TurnOrchestrator,
+    _build_greeting_system_prompt,
+)
 
 # ---------------------------------------------------------------------------
 # GreetingRequest schema validation
@@ -51,17 +53,17 @@ class TestGreetingRequestSchema:
 
     @pytest.mark.unit
     def test_invalid_topic_rejected(self):
-        with pytest.raises(Exception):
+        with pytest.raises(Exception):  # noqa: B017 — validation raises ValidationError; broad assert kept for backward compat
             GreetingRequest(topic="cooking")
 
     @pytest.mark.unit
     def test_empty_topic_rejected(self):
-        with pytest.raises(Exception):
+        with pytest.raises(Exception):  # noqa: B017 — validation raises ValidationError; broad assert kept for backward compat
             GreetingRequest(topic="")
 
     @pytest.mark.unit
     def test_none_topic_rejected(self):
-        with pytest.raises(Exception):
+        with pytest.raises(Exception):  # noqa: B017 — validation raises ValidationError; broad assert kept for backward compat
             GreetingRequest(topic=None)
 
     @pytest.mark.unit
@@ -113,9 +115,7 @@ class TestProcessGreeting:
         return mock
 
     @pytest.fixture
-    def orchestrator(
-        self, db_session: AsyncSession, mock_llm, mock_tts, mock_turn_repo
-    ):
+    def orchestrator(self, db_session: AsyncSession, mock_llm, mock_tts, mock_turn_repo):
         """Create a TurnOrchestrator with mocked dependencies."""
         orch = TurnOrchestrator(db_session)
         orch._llm = mock_llm
@@ -124,10 +124,8 @@ class TestProcessGreeting:
         return orch
 
     @pytest.mark.unit
-    async def test_process_greeting_yields_expected_event_sequence(
-        self, orchestrator
-    ):
-        """Verify the event sequence: ai_response_chunk(s) -> ai_response_done -> tts_audio_url -> turn_complete."""
+    async def test_process_greeting_yields_expected_event_sequence(self, orchestrator):
+        """Verify event order: chunk(s) -> ai_response_done -> tts_audio_url -> turn_complete."""
         conversation_id = uuid.uuid4()
 
         events = []
@@ -163,9 +161,7 @@ class TestProcessGreeting:
         assert chunk_texts == ["Hello", "! ", "How are you?"]
 
     @pytest.mark.unit
-    async def test_process_greeting_ai_response_done_contains_full_text(
-        self, orchestrator
-    ):
+    async def test_process_greeting_ai_response_done_contains_full_text(self, orchestrator):
         """Verify that ai_response_done contains the concatenated full text."""
         conversation_id = uuid.uuid4()
 
@@ -199,9 +195,7 @@ class TestProcessGreeting:
         )
 
     @pytest.mark.unit
-    async def test_process_greeting_tts_audio_url_event(
-        self, orchestrator, mock_tts
-    ):
+    async def test_process_greeting_tts_audio_url_event(self, orchestrator, mock_tts):
         """Verify that the tts_audio_url event contains the TTS URL."""
         conversation_id = uuid.uuid4()
 
@@ -217,9 +211,7 @@ class TestProcessGreeting:
         mock_tts.synthesize.assert_called_once_with("Hello! How are you?")
 
     @pytest.mark.unit
-    async def test_process_greeting_commits_session(
-        self, orchestrator, db_session
-    ):
+    async def test_process_greeting_commits_session(self, orchestrator, db_session):
         """Verify that the session is committed after all steps."""
         conversation_id = uuid.uuid4()
 
@@ -234,9 +226,7 @@ class TestProcessGreeting:
         db_session.commit.assert_called_once()
 
     @pytest.mark.unit
-    async def test_process_greeting_uses_greeting_system_prompt(
-        self, orchestrator
-    ):
+    async def test_process_greeting_uses_greeting_system_prompt(self, orchestrator):
         """Verify that the greeting system prompt is used, not the conversation prompt."""
         conversation_id = uuid.uuid4()
         topic = "technology"
@@ -256,7 +246,7 @@ class TestProcessGreeting:
 
         assert len(captured_messages) == 1
         assert captured_messages[0].role == "system"
-        expected_prompt = _GREETING_SYSTEM_PROMPT.format(topic=topic)
+        expected_prompt = _build_greeting_system_prompt(topic)
         assert captured_messages[0].content == expected_prompt
 
     @pytest.mark.unit
@@ -331,9 +321,7 @@ class TestGreetingEndpoint:
         assert data["error"]["code"] == "INVALID_STATE"
 
     @pytest.mark.integration
-    async def test_greeting_rejects_invalid_topic(
-        self, client, test_conversation: Conversation
-    ):
+    async def test_greeting_rejects_invalid_topic(self, client, test_conversation: Conversation):
         """Greeting should return 422 for invalid topic."""
         response = await client.post(
             f"/api/conversations/{test_conversation.id}/greeting",
@@ -342,9 +330,7 @@ class TestGreetingEndpoint:
         assert response.status_code == 422
 
     @pytest.mark.integration
-    async def test_greeting_rejects_missing_topic(
-        self, client, test_conversation: Conversation
-    ):
+    async def test_greeting_rejects_missing_topic(self, client, test_conversation: Conversation):
         """Greeting should return 422 when topic is missing."""
         response = await client.post(
             f"/api/conversations/{test_conversation.id}/greeting",
@@ -371,9 +357,7 @@ class TestGreetingEndpoint:
         We mock the orchestrator to avoid calling real LLM/TTS services.
         The endpoint returns an SSE response, so we check the status code.
         """
-        with patch(
-            "coyo.routers.conversations.TurnOrchestrator"
-        ) as MockOrchestrator:
+        with patch("coyo.routers.conversations.TurnOrchestrator") as MockOrchestrator:
             mock_instance = MagicMock()
 
             async def mock_greeting(**kwargs):
