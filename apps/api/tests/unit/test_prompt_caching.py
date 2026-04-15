@@ -90,24 +90,22 @@ class TestUsageLogging:
 
     @pytest.mark.unit
     def test_log_usage_computes_cache_hit_ratio(self):
-        import structlog
-
         usage = SimpleNamespace(
             prompt_tokens=1000,
             completion_tokens=200,
             prompt_tokens_details=SimpleNamespace(cached_tokens=800),
         )
-        with structlog.testing.capture_logs() as logs:
+        with patch("coyo.services.llm.openai_client.logger") as mock_logger:
             _log_usage("gpt-test", "chat", usage)
 
-        assert len(logs) == 1
-        entry = logs[0]
-        assert entry["event"] == "openai_usage"
-        assert entry["prompt_tokens"] == 1000
-        assert entry["cached_tokens"] == 800
-        assert entry["cache_hit_ratio"] == 0.8
-        assert entry["model"] == "gpt-test"
-        assert entry["method"] == "chat"
+        mock_logger.info.assert_called_once()
+        call = mock_logger.info.call_args
+        assert call.args[0] == "openai_usage"
+        assert call.kwargs["prompt_tokens"] == 1000
+        assert call.kwargs["cached_tokens"] == 800
+        assert call.kwargs["cache_hit_ratio"] == 0.8
+        assert call.kwargs["model"] == "gpt-test"
+        assert call.kwargs["method"] == "chat"
 
     @pytest.mark.unit
     def test_log_usage_handles_missing_details_gracefully(self):
