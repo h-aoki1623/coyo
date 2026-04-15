@@ -19,31 +19,27 @@ appId: to.coyo.app
 - waitForAnimationToEnd
 
 # Confirm sign-out in the native Alert.
-# On Android, native AlertDialog auto-uppercases ("SIGN OUT" — unique on screen).
-# On iOS, the button is "Sign Out" (same label as the trigger button, so use index: 1).
+# The Home screen trigger button and the Alert's confirm button share the
+# same label ("Sign Out" / "サインアウト"). We disambiguate via Maestro's
+# `rightOf:` selector relative to the Alert's Cancel button — "Cancel" /
+# "キャンセル" only appears inside the Alert, and the confirm button is
+# always rendered to the right of Cancel on 2-button alerts on both iOS
+# and Android. Maestro text matching is case-insensitive so Android's
+# auto-uppercased "CANCEL" also matches "Cancel".
 - runFlow:
     when:
-      visible: "SIGN OUT"
-    commands:
-      - tapOn: "SIGN OUT"
-- runFlow:
-    when:
-      visible:
-        text: "Sign Out"
-        index: 1
+      visible: "Sign out?"
     commands:
       - tapOn:
           text: "Sign Out"
-          index: 1
+          rightOf: "Cancel"
 - runFlow:
     when:
-      visible:
-        text: "サインアウト"
-        index: 1
+      visible: "サインアウトしますか?"
     commands:
       - tapOn:
           text: "サインアウト"
-          index: 1
+          rightOf: "キャンセル"
 
 # Wait for the Welcome screen to appear after sign-out
 - extendedWaitUntil:
