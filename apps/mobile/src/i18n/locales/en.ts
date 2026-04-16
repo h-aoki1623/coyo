@@ -208,6 +208,38 @@ const en = {
       resendCooldown: 'Resend ({{seconds}}s)',
     },
     signOut: 'Sign Out',
+    passwordReset: {
+      enterEmail: {
+        title: 'Reset Password',
+        description:
+          'Enter the email address associated with your account. We will send you a link to reset your password.',
+        placeholder: 'Email',
+        submit: 'Send',
+      },
+      sent: {
+        title: 'Check Your Email',
+        description: 'We sent you a link to reset your password.',
+        step1: 'Open your email app',
+        step2: 'Find the email from Coyo (check your spam folder too)',
+        step3: 'Tap "Reset password"',
+        didNotReceive: "Didn't receive it? ",
+        resend: 'Resend',
+        resendCooldown: 'Resend ({{seconds}}s)',
+      },
+      newPassword: {
+        title: 'Set a New Password',
+        placeholder: 'New password',
+        confirmPlaceholder: 'Confirm new password',
+        submit: 'Update',
+        mismatch: 'Passwords do not match.',
+        invalidLink: 'This link is invalid or has expired. Please try again.',
+      },
+      success: {
+        title: 'Password Updated',
+        description: 'You can now sign in with your new password.',
+        backToSignIn: 'Back to Sign In',
+      },
+    },
   },
 
   // Firebase Auth errors
@@ -215,6 +247,7 @@ const en = {
     emailAlreadyInUse: 'This email address is already registered.',
     invalidEmail: 'Please enter a valid email address.',
     weakPassword: 'Password must be at least 8 characters.',
+    passwordTooLong: 'Password must be 128 characters or fewer.',
     invalidCredential: 'Incorrect email or password.',
     tooManyRequests: 'Too many attempts. Please try again later.',
     networkError: 'Network error. Please check your connection.',
@@ -223,6 +256,10 @@ const en = {
     signInFailed: 'Sign-in failed. Please try again.',
     signOutFailed: 'Sign-out failed. Please try again.',
     resendFailed: 'Failed to resend verification email.',
+    invalidActionCode: 'This link is invalid. Please request a new password reset.',
+    expiredActionCode: 'This link has expired. Please request a new password reset.',
+    passwordResetRequestFailed: 'Failed to send password reset email.',
+    passwordResetConfirmFailed: 'Failed to update password. Please try again.',
   },
 
   // Common

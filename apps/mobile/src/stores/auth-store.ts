@@ -16,6 +16,7 @@ import {
   onAuthStateChanged,
   reloadUser,
   sendEmailVerification as firebaseSendEmailVerification,
+  sendPasswordResetEmail as firebaseSendPasswordResetEmail,
   signInWithApple,
   signInWithEmail,
   signInWithGoogle,
@@ -49,6 +50,7 @@ interface AuthState {
   handleSignInWithApple: () => Promise<void>;
   handleSignOut: () => Promise<void>;
   resendVerification: () => Promise<void>;
+  requestPasswordReset: (email: string) => Promise<void>;
   checkEmailVerified: () => Promise<boolean>;
   clearError: () => void;
   getToken: () => Promise<string | null>;
@@ -178,6 +180,30 @@ export const useAuthStore = create<AuthState>((set, _get) => ({
     } catch (err) {
       const message = getFirebaseErrorMessage(err, t('firebaseErrors.resendFailed'));
       set({ error: message });
+      throw err;
+    }
+  },
+
+  requestPasswordReset: async (email) => {
+    set({ isLoading: true, error: null });
+    try {
+      await firebaseSendPasswordResetEmail(email);
+      set({ isLoading: false });
+    } catch (err) {
+      // Swallow `auth/user-not-found` to prevent account enumeration:
+      // from the UI's perspective the request always succeeds, so an
+      // attacker cannot infer whether an email is registered by comparing
+      // error vs. success responses. Firebase itself does not send an
+      // email to an unregistered address, so this is safe.
+      const code = typeof err === 'object' && err !== null && 'code' in err
+        ? String((err as { code: unknown }).code)
+        : '';
+      if (code === 'auth/user-not-found') {
+        set({ isLoading: false });
+        return;
+      }
+      const message = getFirebaseErrorMessage(err, t('firebaseErrors.passwordResetRequestFailed'));
+      set({ isLoading: false, error: message });
       throw err;
     }
   },

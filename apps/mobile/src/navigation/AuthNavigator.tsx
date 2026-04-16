@@ -6,6 +6,9 @@ import { AuthMethodScreen } from '@/features/auth/AuthMethodScreen';
 import { SignUpFormScreen } from '@/features/auth/SignUpFormScreen';
 import { SignInFormScreen } from '@/features/auth/SignInFormScreen';
 import { EmailVerificationScreen } from '@/features/auth/EmailVerificationScreen';
+import { PasswordResetEmailScreen } from '@/features/auth/PasswordResetEmailScreen';
+import { PasswordResetSentScreen } from '@/features/auth/PasswordResetSentScreen';
+import { PasswordResetSuccessScreen } from '@/features/auth/PasswordResetSuccessScreen';
 
 import type { AuthStackParamList } from './types';
 
@@ -26,6 +29,13 @@ export function AuthNavigator() {
       <Stack.Screen
         name="EmailVerification"
         component={EmailVerificationScreen}
+        options={{ gestureEnabled: false }}
+      />
+      <Stack.Screen name="PasswordResetEmail" component={PasswordResetEmailScreen} />
+      <Stack.Screen name="PasswordResetSent" component={PasswordResetSentScreen} />
+      <Stack.Screen
+        name="PasswordResetSuccess"
+        component={PasswordResetSuccessScreen}
         options={{ gestureEnabled: false }}
       />
     </Stack.Navigator>

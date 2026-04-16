@@ -31,6 +31,24 @@ const EMAIL_VERIFICATION_SETTINGS = {
   android: { packageName: PACKAGE_NAME, installApp: false },
 };
 
+// ActionCodeSettings for password reset links.
+//
+// `handleCodeInApp: false` — the user enters their new password on Firebase's
+// hosted web page (not in-app). After a successful reset, Firebase redirects
+// to the `continueUrl` below, which triggers a meta-refresh back to the app
+// via `coyo://password-reset-done`, landing on the in-app Success screen.
+//
+// In-app password entry requires Universal Links / App Links infrastructure
+// that is tracked in a separate issue. Until then, the web-page flow is the
+// only working approach.
+const PASSWORD_RESET_CONTINUE_URL = `${API_BASE_URL}/api/auth/password-reset-redirect`;
+const PASSWORD_RESET_SETTINGS = {
+  url: PASSWORD_RESET_CONTINUE_URL,
+  handleCodeInApp: false,
+  iOS: { bundleId: BUNDLE_ID },
+  android: { packageName: PACKAGE_NAME, installApp: false },
+};
+
 /**
  * Wrapper for User.sendEmailVerification that works around a type definition
  * mismatch in @react-native-firebase/auth v21 where the method-style API's
@@ -133,6 +151,16 @@ export async function sendEmailVerification(): Promise<void> {
   const user = auth().currentUser;
   if (!user) throw new Error('No authenticated user');
   await sendVerificationEmail(user);
+}
+
+/**
+ * Send a password reset email. After the user resets on Firebase's hosted
+ * page, they are redirected to the `continueUrl` which bounces them back
+ * into the app.
+ */
+export async function sendPasswordResetEmail(email: string): Promise<void> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  await (auth() as any).sendPasswordResetEmail(email, PASSWORD_RESET_SETTINGS);
 }
 
 export async function reloadUser(): Promise<FirebaseAuthTypes.User | null> {

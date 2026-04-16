@@ -1,5 +1,5 @@
 import { useCallback, useEffect } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Linking } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 import { useFonts } from 'expo-font';
@@ -17,6 +17,8 @@ import {
 import * as ExpoSplashScreen from 'expo-splash-screen';
 
 import { RootNavigator } from '@/navigation/RootNavigator';
+import { linking } from '@/navigation/linking';
+import { signOut as firebaseSignOut } from '@/services/firebase-auth';
 import { useAuthStore } from '@/stores/auth-store';
 import { useSuggestionsStore } from '@/stores/suggestions-store';
 
@@ -44,6 +46,31 @@ export default function App() {
   useEffect(() => {
     const unsubscribe = useAuthStore.getState().initialize();
     return unsubscribe;
+  }, []);
+
+  // When a coyo://password-reset-done URL arrives (after the user resets
+  // their password on Firebase's hosted page), sign out so the AuthNavigator
+  // mounts and the deep link resolves to the PasswordResetSuccess screen.
+  // Firebase revokes refresh tokens on password change, but the in-memory
+  // session may still appear authenticated momentarily — signing out eagerly
+  // avoids a race where the deep link arrives before onAuthStateChanged fires.
+  useEffect(() => {
+    const isResetDoneUrl = (url: string | null): boolean =>
+      url === 'coyo://password-reset-done'
+      || (url?.startsWith('coyo://password-reset-done?') ?? false);
+
+    const handleResetDoneUrl = (url: string | null) => {
+      if (!isResetDoneUrl(url)) return;
+      firebaseSignOut().catch(() => {});
+    };
+
+    const subscription = Linking.addEventListener('url', ({ url }) => {
+      handleResetDoneUrl(url);
+    });
+
+    Linking.getInitialURL().then(handleResetDoneUrl).catch(() => {});
+
+    return () => subscription.remove();
   }, []);
 
   // Whether the user is heading to the Home screen — only then do we need
@@ -89,7 +116,7 @@ export default function App() {
 
   return (
     <View style={styles.root} onLayout={onLayoutRootView}>
-      <NavigationContainer>
+      <NavigationContainer linking={linking}>
         <StatusBar style="auto" />
         <RootNavigator />
       </NavigationContainer>
