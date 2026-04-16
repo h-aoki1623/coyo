@@ -23,12 +23,16 @@
 #     bash scripts/uv-install.sh ... → wrapper that injects --exclude-newer
 #     bash scripts/install-npm-pinned.sh
 #     uv sync --frozen ...           → restore from the lockfile
-#     uv venv / uv run / uv --version → no resolution, no cooldown needed
+#     uv run --frozen ...            → run without re-resolving
+#     uv venv / uv --version        → no resolution, no cooldown needed
+#     make api-test                  → uv run --frozen pytest
+#     make api-cmd CMD="..."         → uv run --frozen <arbitrary>
 #
 # What the hook blocks (each is a "common accident" Claude might emit):
 #     uv pip install / uv pip compile / uv pip sync / uv pip uninstall
 #     uv add / uv lock
 #     uv sync (without --frozen)
+#     uv run  (without --frozen) — silently strips exclude-newer from uv.lock
 #     uv tool install / uv tool run / uvx
 #     pip install (pip, pip3, python -m pip, python3 -m pip)
 #     bash -c / sh -c / eval / python -c   when the inner string mentions
@@ -139,6 +143,16 @@ if [[ "$command" =~ uv[[:space:]]+sync[^\&\|\;]* ]]; then
   fi
 fi
 
+# uv run (without --frozen). Same approach as uv sync: extract the segment,
+# strip comments, look for --frozen as a standalone token.
+if [[ "$command" =~ uv[[:space:]]+run[^\&\|\;]* ]]; then
+  uv_run_segment="${BASH_REMATCH[0]}"
+  uv_run_segment_clean="${uv_run_segment%%#*}"
+  if ! [[ "$uv_run_segment_clean" =~ (^|[[:space:]])--frozen([[:space:]=]|$) ]]; then
+    block "uv run without --frozen detected (use 'make api-test' or '.venv/bin/<cmd>' instead)"
+  fi
+fi
+
 # pip install in any of its forms.
 if [[ "$command" =~ ${LEAD}(python[23]?[[:space:]]+-m[[:space:]]+)?pip[23]?[[:space:]]+install ]]; then
   block "pip install detected"
@@ -154,12 +168,12 @@ fi
 # bash -c / sh -c with uv/pip inside the quoted string.
 # (\b word boundaries are not reliable in bash POSIX ERE on macOS, so we
 # rely on greedy `.*` + the explicit token shapes in the alternation.)
-if [[ "$command" =~ (bash|sh)[[:space:]]+-c[[:space:]]+[\"\'].*(uv[[:space:]]+(pip|add|lock|sync|tool)|uvx|pip[23]?[[:space:]]+install) ]]; then
+if [[ "$command" =~ (bash|sh)[[:space:]]+-c[[:space:]]+[\"\'].*(uv[[:space:]]+(pip|add|lock|sync|run|tool)|uvx|pip[23]?[[:space:]]+install) ]]; then
   block "indirect uv/pip via ${BASH_REMATCH[1]} -c detected"
 fi
 
 # eval with uv/pip inside the quoted string.
-if [[ "$command" =~ eval[[:space:]]+[\"\'].*(uv[[:space:]]+(pip|add|lock|sync|tool)|uvx|pip[23]?[[:space:]]+install) ]]; then
+if [[ "$command" =~ eval[[:space:]]+[\"\'].*(uv[[:space:]]+(pip|add|lock|sync|run|tool)|uvx|pip[23]?[[:space:]]+install) ]]; then
   block "indirect uv/pip via eval detected"
 fi
 

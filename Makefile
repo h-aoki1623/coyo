@@ -1,4 +1,4 @@
-.PHONY: dev-mobile dev-api dev-ios dev-android dev-both dev-stop lint lint-mobile lint-api test test-mobile test-api e2e e2e-ios e2e-android migrate migrate-new docker-up docker-down docker-reset generate-api-types db-clean-users eval-a eval-b eval-c eval-all api-lock api-install
+.PHONY: dev-mobile dev-api dev-ios dev-android dev-both dev-stop lint lint-mobile lint-api test test-mobile test-api e2e e2e-ios e2e-android migrate migrate-new docker-up docker-down docker-reset generate-api-types db-clean-users eval-a eval-b eval-c eval-all api-lock api-install api-test api-cmd
 
 # Python dependency management (uv-based, with release-age cooldown)
 #
@@ -6,6 +6,12 @@
 #               Use this for environment setup. No network resolution: deps
 #               are restored verbatim from the lockfile, so the supply-chain
 #               cooldown that was applied at lock time is preserved.
+#
+# api-test      Run pytest via uv run --frozen (lockfile is never re-resolved).
+#               Pass extra args: make api-test ARGS="-k test_foo -v"
+#
+# api-cmd       Run an arbitrary command via uv run --frozen.
+#               Example: make api-cmd CMD="ruff check src/"
 #
 # api-lock      Regenerate apps/api/uv.lock with the cooldown applied
 #               (versions younger than UV_COOLDOWN_DAYS days are excluded).
@@ -20,6 +26,13 @@
 # direct `uv pip install` / `uv lock` / `pip install` invocation.
 api-lock:
 	cd apps/api && ../../scripts/uv-install.sh lock
+
+api-test:
+	cd apps/api && uv run --frozen --extra dev pytest $(ARGS)
+
+api-cmd:
+	@if [ -z "$(CMD)" ]; then echo "ERROR: CMD is required. Usage: make api-cmd CMD=\"ruff check src/\""; exit 1; fi
+	cd apps/api && uv run --frozen --extra dev $(CMD)
 
 api-install:
 	@if [ apps/api/pyproject.toml -nt apps/api/uv.lock ]; then \

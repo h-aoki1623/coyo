@@ -32,21 +32,23 @@ bypass the cooldown:
 - **`.claude/hooks/check-uv-install.sh`** — refuses Bash commands that
   invoke `uv pip install` / `uv pip compile|sync|uninstall`, `uv add`,
   `uv remove`, `uv lock`, `uv sync` (without `--frozen`),
-  `uv tool install|run|upgrade`, `uvx`, or `pip install`. Also refuses
-  `bash -c '...'` / `sh -c '...'` / `eval '...'` / `python -c '...'` when
-  the inner string mentions any of the above. Also refuses Bash file
-  mutations (`chmod`, `rm`, `mv`, `cp`, `sed -i`, `tee`, `ln`, `>`/`>>`)
-  that target any protected file, so the hook cannot be silently disabled
-  by `chmod -x .claude/hooks/check-uv-install.sh`.
+  `uv run` (without `--frozen`), `uv tool install|run|upgrade`, `uvx`,
+  or `pip install`. Also refuses `bash -c '...'` / `sh -c '...'` /
+  `eval '...'` / `python -c '...'` when the inner string mentions any
+  of the above. Also refuses Bash file mutations (`chmod`, `rm`, `mv`,
+  `cp`, `sed -i`, `tee`, `ln`, `>`/`>>`) that target any protected file,
+  so the hook cannot be silently disabled by
+  `chmod -x .claude/hooks/check-uv-install.sh`.
 - **`.claude/hooks/check-protected-files.sh`** — refuses Edit/Write/MultiEdit
   on the files that enforce the policy: `apps/mobile/.npmrc`,
   `scripts/uv-install.sh`, `scripts/install-npm-pinned.sh`, and the two
   hook scripts themselves. Symlink targets are resolved before matching.
 
 The sanctioned entry points are `make api-lock`, `make api-install`,
+`make api-test`, `make api-cmd CMD="..."`,
 `bash scripts/uv-install.sh`, `bash scripts/install-npm-pinned.sh`, and
-the no-resolution uv subcommands (`uv venv`, `uv run`, `uv sync --frozen`,
-`uv --version`).
+the no-resolution uv subcommands (`uv venv`, `uv run --frozen`,
+`uv sync --frozen`, `uv --version`).
 
 > **What these hooks are NOT:** a security boundary against a motivated
 > or compromised actor. Regex over a shell command string cannot reliably

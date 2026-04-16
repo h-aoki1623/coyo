@@ -115,12 +115,12 @@ cd apps/api
 # --no-dev skips pytest/ruff/etc. which production doesn't need.
 uv sync --frozen --no-dev
 
-# Run migrations against production database via `uv run` (auto-picks up .venv)
+# Run migrations against production database (auto-picks up .venv)
 # NOTE: Use single quotes to avoid shell interpretation of special characters in password
 DATABASE_URL='postgresql+asyncpg://<user>:<password>@<host>:6543/<database>?ssl=require' \
 REDIS_URL='redis://localhost:6379' \
 OPENAI_API_KEY='dummy' \
-uv run alembic upgrade head
+uv run --frozen alembic upgrade head
 ```
 
 ### 2.2 Build and Deploy
