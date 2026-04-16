@@ -10,6 +10,7 @@ import { AuthFormLayout } from './components/AuthFormLayout';
 import { AuthInput } from './components/AuthInput';
 import { ErrorBanner } from './components/ErrorBanner';
 import { SubmitButton } from './components/SubmitButton';
+import { validatePassword } from './validation';
 
 import type { AuthStackParamList } from '@/navigation/types';
 
@@ -27,7 +28,7 @@ export function SignUpFormScreen({ navigation }: Props) {
 
   const isFormValid = name.trim().length > 0
     && email.trim().length > 0
-    && password.length > 0;
+    && validatePassword(password) === null;
 
   const handleSubmit = useCallback(async () => {
     if (!isFormValid || isLoading) return;

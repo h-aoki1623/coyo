@@ -207,6 +207,38 @@ const ja = {
       resendCooldown: '再送信 ({{seconds}}秒)',
     },
     signOut: 'サインアウト',
+    passwordReset: {
+      enterEmail: {
+        title: 'パスワードをリセット',
+        description:
+          'ご登録のメールアドレスを入力してください。パスワードリセット用のリンクをお送りします。',
+        placeholder: 'メールアドレス',
+        submit: '送信',
+      },
+      sent: {
+        title: 'メールを確認',
+        description: 'パスワードリセット用のリンクを送信しました。',
+        step1: 'メールアプリを開く',
+        step2: 'Coyoからのメールを確認（迷惑メールフォルダもご確認ください）',
+        step3: '「パスワードをリセット」をタップ',
+        didNotReceive: '届きませんでしたか？ ',
+        resend: '再送信',
+        resendCooldown: '再送信 ({{seconds}}秒)',
+      },
+      newPassword: {
+        title: '新しいパスワードを設定',
+        placeholder: '新しいパスワード',
+        confirmPlaceholder: '新しいパスワード（確認）',
+        submit: '変更',
+        mismatch: 'パスワードが一致しません。',
+        invalidLink: 'リンクが無効か、有効期限が切れています。もう一度お試しください。',
+      },
+      success: {
+        title: 'パスワードを更新しました',
+        description: '新しいパスワードでログインできます。',
+        backToSignIn: 'ログイン画面へ',
+      },
+    },
   },
 
   // Firebase Auth errors
@@ -214,6 +246,7 @@ const ja = {
     emailAlreadyInUse: 'このメールアドレスは既に登録されています。',
     invalidEmail: '有効なメールアドレスを入力してください。',
     weakPassword: 'パスワードは8文字以上で入力してください。',
+    passwordTooLong: 'パスワードは128文字以内で入力してください。',
     invalidCredential: 'メールアドレスまたはパスワードが正しくありません。',
     tooManyRequests: '試行回数が多すぎます。しばらくしてからお試しください。',
     networkError: 'ネットワークエラーです。接続を確認してください。',
@@ -222,6 +255,10 @@ const ja = {
     signInFailed: 'サインインに失敗しました。もう一度お試しください。',
     signOutFailed: 'サインアウトに失敗しました。もう一度お試しください。',
     resendFailed: '確認メールの再送信に失敗しました。',
+    invalidActionCode: 'リンクが無効です。もう一度パスワードリセットをお試しください。',
+    expiredActionCode: 'リンクの有効期限が切れています。もう一度パスワードリセットをお試しください。',
+    passwordResetRequestFailed: 'パスワードリセットメールの送信に失敗しました。',
+    passwordResetConfirmFailed: 'パスワードの変更に失敗しました。もう一度お試しください。',
   },
 
   // Common

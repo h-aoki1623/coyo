@@ -12,6 +12,7 @@ interface Props {
   secureTextEntry?: boolean;
   keyboardType?: KeyboardTypeOptions;
   autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
+  editable?: boolean;
   testID?: string;
 }
 
@@ -22,6 +23,7 @@ export function AuthInput({
   secureTextEntry,
   keyboardType,
   autoCapitalize,
+  editable,
   testID,
 }: Props) {
   // iOS detects secureTextEntry fields as password inputs and shows
@@ -45,6 +47,7 @@ export function AuthInput({
       autoComplete="off"
       importantForAutofill="no"
       autoCorrect={false}
+      editable={editable}
       accessibilityLabel={placeholder}
       testID={testID}
     />

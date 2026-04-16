@@ -15,6 +15,8 @@ const ERROR_MAP: Record<string, string> = {
   'auth/too-many-requests': 'firebaseErrors.tooManyRequests',
   'auth/network-request-failed': 'firebaseErrors.networkError',
   'auth/user-disabled': 'firebaseErrors.userDisabled',
+  'auth/invalid-action-code': 'firebaseErrors.invalidActionCode',
+  'auth/expired-action-code': 'firebaseErrors.expiredActionCode',
 };
 
 /** Error codes that indicate the user cancelled sign-in (not a real error). */

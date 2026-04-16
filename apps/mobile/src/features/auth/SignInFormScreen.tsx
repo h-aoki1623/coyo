@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, Pressable, StyleSheet } from 'react-native';
 
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
@@ -82,7 +82,15 @@ export function SignInFormScreen({ navigation }: Props) {
       />
 
       <View style={styles.forgotContainer}>
-        <Text style={styles.forgotText}>{t('auth.signIn.forgotPassword')}</Text>
+        <Pressable
+          onPress={() => navigation.navigate('PasswordResetEmail')}
+          hitSlop={8}
+          accessibilityRole="button"
+          accessibilityLabel={t('auth.signIn.forgotPassword')}
+          testID="signin-forgot-password-link"
+        >
+          <Text style={styles.forgotText}>{t('auth.signIn.forgotPassword')}</Text>
+        </Pressable>
       </View>
     </AuthFormLayout>
   );
@@ -93,7 +101,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   forgotContainer: {
-    marginTop: 20,
+    marginTop: 24,
     alignItems: 'center',
   },
   forgotText: {

@@ -16,5 +16,6 @@ export { SpeechBubbleIcon } from './SpeechBubbleIcon';
 export { HintCircleIcon } from './HintCircleIcon';
 export { SpinnerIcon } from './SpinnerIcon';
 export { MailIcon } from './MailIcon';
+export { CheckIcon } from './CheckIcon';
 export { GoogleIcon } from './GoogleIcon';
 export { AppleIcon } from './AppleIcon';
