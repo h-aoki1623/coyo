@@ -1,6 +1,16 @@
 # Coyo
 
-AI English conversation practice app.
+Coyo is an AI-powered English conversation practice app designed to help you improve your English naturally and enjoyably.
+
+### Features
+
+- **Real-time correction** — Coyo reviews your messages and offers natural, constructive feedback to help you refine your grammar, vocabulary, and expression.
+- **Personalized conversations** — Conversations adapt to your interests and past episodes, so every session feels relevant and engaging rather than generic.
+- **Topic suggestions** — Not sure what to talk about? Coyo surfaces topics tailored to what you care about, so you always have a great starting point.
+
+### Why Coyo?
+
+Language learning sticks when it's personal. Coyo remembers what you've talked about, learns what interests you, and builds on that context to make each conversation more meaningful than the last.
 
 ## Project Structure
 
