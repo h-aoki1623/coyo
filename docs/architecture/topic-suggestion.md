@@ -33,7 +33,7 @@ The pipeline depends on the memory extraction system (see [Memory & Conversation
 
 ### 2.1 Generation Trigger & Schedule
 
-Topic generation is triggered by a **Cloud Scheduler** job that sends an HTTP POST to `/api/topics/generate` daily at **06:00 JST** (before users start their day). The endpoint is protected by an HMAC secret (`X-Cron-Secret`) to prevent unauthorized invocation. Upon receiving the request, `TopicGenerationService` executes three steps in sequence: common topic generation, user assignment, and personal topic generation.
+Topic generation is triggered by a **Cloud Scheduler** job that runs daily at **06:00 JST**.
 
 ### 2.2 Generation Flow
 
