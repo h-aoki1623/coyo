@@ -6,7 +6,7 @@ This document describes the evaluation framework for measuring the quality of Co
 
 | Evaluation | What it Measures | Key Metrics |
 |---|---|---|
-| **Eval A** | LLM raw output quality | P/R/F1, niche rate, news relevance, type confusion, Wikidata hit |
+| **Eval A** | LLM raw output quality | Precision/Recall/F1, niche rate, news relevance, type confusion, Wikidata hit |
 | **Eval B** | End-to-end pipeline quality (LLM + post-processing) | All of Eval A + IAB match rate, normalization accuracy |
 | **Eval C** | Keyword deduplication accuracy | False merge rate, false split rate |
 
@@ -71,71 +71,80 @@ gold_labels:
 
 Eval A measures whether the production LLM extracts the right keywords from conversation transcripts, **before** any post-processing.
 
-### Pipeline
+**Category**
 
-```
-Test Case (transcript + gold labels)
-    |
-    v
-MemoryExtractionService.extract_from_transcript()
-    |  (production LLM call)
-    v
-Predicted keywords (categories + entities)
-    |
-    v
-Bipartite matching against gold labels
-    |
-    v
-Metric computation
-```
+| Metric | Target | Description |
+|---|---|---|
+| Precision / Recall / F1 | — | Keyword extraction accuracy for broad topics |
+| Recall Breakdown | — | Recall split by explicit vs. implicit mentions |
+| Niche Rate | — | % of categories not matching IAB taxonomy |
 
-### Primary Metrics: P/R/F1
+**Entity**
 
-Precision, Recall, and F1 are computed separately for categories and entities using **micro-averaged** bipartite matching across all test cases.
+| Metric | Target | Description |
+|---|---|---|
+| Precision / Recall / F1 | — | Keyword extraction accuracy for proper nouns |
+| Recall Breakdown | — | Recall split by explicit vs. implicit mentions |
+| Type Confusion | — | Entity/category misclassification rate |
+| Wikidata Hit Rate | — | % of entities confirmed via Wikidata API |
 
-#### Matching Algorithm
+**is_news_relevant**
 
-Keyword matching uses embedding-based bipartite matching rather than exact string comparison. This handles semantic equivalence (e.g., "artificial intelligence" matching "AI").
+| Metric | Target | Description |
+|---|---|---|
+| Precision / Recall / F1 | — | `is_news_relevant` flag accuracy (confusion matrix, split by category/entity/overall) |
 
-1. **Embed** all predicted and gold keywords in a single batch call
-2. **Build** a cosine similarity matrix (predicted x gold)
-3. **Zero out** similarities below the threshold (category: 0.90, entity: 0.85)
-4. **Solve** maximum-weight bipartite matching via the Hungarian algorithm (`scipy.optimize.linear_sum_assignment`)
-5. **Classify** each keyword:
-   - **TP**: Predicted keyword matched to a gold keyword (above threshold)
-   - **FP**: Predicted keyword with no matching gold keyword
-   - **FN**: Gold keyword with no matching predicted keyword
+### Precision / Recall / F1
+
+Precision, Recall, F1 are computed separately for categories and entities, **micro-averaged** across all test cases. The same Precision/Recall/F1 formulas are also used for `is_news_relevant` classification, where the confusion matrix is derived from matched keyword pairs.
+
+- **Precision** — Of the keywords extracted, what fraction matched the gold labels. For `is_news_relevant`, of the keywords predicted as news-relevant, what fraction was correct
+- **Recall** — Of the gold-label keywords, what fraction was successfully extracted. For `is_news_relevant`, of the actually news-relevant keywords, what fraction was correctly flagged
+- **F1** — Harmonic mean of Precision and Recall. Balances both into a single score
 
 ```
 Precision = TP / (TP + FP)
 Recall    = TP / (TP + FN)
-F1        = 2 * P * R / (P + R)
+F1        = 2 * Precision * Recall / (Precision + Recall)
 ```
 
-#### Recall Breakdown by Mention Type
+#### Category / Entity Keyword Matching
+
+For categories and entities, TP/FP/FN are determined via **embedding-based bipartite matching** rather than exact string comparison. This handles semantic equivalence (e.g., "artificial intelligence" matching "AI"). Precision/Recall/F1 are then computed from these TP/FP/FN counts.
+
+1. Embed all predicted and gold keywords in a single batch call
+2. Build a cosine similarity matrix (predicted x gold)
+3. Zero out similarities below the threshold (category: 0.90, entity: 0.85)
+4. Solve maximum-weight bipartite matching via the Hungarian algorithm
+5. Classify each keyword:
+   - **TP**: Predicted keyword matched to a gold keyword (above threshold)
+   - **FP**: Predicted keyword with no matching gold keyword
+   - **FN**: Gold keyword with no matching predicted keyword
+6. Compute Precision/Recall/F1 from the TP/FP/FN counts
+
+#### is_news_relevant Classification
+
+For `is_news_relevant`, Precision/Recall/F1 are computed from a binary confusion matrix rather than bipartite matching:
+
+1. Take only **matched pairs** (TP from the category/entity bipartite matching above)
+2. For each pair, compare the predicted `is_news_relevant` flag against the gold flag
+3. Build a confusion matrix (TP/FP/FN/TN) where TP = both predicted and gold are `true`, FP = predicted `true` but gold `false`, etc.
+4. Compute Precision/Recall/F1 from this confusion matrix, split by keyword type (category, entity, overall)
+
+### Recall Breakdown (Category / Entity)
 
 Recall is further broken down by `mention_type` (explicit vs. implicit). This reveals whether the LLM struggles with implicit signals (e.g., inferring "tennis" from a discussion about a tennis player) compared to explicit statements ("I love tennis").
 
-### Secondary Metrics
-
-#### Niche Rate
+### Niche Rate (Category)
 
 Measures what percentage of predicted category keywords are "niche" — topics not recognized in the IAB Content Taxonomy.
 
 - For each predicted category, compute its best cosine similarity to any IAB taxonomy label embedding
-- If `best_similarity < keyword_validate_threshold` (configurable), the keyword is classified as niche
+- If the best similarity falls below the validation threshold (configurable), the keyword is classified as niche
 - **Niche rate** = niche count / total predicted categories
 - A high niche rate may indicate the LLM is hallucinating non-standard topics, or it may indicate legitimate niche interests depending on the test set
 
-#### News Relevance (`is_news_relevant`)
-
-Evaluates the accuracy of the `is_news_relevant` flag on matched keyword pairs. Computed as a confusion matrix (TP/FP/FN/TN) split by keyword type (category, entity, overall).
-
-- Only evaluated on **matched pairs** (TP from the bipartite matching)
-- Compares the predicted flag against the gold flag
-- Reports P/R/F1 derived from the confusion matrix
-
-#### Type Confusion
+### Type Confusion (Category / Entity)
 
 Measures the rate of entity/category misclassification on matched keyword pairs.
 
@@ -143,7 +152,7 @@ Measures the rate of entity/category misclassification on matched keyword pairs.
 - **Type confusion rate** = confused pairs / total matched pairs
 - Example: Gold says "Tesla" is an `entity`, but the LLM classified it as a `category`
 
-#### Wikidata Hit Rate
+### Wikidata Hit Rate (Entity)
 
 Validates whether predicted entity keywords correspond to real-world entities using a three-stage pipeline:
 
@@ -153,57 +162,48 @@ Validates whether predicted entity keywords correspond to real-world entities us
 
 **Wikidata hit rate** = Stage 1 valid count / total entity count. This measures what fraction of entity keywords can be confirmed via Wikidata alone.
 
-### Output
-
-```
-EvalAResult
-  ├── timestamp, model, test_case_count
-  ├── category_metrics (P/R/F1 + recall_breakdown + niche_rate)
-  ├── entity_metrics   (P/R/F1 + recall_breakdown + type_confusion + wikidata_hit)
-  ├── news_relevant    (by category / entity / overall)
-  └── per_case_details (TP/FP/FN, matched pairs, niche keywords, etc.)
-```
-
 ---
 
 ## Eval B: End-to-End Pipeline Quality
 
 Eval B extends Eval A by running the **full production pipeline**: LLM extraction followed by `KeywordPostprocessor`.
 
-### Pipeline
+**Category**
 
-```
-Test Case (transcript + gold labels)
-    |
-    v
-MemoryExtractionService.extract_from_transcript()
-    |  (production LLM call)
-    v
-Raw keywords
-    |
-    v
-KeywordPostprocessor.process()
-    |  (dedup, IAB mapping, merge detection)
-    v
-Processed keywords (with iab_category_id)
-    |
-    v
-Bipartite matching against gold labels
-    |
-    v
-Metric computation (Eval A metrics + IAB metrics)
-```
+| Metric | Target | Description |
+|---|---|---|
+| Precision / Recall / F1 | — | Same as Eval A, measured after post-processing |
+| Recall Breakdown | — | Recall split by explicit vs. implicit mentions |
+| IAB Match Rate | — | % of categories successfully mapped to an IAB taxonomy ID |
+| Normalization Accuracy | — | Predicted IAB ID vs. gold IAB ID match rate |
 
-### Additional Metrics (Beyond Eval A)
+**Entity**
 
-#### IAB Match Rate
+| Metric | Target | Description |
+|---|---|---|
+| Precision / Recall / F1 | — | Same as Eval A, measured after post-processing |
+| Recall Breakdown | — | Recall split by explicit vs. implicit mentions |
+| Type Confusion | — | Entity/category misclassification rate |
+| Wikidata Hit Rate | — | % of entities confirmed via Wikidata API |
+
+**is_news_relevant**
+
+| Metric | Target | Description |
+|---|---|---|
+| Precision / Recall / F1 | — | `is_news_relevant` flag accuracy (confusion matrix, split by category/entity/overall) |
+
+### Precision / Recall / F1
+
+Computed identically to Eval A (see [Eval A: Precision / Recall / F1](#precision--recall--f1)), but measured on the **post-processed** keywords rather than raw LLM output. The same bipartite matching and is_news_relevant classification methods apply.
+
+### IAB Match Rate (Category)
 
 Measures what percentage of predicted category keywords were successfully mapped to an IAB taxonomy ID by the post-processor.
 
-- **IAB match rate** = categories with `iab_category_id != null` / total categories
+- **IAB match rate** = categories with a non-null `iab_category_id` / total categories
 - A low rate indicates the post-processor is struggling to map keywords to IAB categories
 
-#### Normalization Accuracy
+### Normalization Accuracy (Category)
 
 If gold labels include `iab_category_id`, this metric checks whether the predicted IAB ID matches the gold IAB ID.
 
@@ -211,22 +211,16 @@ If gold labels include `iab_category_id`, this metric checks whether the predict
 - Only computed when gold IAB IDs are available
 - Evaluates the precision of IAB taxonomy assignment
 
-### Output
-
-```
-EvalBResult
-  ├── timestamp, model, test_case_count
-  ├── category_metrics (P/R/F1 + recall_breakdown + iab_match + normalization_accuracy)
-  ├── entity_metrics   (P/R/F1 + recall_breakdown + type_confusion + wikidata_hit)
-  ├── news_relevant    (by category / entity / overall)
-  └── per_case_details (TP/FP/FN, matched pairs, etc.)
-```
-
 ---
 
 ## Eval C: Dedup Accuracy
 
 Eval C measures the accuracy of the keyword deduplication algorithm in isolation. It uses dedicated test sets of keyword pairs rather than conversation transcripts.
+
+| Metric | Target | Description |
+|---|---|---|
+| False Merge Rate | < 2% | % of distinct pairs incorrectly merged |
+| False Split Rate | < 10% | % of synonym pairs incorrectly kept separate |
 
 ### Test Data
 
@@ -235,55 +229,33 @@ Two YAML files in `eval/data/dedup_pairs/`:
 - **`should_merge.yaml`**: Pairs that represent the same concept (e.g., "AI" / "artificial intelligence")
 - **`should_not_merge.yaml`**: Pairs that are different concepts (e.g., "machine learning" / "machine")
 
-### Hybrid Algorithm (Production)
+### False Merge Rate / False Split Rate
 
-The evaluation mirrors the production dedup logic, which uses a two-stage approach:
+The evaluation mirrors the production dedup logic, which uses a hybrid two-stage approach (embedding similarity + LLM confirmation) to decide whether a keyword pair should be merged.
 
-```
-Keyword pair (a, b)
-    |
-    v
-Compute cosine similarity of embeddings
-    |
-    ├── similarity >= dedup_threshold ──────> Auto-merge (no LLM)
-    |
-    ├── candidate_threshold <= similarity
-    |   < dedup_threshold ─────────────────> LLM confirmation
-    |                                          |
-    |                                          ├── LLM says synonym ──> Merge
-    |                                          └── LLM says different -> No merge
-    |
-    └── similarity < candidate_threshold ──> No merge (no LLM)
-```
+#### Dedup Algorithm
 
-The three zones:
+For each keyword pair, the merge decision is made in three zones based on embedding cosine similarity:
 
 | Zone | Condition | Action |
 |---|---|---|
-| **Auto-merge** | `sim >= dedup_threshold` | Merge without LLM (high confidence) |
-| **Candidate** | `candidate_threshold <= sim < dedup_threshold` | Ask LLM to confirm |
-| **No merge** | `sim < candidate_threshold` | Treat as distinct (high confidence) |
+| **Auto-merge** | Similarity at or above the dedup threshold | Merge without LLM (high confidence) |
+| **Candidate** | Similarity between the candidate threshold and the dedup threshold | Ask LLM to confirm whether the pair are synonyms |
+| **No merge** | Similarity below the candidate threshold | Treat as distinct (high confidence) |
 
-### Metrics
+#### Metric Computation
 
-| Metric | Formula | Target |
-|---|---|---|
-| **False Merge Rate** | false merges / should_not_merge pairs | < 2% |
-| **False Split Rate** | false splits / should_merge pairs | < 10% |
+Each pair's merge decision is compared against the gold label (should_merge or should_not_merge):
 
-A false merge (merging distinct concepts) is more damaging than a false split (keeping synonyms separate), so the target is asymmetric.
-
-### Output
+- **False Merge** — A pair from `should_not_merge` that was incorrectly merged
+- **False Split** — A pair from `should_merge` that was incorrectly kept separate
 
 ```
-EvalCResult
-  ├── timestamp, threshold_used, candidate_threshold_used
-  ├── false_merge_rate, false_split_rate
-  ├── merge_pair_count, split_pair_count
-  ├── false_merge_pairs (per-pair details)
-  ├── false_split_pairs (per-pair details)
-  └── all_results (every pair with similarity, expected, actual, llm_invoked, llm_reason)
+False Merge Rate = false merges / total should_not_merge pairs
+False Split Rate = false splits / total should_merge pairs
 ```
+
+A false merge (merging distinct concepts) is more damaging than a false split (keeping synonyms separate), so the target is asymmetric (< 2% vs. < 10%).
 
 ---
 
@@ -337,69 +309,3 @@ python -m eval run-a --output-dir /tmp/eval  # Override results directory
 
 - **Console**: Markdown summary table
 - **JSON results**: Timestamped files in `eval/results/` (e.g., `eval_a_2026-04-06T08-01-25.json`)
-
----
-
-## Data Flow: Production vs. Evaluation
-
-```
-                    PRODUCTION                          EVALUATION
-                    ----------                          ----------
-
-Conversation ──> extract_from_transcript() ──> Raw keywords
-                                                   |
-                        ┌──────────────────────────┤
-                        |                          |
-                        v                          v
-                 PostProcessor              Eval A: compare raw
-                        |                   keywords to gold labels
-                        v
-                 Processed keywords ──────> Eval B: compare processed
-                        |                   keywords to gold labels
-                        v
-                  UserInterest DB
-
-                                            Eval C: test dedup pairs
-                                            (independent of A/B)
-```
-
----
-
-## Directory Structure
-
-```
-apps/api/eval/
-├── __init__.py
-├── __main__.py              # CLI entry point
-├── config.py                # Eval-specific settings (thresholds, paths)
-├── loader.py                # YAML test case and dedup pair loader
-├── models.py                # Pydantic models (TestCase, GoldKeyword, result types)
-├── report.py                # Console summary and JSON result output
-├── runners/
-│   ├── eval_a.py            # LLM raw output quality
-│   ├── eval_b.py            # End-to-end pipeline quality
-│   └── eval_c.py            # Dedup accuracy
-├── metrics/
-│   ├── embedding_match.py   # P/R/F1 via bipartite matching (Hungarian algorithm)
-│   ├── news_relevant.py     # is_news_relevant confusion matrix
-│   ├── niche_rate.py        # IAB similarity-based niche detection
-│   ├── type_confusion.py    # Entity/category type confusion rate
-│   ├── iab_match.py         # IAB normalization metrics (Eval B)
-│   └── dedup_accuracy.py    # False merge/split rates (Eval C)
-├── validators/
-│   ├── entity_validator.py  # 3-stage entity validation (Wikidata -> LLM -> Human)
-│   ├── llm_judge.py         # LLM-as-judge service
-│   └── wikidata_lookup.py   # Wikidata API integration
-├── scripts/
-│   ├── generate_cases.py    # Generate synthetic test cases
-│   ├── generate_corpus_cases.py
-│   └── annotate_iab_ids.py  # Annotate gold labels with IAB IDs
-├── data/
-│   ├── cases/
-│   │   ├── corpus/          # 40 hand-curated test cases (4 per domain)
-│   │   └── generated/       # 21 synthetic test cases
-│   ├── dedup_pairs/         # Keyword pair dedup test sets
-│   ├── wikidata/            # Cached Wikidata lookups
-│   └── .cache/              # Embedding cache
-└── results/                 # Timestamped evaluation results (JSON)
-```
