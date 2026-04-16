@@ -14,10 +14,11 @@ This document describes how Coyo extracts, stores, and injects user memories to 
   - [2.1 Extraction Trigger & Flow](#21-extraction-trigger--flow)
   - [2.2 Unified LLM Extraction](#22-unified-llm-extraction)
   - [2.3 User Attributes — Extraction & Update Logic](#23-user-attributes--extraction--update-logic)
-  - [2.4 User Interests — Post-Processing Pipeline](#24-user-interests--post-processing-pipeline)
-  - [2.5 Conversation Summaries — Creation Logic](#25-conversation-summaries--creation-logic)
-  - [2.6 Batch Regeneration (Every 5 Conversations)](#26-batch-regeneration-every-5-conversations)
-  - [2.7 2-Layer Weight Model](#27-2-layer-weight-model)
+  - [2.4 User Interests — LLM Extraction Rules](#24-user-interests--llm-extraction-rules)
+  - [2.5 User Interests — Post-Processing Pipeline](#25-user-interests--post-processing-pipeline)
+  - [2.6 Conversation Summaries — Creation Logic](#26-conversation-summaries--creation-logic)
+  - [2.7 Batch Regeneration (Every 5 Conversations)](#27-batch-regeneration-every-5-conversations)
+  - [2.8 2-Layer Weight Model](#28-2-layer-weight-model)
 - [3. Memory Injection into Conversations](#3-memory-injection-into-conversations)
   - [3.1 Injection Timing & Snapshot Strategy](#31-injection-timing--snapshot-strategy)
   - [3.2 Theme Context Construction](#32-theme-context-construction)
@@ -161,25 +162,6 @@ A single LLM call extracts all three memory types from the conversation transcri
 }
 ```
 
-**Signal detection rules** (for interests):
-
-| Signal Type | Confidence | Examples |
-|---|---|---|
-| Explicit | High | "I love X", "I'm a fan of X", sustained enthusiasm |
-| Implicit | Medium | Specialized knowledge, habitual behavior, repeated positive references |
-
-**Exclusion filters** (even if signal detected):
-
-1. Transactional context (hotel check-in ≠ travel interest)
-2. Non-celebrity personal names
-3. AI-side interest (AI introduced the topic)
-4. Daily routine (unless genuine passion)
-5. Conversation-scoped curiosity
-6. Ambiguous context
-7. Casual mention without follow-up
-8. Generic locations as background
-9. Language learning activity (the app's purpose, not an interest)
-
 ### 2.3 User Attributes — Extraction & Update Logic
 
 ```
@@ -195,7 +177,39 @@ For each MemoryItem from LLM:
 
 Key rule: **Higher confidence always wins**. A directly stated fact (1.0) overrides an inferred one (0.5).
 
-### 2.4 User Interests — Post-Processing Pipeline
+### 2.4 User Interests — LLM Extraction Rules
+
+Interest extraction uses a 3-step decision process within the LLM prompt. These rules apply **only to interests** (categories and entities), not to user attributes or conversation summaries.
+
+**Step 1 — Signal detection**:
+
+| Signal Type | Confidence | Examples |
+|---|---|---|
+| Explicit | High | "I love X", "I'm a fan of X", sustained enthusiasm |
+| Implicit | Medium | Specialized knowledge, habitual behavior, repeated positive references |
+
+If no explicit or implicit signal is present, the LLM returns empty lists.
+
+**Step 2 — Exclusion filters** (even if signal detected):
+
+1. Transactional context (hotel check-in ≠ travel interest)
+2. Non-celebrity personal names
+3. AI-side interest (AI introduced the topic)
+4. Daily routine (unless genuine passion)
+5. Conversation-scoped curiosity
+6. Ambiguous context
+7. Casual mention without follow-up
+8. Generic locations as background
+9. Language learning activity (the app's purpose, not an interest)
+
+**Step 3 — Formatting rules**:
+
+- Categories must correspond to an IAB Content Taxonomy category (Tier 1–4)
+- Entities must be notable proper nouns with a Wikipedia-level public presence
+- Granularity should match the scope of interest the user expressed (broad interest → broader tier)
+- Semantic deduplication: keep only one keyword per concept
+
+### 2.5 User Interests — Post-Processing Pipeline
 
 After LLM extraction, interests pass through a 3-stage pipeline before DB upsert:
 
@@ -231,7 +245,7 @@ Upsert to user_interests table
 
 **Topic keyword injection**: After the pipeline, the conversation's topic keyword (from `TopicSuggestion.source_keyword` or fixed-topic IAB mapping) is also upserted as an interest if not already extracted by the LLM.
 
-### 2.5 Conversation Summaries — Creation Logic
+### 2.6 Conversation Summaries — Creation Logic
 
 Created once per conversation during extraction:
 
@@ -242,7 +256,7 @@ Created once per conversation during extraction:
 
 The embedding text structure mirrors `ThemeContext` composition so that cosine similarity captures topical alignment rather than stylistic differences.
 
-### 2.6 Batch Regeneration (Every 5 Conversations)
+### 2.7 Batch Regeneration (Every 5 Conversations)
 
 Triggered when `conversation_count % 5 == 0`:
 
@@ -258,7 +272,7 @@ Triggered when `conversation_count % 5 == 0`:
 2. LLM generates a 2–3 paragraph narrative (150–250 words, third person)
 3. Upsert to `user_profile_summaries` with `conversation_count_at_update`
 
-### 2.7 2-Layer Weight Model
+### 2.8 2-Layer Weight Model
 
 User interests use a 2-layer weight model that balances long-term loyalty with recent activity:
 
