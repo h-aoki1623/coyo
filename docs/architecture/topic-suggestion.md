@@ -37,9 +37,15 @@ Topic generation is triggered by a **Cloud Scheduler** job that sends an HTTP PO
 
 ### 2.2 Generation Flow
 
-The generation endpoint performs three sequential operations. First, it generates common topics — checking for idempotency (skip if today's topics already exist), then trying keyword-driven generation (Section 2.3) with a fallback to trending search (Section 2.4). Second, it assigns the generated common topics to all active users. Third, it generates personal topics — again with an idempotency check, followed by collecting per-user interest keywords, deduplicating against the common pool, pooling unique keywords across users, and fetching a topic for each keyword (Section 2.5).
+The generation endpoint performs three sequential operations:
 
-These steps run sequentially. Personal topic generation failure does not affect the response — it is caught and logged, returning `personal_topics_generated: 0`.
+**Step 1 — Generate common topics**: Check idempotency (skip if today's topics already exist), then try keyword-driven generation (Section 2.3). If no keywords exist, fall back to trending search (Section 2.4).
+
+**Step 2 — Assign to users**: Assign the common topics generated in Step 1 to all active users.
+
+**Step 3 — Generate personal topics**: After an idempotency check, collect per-user interest keywords, remove keywords that overlap with the common pool, pool unique keywords across users, and fetch/store/assign a topic for each keyword (Section 2.5).
+
+These steps run sequentially. Personal topic generation failure does not affect the overall response — it is caught and logged, returning `personal_topics_generated: 0`.
 
 ### 2.3 Common Topics — Keyword-Driven Generation
 
