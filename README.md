@@ -110,4 +110,4 @@ make migrate-new MSG="description"  # Create new migration
 make generate-api-types # Regenerate TS types from OpenAPI spec
 ```
 
-For the full scripts reference, see [docs/CONTRIB.md](docs/CONTRIB.md). For troubleshooting, see [docs/RUNBOOK.md](docs/RUNBOOK.md). For production deployment, see [docs/DEPLOY.md](docs/DEPLOY.md).
+For the full scripts reference, see [docs/CONTRIB.md](docs/CONTRIB.md). For troubleshooting, see [docs/RUNBOOK.md](docs/RUNBOOK.md). For production deployment, see [docs/deploy/DEPLOY.md](docs/deploy/DEPLOY.md).
