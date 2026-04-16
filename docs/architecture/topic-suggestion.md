@@ -11,10 +11,7 @@ This document describes how Coyo generates, assigns, and serves personalized top
   - [2.3 Common Topics — Keyword-Driven Generation](#23-common-topics--keyword-driven-generation)
   - [2.4 Common Topics — Trending Fallback (Cold Start)](#24-common-topics--trending-fallback-cold-start)
   - [2.5 Personal Topics — Interest-Based Generation](#25-personal-topics--interest-based-generation)
-  - [2.6 LLM Prompts & Web Search](#26-llm-prompts--web-search)
-  - [2.7 JSON Parsing & Fallback Chain](#27-json-parsing--fallback-chain)
-  - [2.8 Keyword Sanitization](#28-keyword-sanitization)
-  - [2.9 Idempotency](#29-idempotency)
+  - [2.6 Idempotency](#26-idempotency)
 - [3. Topic Assignment](#3-topic-assignment)
   - [3.1 Common Topic Assignment](#31-common-topic-assignment)
   - [3.2 Personal Topic Assignment](#32-personal-topic-assignment)
@@ -138,60 +135,7 @@ Personal topics are generated from individual user interests that are marked as 
 
 **Step 4 — Fetch, store, and assign**: For each unique keyword in the pool, the system fetches a topic via a single LLM + web search call, stores it as one `topic_suggestions` row with `pool_type="personal"`, and then creates a `user_topic_suggestions` link for every user who has that interest, using the user's effective weight as the relevance score.
 
-### 2.6 LLM Prompts & Web Search
-
-Topic generation uses the OpenAI Responses API with `web_search_preview` tool. The model decides autonomously whether to perform a web search based on the prompt.
-
-**Common topics prompt** (trending fallback):
-- Instructs the LLM to find 3 trending topics from today or recent days
-- Requires diverse categories (sports, technology, entertainment, science, business)
-- Each topic must include: title (max 10 words), summary (2 sentences), source_keyword, article_content (500–800 characters)
-
-**Personal/keyword-driven prompt**:
-- Instructs the LLM to search for latest news about a specific keyword
-- Each topic must include: title (max 10 words), summary (2 sentences), article_content (500–800 characters)
-
-Both prompts:
-- Emphasize recency: "from TODAY or the past few days"
-- Target audience: "English conversation starters for Japanese learners"
-- Request valid JSON output
-
-**LLM parameters**:
-
-| Parameter | Value |
-|---|---|
-| Model | `gpt-5.4-nano` (configurable via `llm_topic_model`) |
-| Temperature | 0.7 (variety in suggestions) |
-| Max tokens | 2000 (common/trending), 1500 (personal/keyword) |
-| Tool | `web_search_preview` (auto tool choice) |
-
-### 2.7 JSON Parsing & Fallback Chain
-
-LLM responses are parsed with a two-tier fallback:
-
-```
-LLM response text
-    │
-    ├── 1. Try parse JSON directly
-    │       Strip markdown code fences (```json ... ```) if present
-    │       Validate with Pydantic model
-    │
-    └── 2. Fallback: structured output
-            Re-call LLM with structured() (JSON mode)
-            Returns strongly-typed Pydantic model
-```
-
-For personal topics, if both tiers fail, the keyword is skipped and the remaining keywords proceed — partial failure does not block the pipeline.
-
-### 2.8 Keyword Sanitization
-
-Before interpolating a keyword into an LLM prompt, it is validated to prevent prompt injection:
-
-- **Max length**: 100 characters
-- **Allowed characters**: `^[\w\s\-'/&.,()]+$` (Unicode word characters, spaces, common punctuation)
-- **Rejected keywords**: return `None`, causing the topic to be skipped
-
-### 2.9 Idempotency
+### 2.6 Idempotency
 
 Both common and personal pipelines check for existing topics before generating:
 
