@@ -11,7 +11,6 @@ This document describes how Coyo generates, assigns, and serves personalized top
   - [2.3 Common Topics — Keyword-Driven Generation](#23-common-topics--keyword-driven-generation)
   - [2.4 Common Topics — Trending Fallback (Cold Start)](#24-common-topics--trending-fallback-cold-start)
   - [2.5 Personal Topics — Interest-Based Generation](#25-personal-topics--interest-based-generation)
-  - [2.6 Idempotency](#26-idempotency)
 - [3. Key Files](#3-key-files)
 
 ---
@@ -68,15 +67,6 @@ Personal topics are generated from individual user interests that are marked as 
 **Step 3 — Pool keywords across users**: The remaining keywords are pooled into a single map from keyword to the list of users who hold that interest (along with each user's effective weight). If multiple users share the same interest keyword, it appears only once in the pool — the system generates the topic once and assigns it to all relevant users.
 
 **Step 4 — Fetch, store, and assign**: For each unique keyword in the pool, the system fetches a topic via a single LLM + web search call, stores it as one `topic_suggestions` row with `pool_type="personal"`, and then creates a `user_topic_suggestions` link for every user who has that interest, using the user's effective weight as the relevance score.
-
-### 2.6 Idempotency
-
-Both common and personal pipelines check for existing topics before generating:
-
-- **Common**: `get_common_suggestions(today)` — if non-empty, return existing count
-- **Personal**: `get_personal_suggestions(today)` — if non-empty, return existing count
-
-This makes the pipeline safe to retry (Cloud Scheduler retry, manual trigger, etc.) without producing duplicate topics.
 
 ---
 
