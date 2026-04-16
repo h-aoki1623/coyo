@@ -60,14 +60,14 @@ jobs:
 
       # Run database migrations
       # Install from lockfile (supply-chain cooldown baked in) into a venv
-      # inside apps/api, then invoke alembic via `uv run` so the venv is
+      # inside apps/api, then invoke alembic via `uv run --frozen` so the venv is
       # picked up automatically.
       - name: Check pending migrations
         id: migration-check
         working-directory: apps/api
         run: |
           uv sync --frozen --no-dev
-          if uv run alembic check 2>&1 | grep -q "No new upgrade operations detected"; then
+          if uv run --frozen alembic check 2>&1 | grep -q "No new upgrade operations detected"; then
             echo "has_pending=false" >> $GITHUB_OUTPUT
             echo "No pending migrations"
           else
@@ -82,7 +82,7 @@ jobs:
       - name: Run migrations
         if: steps.migration-check.outputs.has_pending == 'true'
         working-directory: apps/api
-        run: uv run alembic upgrade head
+        run: uv run --frozen alembic upgrade head
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           REDIS_URL: "memory://"

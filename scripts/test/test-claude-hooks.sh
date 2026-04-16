@@ -126,6 +126,27 @@ assert_blocked "block: env-var prefix --frozen + uv sync"
 run_bash_hook "uv sync --frozen-mode"
 assert_blocked "block: uv sync --frozen-mode (not standalone token)"
 
+run_bash_hook "uv run pytest"
+assert_blocked "block: uv run without --frozen"
+
+run_bash_hook "uv run --extra dev pytest"
+assert_blocked "block: uv run --extra dev (no --frozen)"
+
+run_bash_hook "cd apps/api && uv run pytest"
+assert_blocked "block: chained uv run without --frozen"
+
+run_bash_hook "uv run ruff check src/"
+assert_blocked "block: uv run ruff (no --frozen)"
+
+run_bash_hook "uv run --refresh # --frozen"
+assert_blocked "block: uv run with --frozen as comment"
+
+run_bash_hook "uv run --frozen-mode pytest"
+assert_blocked "block: uv run --frozen-mode (not standalone token)"
+
+run_bash_hook "FOO=--frozen uv run pytest"
+assert_blocked "block: env-var prefix --frozen + uv run"
+
 run_bash_hook "pip install httpx"
 assert_blocked "block: pip install"
 
@@ -160,6 +181,12 @@ assert_blocked "block: bash -c pip install"
 
 run_bash_hook "bash -c 'uvx ruff'"
 assert_blocked "block: bash -c uvx"
+
+run_bash_hook "bash -c 'uv run pytest'"
+assert_blocked "block: bash -c uv run (indirect)"
+
+run_bash_hook "eval 'uv run --frozen pytest'"
+assert_blocked "block: eval uv run --frozen (indirect, no escape hatch)"
 
 run_bash_hook "eval 'uv pip install evil'"
 assert_blocked "block: eval uv pip install"
@@ -261,8 +288,23 @@ assert_allowed "allow: uv sync --frozen=true"
 run_bash_hook "uv venv"
 assert_allowed "allow: uv venv"
 
-run_bash_hook "uv run pytest"
-assert_allowed "allow: uv run pytest"
+run_bash_hook "uv run --frozen pytest"
+assert_allowed "allow: uv run --frozen pytest"
+
+run_bash_hook "uv run --frozen --extra dev pytest"
+assert_allowed "allow: uv run --frozen --extra dev pytest"
+
+run_bash_hook "cd apps/api && uv run --frozen --extra dev pytest"
+assert_allowed "allow: chained uv run --frozen"
+
+run_bash_hook "uv run --frozen=true pytest"
+assert_allowed "allow: uv run --frozen=true"
+
+run_bash_hook "make api-test"
+assert_allowed "allow: make api-test"
+
+run_bash_hook "make api-cmd CMD='ruff check'"
+assert_allowed "allow: make api-cmd"
 
 run_bash_hook "uv --version"
 assert_allowed "allow: uv --version"
