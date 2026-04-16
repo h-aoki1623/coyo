@@ -128,37 +128,15 @@ Each `TopicItem` includes a `source_keyword` assigned by the LLM (e.g., "NBA", "
 
 ### 2.5 Personal Topics — Interest-Based Generation
 
-Personal topics are generated from individual user interests that are marked as news-relevant (`is_news_relevant=true`).
+Personal topics are generated from individual user interests that are marked as news-relevant (`is_news_relevant=true`). The process follows four steps:
 
-```
-Step 1: Collect per-user keywords
-    For each active user:
-        get_top_interests(
-            keyword_type="category",
-            is_news_relevant=true,
-            limit=7
-        )
-        → List of (keyword, effective_weight) pairs
+**Step 1 — Collect per-user keywords**: For each active user, the system retrieves up to 7 top interests of type `category` that have `is_news_relevant=true`, ranked by effective weight (see [2-Layer Weight Model](memory-and-personalization.md#28-2-layer-weight-model)). Each result is a keyword paired with the user's effective weight for that interest.
 
-Step 2: Deduplicate against common pool
-    Remove keywords that match any common topic's source_keyword
-    (case-insensitive comparison)
+**Step 2 — Deduplicate against common pool**: Keywords that match any of today's common topics' `source_keyword` (case-insensitive) are removed. This prevents personal topics from duplicating content already available to the user via the common pool.
 
-Step 3: Pool keywords across users
-    keyword → [(user_id, effective_weight), ...]
-    Same keyword from multiple users → single LLM call, multiple assignments
+**Step 3 — Pool keywords across users**: The remaining keywords are pooled into a single map from keyword to the list of users who hold that interest (along with each user's effective weight). If multiple users share the same interest keyword, it appears only once in the pool — the system generates the topic once and assigns it to all relevant users.
 
-Step 4: Fetch, store, and assign
-    For each unique keyword:
-        _fetch_personal_topic(keyword)   ← ONE LLM call
-        create_suggestion(pool_type="personal")   ← ONE DB row
-        For each user with this interest:
-            create_user_suggestion(relevance_score=effective_weight)
-```
-
-**Cost optimization**: Keywords are pooled across users so each keyword triggers exactly one LLM + web search call, regardless of how many users share that interest.
-
-**Deduplication**: Keywords already covered by the common pool are excluded to avoid showing duplicate topics.
+**Step 4 — Fetch, store, and assign**: For each unique keyword in the pool, the system fetches a topic via a single LLM + web search call, stores it as one `topic_suggestions` row with `pool_type="personal"`, and then creates a `user_topic_suggestions` link for every user who has that interest, using the user's effective weight as the relevance score.
 
 ### 2.6 LLM Prompts & Web Search
 
