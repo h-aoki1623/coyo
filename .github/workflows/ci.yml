@@ -105,7 +105,7 @@ jobs:
           enable-cache: true
           cache-dependency-glob: "apps/api/uv.lock"
       - run: uv sync --frozen --extra dev
-      - run: uv run ruff check src/
+      - run: uv run --frozen ruff check src/
 
   lint-mobile:
     name: Lint Mobile
@@ -157,7 +157,7 @@ jobs:
           enable-cache: true
           cache-dependency-glob: "apps/api/uv.lock"
       - run: uv sync --frozen --extra dev
-      - run: uv run pytest --tb=short
+      - run: uv run --frozen pytest --tb=short
 
   test-mobile:
     name: Test Mobile

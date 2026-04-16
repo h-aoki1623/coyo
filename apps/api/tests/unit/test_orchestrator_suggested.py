@@ -8,11 +8,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from coyo.services.turn_orchestrator import (
     TurnOrchestrator,
-    _GREETING_SYSTEM_PROMPT,
-    _SUGGESTED_GREETING_SYSTEM_PROMPT,
-    _CONVERSATION_SYSTEM_PROMPT,
+    _build_greeting_system_prompt,
+    _build_suggested_greeting_system_prompt,
 )
-
 
 # ---------------------------------------------------------------------------
 # process_greeting with article_context
@@ -68,7 +66,8 @@ class TestProcessGreetingWithArticleContext:
         orchestrator._llm.chat = capture_chat
 
         async for _ in orchestrator.process_greeting(
-            conversation_id=uuid.uuid4(), user_id=uuid.uuid4(),
+            conversation_id=uuid.uuid4(),
+            user_id=uuid.uuid4(),
             topic="suggested",
             article_context=article_context,
         ):
@@ -76,9 +75,7 @@ class TestProcessGreetingWithArticleContext:
 
         assert len(captured_messages) == 1
         assert captured_messages[0].role == "system"
-        expected = _SUGGESTED_GREETING_SYSTEM_PROMPT.format(
-            article_context=article_context
-        )
+        expected = _build_suggested_greeting_system_prompt(article_context)
         assert captured_messages[0].content == expected
 
     @pytest.mark.unit
@@ -93,13 +90,14 @@ class TestProcessGreetingWithArticleContext:
         orchestrator._llm.chat = capture_chat
 
         async for _ in orchestrator.process_greeting(
-            conversation_id=uuid.uuid4(), user_id=uuid.uuid4(),
+            conversation_id=uuid.uuid4(),
+            user_id=uuid.uuid4(),
             topic="sports",
         ):
             pass
 
         assert len(captured_messages) == 1
-        expected = _GREETING_SYSTEM_PROMPT.format(topic="sports")
+        expected = _build_greeting_system_prompt("sports")
         assert captured_messages[0].content == expected
 
     @pytest.mark.unit
@@ -107,7 +105,8 @@ class TestProcessGreetingWithArticleContext:
         """The event sequence should be correct even with article_context."""
         events = []
         async for event in orchestrator.process_greeting(
-            conversation_id=uuid.uuid4(), user_id=uuid.uuid4(),
+            conversation_id=uuid.uuid4(),
+            user_id=uuid.uuid4(),
             topic="suggested",
             article_context="Title: Test\n\nContent here.",
         ):
@@ -132,13 +131,14 @@ class TestProcessGreetingWithArticleContext:
 
         # Empty string is falsy, so it should use the regular prompt
         async for _ in orchestrator.process_greeting(
-            conversation_id=uuid.uuid4(), user_id=uuid.uuid4(),
+            conversation_id=uuid.uuid4(),
+            user_id=uuid.uuid4(),
             topic="technology",
             article_context="",
         ):
             pass
 
-        expected = _GREETING_SYSTEM_PROMPT.format(topic="technology")
+        expected = _build_greeting_system_prompt("technology")
         assert captured_messages[0].content == expected
 
 
@@ -212,9 +212,7 @@ class TestBuildMessagesWithSuggestedTopic:
         prev_ai.role = "ai"
         prev_ai.text = "Hello! Nice to meet you."
 
-        mock_turn_repo.get_by_conversation_id = AsyncMock(
-            return_value=[prev_user, prev_ai]
-        )
+        mock_turn_repo.get_by_conversation_id = AsyncMock(return_value=[prev_user, prev_ai])
 
         messages = await orchestrator._build_messages(
             uuid.uuid4(),

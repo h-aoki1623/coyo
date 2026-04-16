@@ -45,7 +45,11 @@ class CorrectionAnalysis(BaseModel):
 
 # -- System prompt template ---------------------------------------------
 
-_CORRECTION_SYSTEM_PROMPT = """\
+# The prompt is split into a byte-stable static prefix and a dynamic suffix
+# (language + user_text) so OpenAI's prompt-prefix cache can reuse the prefix
+# across calls. Do NOT interpolate dynamic values into the prefix.
+
+_CORRECTION_SYSTEM_PROMPT_PREFIX = """\
 You are an English language correction assistant. \
 The input text is transcribed from a spoken English conversation, not written text. \
 Analyze it for genuine spoken-English errors only.
@@ -74,30 +78,41 @@ error, not the entire sentence. Include only 1-2 surrounding words for context.
 - For each item, also provide the full original sentence and the full corrected \
 sentence (with ALL corrections for that sentence applied).
 - Classify each error as one of: "grammar", "expression", "vocabulary".
-- Write all explanations in {correction_language_name}.
+- Write all explanations in the language specified below \
+(see "Explanation language").
 - If the text has no errors, set has_errors to false, corrected_text to the \
 original text, explanation to an empty string, and items to an empty list.
 
 You MUST respond with valid JSON matching this exact schema:
-{{
+{
   "has_errors": <boolean>,
   "corrected_text": "<string>",
   "explanation": "<string — overall explanation of corrections>",
   "items": [
-    {{
+    {
       "original": "<string>",
       "corrected": "<string>",
       "original_sentence": "<string>",
       "corrected_sentence": "<string>",
       "type": "<grammar|expression|vocabulary>",
       "explanation": "<string>"
-    }}
+    }
   ]
-}}
-
-User text to analyze:
-\"\"\"{user_text}\"\"\"\
+}\
 """
+
+
+def _build_correction_system_prompt(
+    correction_language_name: str,
+    user_text: str,
+) -> str:
+    """Compose the correction prompt: static prefix + dynamic suffix."""
+    return (
+        f"{_CORRECTION_SYSTEM_PROMPT_PREFIX}\n\n"
+        f"Explanation language: {correction_language_name}\n\n"
+        f'User text to analyze:\n"""{user_text}"""'
+    )
+
 
 _LANGUAGE_NAMES: dict[str, str] = {
     "ja": "Japanese",
@@ -156,7 +171,7 @@ class CorrectionService:
         )
 
         language_name = _LANGUAGE_NAMES.get(correction_language, correction_language)
-        system_content = _CORRECTION_SYSTEM_PROMPT.format(
+        system_content = _build_correction_system_prompt(
             correction_language_name=language_name,
             user_text=user_text,
         )

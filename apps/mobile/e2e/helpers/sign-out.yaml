@@ -12,6 +12,35 @@ appId: to.coyo.app
 - tapOn:
     id: "sign-out-button"
 
+# Wait for the confirmation Alert to finish animating in before the
+# conditional runFlow blocks below evaluate their visibility predicates
+# — without this, the first `when: visible` can short-circuit against a
+# half-rendered Alert and silently skip all three branches.
+- waitForAnimationToEnd
+
+# Confirm sign-out in the native Alert.
+# The Home screen trigger button and the Alert's confirm button share the
+# same label ("Sign Out" / "サインアウト"). We disambiguate via Maestro's
+# `rightOf:` selector relative to the Alert's Cancel button — "Cancel" /
+# "キャンセル" only appears inside the Alert, and the confirm button is
+# always rendered to the right of Cancel on 2-button alerts on both iOS
+# and Android. Maestro text matching is case-insensitive so Android's
+# auto-uppercased "CANCEL" also matches "Cancel".
+- runFlow:
+    when:
+      visible: "Sign out?"
+    commands:
+      - tapOn:
+          text: "Sign Out"
+          rightOf: "Cancel"
+- runFlow:
+    when:
+      visible: "サインアウトしますか?"
+    commands:
+      - tapOn:
+          text: "サインアウト"
+          rightOf: "キャンセル"
+
 # Wait for the Welcome screen to appear after sign-out
 - extendedWaitUntil:
     visible:

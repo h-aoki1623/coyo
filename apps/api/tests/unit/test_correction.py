@@ -65,6 +65,7 @@ class TestCorrectionService:
 
         # Verify the turn status was updated
         updated_turn = await db_session.get(Turn, test_turn.id)
+        assert updated_turn is not None
         assert updated_turn.correction_status == "has_corrections"
 
     @pytest.mark.unit
@@ -96,6 +97,7 @@ class TestCorrectionService:
 
         # Verify the turn status was updated to 'clean'
         updated_turn = await db_session.get(Turn, test_turn.id)
+        assert updated_turn is not None
         assert updated_turn.correction_status == "clean"
 
     @pytest.mark.unit
@@ -125,6 +127,7 @@ class TestCorrectionService:
 
         assert result is None
         updated_turn = await db_session.get(Turn, test_turn.id)
+        assert updated_turn is not None
         assert updated_turn.correction_status == "clean"
 
     @pytest.mark.unit
@@ -301,36 +304,34 @@ class TestCorrectionPromptContent:
     @pytest.mark.unit
     def test_prompt_mentions_transcribed_spoken_context(self):
         """Verify the prompt indicates input is transcribed spoken English."""
-        from coyo.services.correction import _CORRECTION_SYSTEM_PROMPT
+        from coyo.services.correction import (
+            _CORRECTION_SYSTEM_PROMPT_PREFIX as _CORRECTION_SYSTEM_PROMPT,
+        )
 
         prompt_lower = _CORRECTION_SYSTEM_PROMPT.lower()
         assert "transcribed" in prompt_lower, (
             "Prompt must mention that input is transcribed speech"
         )
-        assert "spoken" in prompt_lower, (
-            "Prompt must mention spoken English context"
-        )
+        assert "spoken" in prompt_lower, "Prompt must mention spoken English context"
 
     @pytest.mark.unit
     def test_prompt_accepts_natural_spoken_patterns(self):
         """Verify the prompt instructs to accept filler words, fragments, and contractions."""
-        from coyo.services.correction import _CORRECTION_SYSTEM_PROMPT
+        from coyo.services.correction import (
+            _CORRECTION_SYSTEM_PROMPT_PREFIX as _CORRECTION_SYSTEM_PROMPT,
+        )
 
         prompt_lower = _CORRECTION_SYSTEM_PROMPT.lower()
-        assert "filler" in prompt_lower, (
-            "Prompt must mention filler words as acceptable"
-        )
-        assert "fragment" in prompt_lower, (
-            "Prompt must mention sentence fragments as acceptable"
-        )
-        assert "contraction" in prompt_lower, (
-            "Prompt must mention contractions as acceptable"
-        )
+        assert "filler" in prompt_lower, "Prompt must mention filler words as acceptable"
+        assert "fragment" in prompt_lower, "Prompt must mention sentence fragments as acceptable"
+        assert "contraction" in prompt_lower, "Prompt must mention contractions as acceptable"
 
     @pytest.mark.unit
     def test_prompt_contains_json_schema_instruction(self):
         """Verify the prompt still includes the JSON output schema instruction."""
-        from coyo.services.correction import _CORRECTION_SYSTEM_PROMPT
+        from coyo.services.correction import (
+            _CORRECTION_SYSTEM_PROMPT_PREFIX as _CORRECTION_SYSTEM_PROMPT,
+        )
 
         assert "has_errors" in _CORRECTION_SYSTEM_PROMPT, (
             "Prompt must reference the has_errors JSON field"
@@ -338,6 +339,4 @@ class TestCorrectionPromptContent:
         assert "corrected_text" in _CORRECTION_SYSTEM_PROMPT, (
             "Prompt must reference the corrected_text JSON field"
         )
-        assert "items" in _CORRECTION_SYSTEM_PROMPT, (
-            "Prompt must reference the items JSON field"
-        )
+        assert "items" in _CORRECTION_SYSTEM_PROMPT, "Prompt must reference the items JSON field"

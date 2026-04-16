@@ -115,6 +115,33 @@ export function HomeScreen({ navigation }: Props) {
   const setPausedConversationId = useAppStore((s) => s.setPausedConversationId);
   const handleSignOut = useAuthStore((s) => s.handleSignOut);
 
+  // Sign-out is a destructive action that wipes the local session. The
+  // raw Pressable used to call `handleSignOut` directly, which made it
+  // possible for an unintended tap (e.g. a fast scroll-then-tap that
+  // landed on the button mid-layout) to drop the user back to Welcome
+  // mid-flow — see issue #157. Routing through a confirmation Alert
+  // both surfaces standard intent for users and prevents accidental
+  // taps from gesture-driven test runners.
+  const confirmSignOut = useCallback(() => {
+    Alert.alert(
+      t('home.signOutConfirm.title'),
+      t('home.signOutConfirm.message'),
+      [
+        { text: t('home.signOutConfirm.cancel'), style: 'cancel' },
+        {
+          text: t('home.signOutConfirm.confirm'),
+          style: 'destructive',
+          onPress: () => {
+            handleSignOut().catch(() => {
+              // handleSignOut surfaces its own error message via the auth
+              // store; the rejection is observed for telemetry only.
+            });
+          },
+        },
+      ],
+    );
+  }, [handleSignOut]);
+
   const topics = useMemo(() => getTopics(), []);
   const { suggestions } = useSuggestions();
 
@@ -222,7 +249,7 @@ export function HomeScreen({ navigation }: Props) {
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} testID="home-scroll-view">
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} testID="home-scroll-view">
         {/* Header area */}
         <View style={styles.header}>
           <View style={styles.headerRow}>
@@ -312,7 +339,7 @@ export function HomeScreen({ navigation }: Props) {
       {/* Sign out */}
       <Pressable
         style={styles.signOutContainer}
-        onPress={handleSignOut}
+        onPress={confirmSignOut}
         accessibilityRole="button"
         accessibilityLabel={t('home.signOut')}
         testID="sign-out-button"
@@ -329,6 +356,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.surfacePrimary,
+  },
+  // ScrollView must explicitly claim flex: 1 so it shares vertical space
+  // with the fixed sign-out button below it.
+  scrollView: {
+    flex: 1,
   },
   scrollContent: {
     paddingBottom: 20,

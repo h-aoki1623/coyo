@@ -1,3 +1,8 @@
+---
+name: verification-loop
+description: "A comprehensive verification system for Claude Code sessions."
+---
+
 # Verification Loop Skill
 
 A comprehensive verification system for Claude Code sessions.
@@ -118,3 +123,5 @@ Run: /verify
 
 This skill complements PostToolUse hooks but provides deeper verification.
 Hooks catch issues immediately; this skill provides comprehensive review.
+
+*Based on [Everything Claude Code](https://github.com/affaan-m/everything-claude-code) (MIT License)*

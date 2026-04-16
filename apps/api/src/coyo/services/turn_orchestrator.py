@@ -48,8 +48,12 @@ logger = structlog.get_logger()
 _STT_CONTEXT_TURN_COUNT = 4
 _STT_MAX_PROMPT_CHARS = 800
 
-_CONVERSATION_SYSTEM_PROMPT = """\
-You are a friendly English conversation partner. The current topic is {topic}.
+# System prompts below are structured as [static prefix] + [dynamic suffix]
+# so OpenAI's prompt-prefix cache can reuse the static portion across calls.
+# Never interpolate a dynamic value into the prefix block — it defeats caching.
+
+_CONVERSATION_SYSTEM_PROMPT_PREFIX = """\
+You are a friendly English conversation partner.
 Keep your responses natural, concise (2-3 sentences), and at an intermediate \
 English level.
 If the user makes a grammar mistake, don't correct them in the conversation — \
@@ -60,24 +64,39 @@ list facts. NEVER include URLs, links, citations, or source references.\
 """
 
 
-_GREETING_SYSTEM_PROMPT = """\
-You are a friendly English conversation partner named Coyo. The current topic is {topic}.
+_GREETING_SYSTEM_PROMPT_PREFIX = """\
+You are a friendly English conversation partner named Coyo.
 Generate a natural opening greeting to start the conversation. Keep it warm and inviting \
 (2-3 sentences). Include exactly one open-ended question about the topic to encourage the \
 user to respond. Speak at an intermediate English level.\
 """
 
-_SUGGESTED_GREETING_SYSTEM_PROMPT = """\
+_SUGGESTED_GREETING_SYSTEM_PROMPT_PREFIX = """\
 You are a friendly English conversation partner named Coyo.
 The user wants to discuss a trending topic they selected.
-
-Background information (use naturally in conversation, don't quote directly):
-{article_context}
-
 Since the user selected this topic, YOU start the conversation.
 Open with a natural, engaging question or comment about this topic.
 Keep it warm and inviting (2-3 sentences). Speak at an intermediate English level.\
 """
+
+
+def _build_conversation_system_prompt(topic: str) -> str:
+    """Compose the turn system prompt: static prefix + dynamic topic suffix."""
+    return f"{_CONVERSATION_SYSTEM_PROMPT_PREFIX}\n\nCurrent topic: {topic}"
+
+
+def _build_greeting_system_prompt(topic: str) -> str:
+    """Compose the greeting system prompt: static prefix + dynamic topic suffix."""
+    return f"{_GREETING_SYSTEM_PROMPT_PREFIX}\n\nCurrent topic: {topic}"
+
+
+def _build_suggested_greeting_system_prompt(article_context: str) -> str:
+    """Compose the suggested-greeting prompt with article context as suffix."""
+    return (
+        f"{_SUGGESTED_GREETING_SYSTEM_PROMPT_PREFIX}\n\n"
+        "Background information (use naturally in conversation, don't quote directly):\n"
+        f"{article_context}"
+    )
 
 
 def _make_event(event: str, data: dict[str, Any]) -> dict[str, Any]:
@@ -263,11 +282,9 @@ class TurnOrchestrator:
 
         # Build messages: system prompt only (no user message)
         if article_context:
-            system_prompt = _SUGGESTED_GREETING_SYSTEM_PROMPT.format(
-                article_context=article_context,
-            )
+            system_prompt = _build_suggested_greeting_system_prompt(article_context)
         else:
-            system_prompt = _GREETING_SYSTEM_PROMPT.format(topic=topic)
+            system_prompt = _build_greeting_system_prompt(topic)
 
         # Build the theme-aware memory snapshot once per conversation and
         # persist it on the Conversation row. The turn path will read it
@@ -364,7 +381,7 @@ class TurnOrchestrator:
         user message.
         """
         topic_label = topic if topic != "suggested" else "a trending news topic"
-        system_prompt = _CONVERSATION_SYSTEM_PROMPT.format(topic=topic_label)
+        system_prompt = _build_conversation_system_prompt(topic_label)
 
         memory_context = await self._read_or_compute_memory_snapshot(
             conversation_id=conversation_id,

@@ -61,13 +61,46 @@ functional verification by execution IS the test:
 |---|---|---|
 | **Unit** | Colocated: `*.test.tsx` next to source | `tests/unit/test_*.py` |
 | **Integration** | `tests/integration/*.test.ts` | `tests/integration/test_*.py` |
-| **E2E** | Top-level `/e2e/` (shared across FE+BE) | — |
+| **E2E** | `apps/mobile/e2e/*.yaml` (Maestro) | — |
 
 ## Troubleshooting Test Failures
 
 1. Check test isolation
 2. Verify mocks are correct
 3. Fix implementation, not tests (unless tests are wrong)
+
+## E2E Testing
+
+### Tool Selection
+
+- **Web**: Playwright — use **web-e2e-tester** agent
+- **Mobile (React Native)**: Maestro — use **mobile-e2e-tester** agent. Playwright does NOT apply to React Native.
+
+### Running E2E Tests (Maestro)
+
+```bash
+make e2e-ios       # All flows on iOS Simulator
+make e2e-android   # All flows on Android Emulator
+make e2e           # All flows on both platforms (sequential)
+
+# Single flow
+make e2e-ios FLOW=app-launch.yaml
+make e2e-android FLOW=navigate-to-history.yaml
+```
+
+### E2E Rules
+
+- NEVER run Maestro CLI commands manually (`maestro test`, `maestro hierarchy`, etc.) — always use `make e2e-*`
+- NEVER use `optional: true` on assertions that validate API responses
+- iOS and Android tests run sequentially (Maestro uses port 7001 for both platforms)
+- Test flows are in `apps/mobile/e2e/*.yaml`
+- `make e2e-*` commands are auto-backgrounded by the Bash tool. After completion, check the result file — do NOT retry based on exit code alone.
+
+### Checking E2E Results
+
+```bash
+cat apps/mobile/e2e/results/e2e-result-latest.txt
+```
 
 ## Agent Support
 

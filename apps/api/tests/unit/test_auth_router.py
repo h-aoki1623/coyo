@@ -25,6 +25,21 @@ def _firebase_payload(
     )
 
 
+@pytest.fixture(autouse=True)
+def _reset_rate_limiter():
+    """Reset the in-memory rate limiter between tests.
+
+    The `memory://` storage persists within the test process, so classes
+    that exercise the same endpoint more than 10 times would otherwise
+    trip the per-minute limit.
+    """
+    from coyo.rate_limit import limiter
+
+    limiter.reset()
+    yield
+    limiter.reset()
+
+
 @pytest.fixture
 async def auth_client(
     db_session: AsyncSession,
@@ -79,6 +94,44 @@ class TestAppRedirect:
         auth_client: AsyncClient,
     ):
         response = await auth_client.get("/api/auth/app-redirect")
+
+        assert response.status_code == 200
+        assert response.headers["x-content-type-options"] == "nosniff"
+
+
+class TestPasswordResetRedirect:
+    """Tests for GET /api/auth/password-reset-redirect."""
+
+    @pytest.mark.unit
+    async def test_password_reset_redirect_returns_html(
+        self,
+        auth_client: AsyncClient,
+    ):
+        response = await auth_client.get("/api/auth/password-reset-redirect")
+
+        assert response.status_code == 200
+        assert "text/html" in response.headers["content-type"]
+        assert "coyo://password-reset-done" in response.text
+
+    @pytest.mark.unit
+    async def test_password_reset_redirect_has_csp_header(
+        self,
+        auth_client: AsyncClient,
+    ):
+        response = await auth_client.get("/api/auth/password-reset-redirect")
+
+        assert response.status_code == 200
+        assert (
+            response.headers["content-security-policy"]
+            == "default-src 'none'; style-src 'unsafe-inline'"
+        )
+
+    @pytest.mark.unit
+    async def test_password_reset_redirect_has_x_content_type_options_header(
+        self,
+        auth_client: AsyncClient,
+    ):
+        response = await auth_client.get("/api/auth/password-reset-redirect")
 
         assert response.status_code == 200
         assert response.headers["x-content-type-options"] == "nosniff"

@@ -6,6 +6,9 @@ export type AuthStackParamList = {
   SignUpForm: undefined;
   SignInForm: undefined;
   EmailVerification: { email: string };
+  PasswordResetEmail: undefined;
+  PasswordResetSent: { email: string };
+  PasswordResetSuccess: undefined;
 };
 
 export type RootStackParamList = {

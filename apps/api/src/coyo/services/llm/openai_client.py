@@ -21,6 +21,39 @@ from coyo.services.llm.base import (
 logger = structlog.get_logger()
 
 
+def _log_usage(model: str, method: str, usage: object) -> None:
+    """Emit a structured log of OpenAI token usage for cache observability.
+
+    Captures ``prompt_tokens_details.cached_tokens`` so cache-hit rate is
+    visible to downstream log pipelines. Best-effort — never raises.
+    """
+    try:
+        prompt_tokens = getattr(usage, "prompt_tokens", None) or getattr(
+            usage, "input_tokens", None
+        )
+        completion_tokens = getattr(usage, "completion_tokens", None) or getattr(
+            usage, "output_tokens", None
+        )
+        details = getattr(usage, "prompt_tokens_details", None) or getattr(
+            usage, "input_tokens_details", None
+        )
+        cached_tokens = getattr(details, "cached_tokens", None) if details is not None else None
+        cache_hit_ratio: float | None = None
+        if prompt_tokens and cached_tokens is not None:
+            cache_hit_ratio = round(cached_tokens / prompt_tokens, 4)
+        logger.info(
+            "openai_usage",
+            model=model,
+            method=method,
+            prompt_tokens=prompt_tokens,
+            completion_tokens=completion_tokens,
+            cached_tokens=cached_tokens,
+            cache_hit_ratio=cache_hit_ratio,
+        )
+    except Exception as exc:  # pragma: no cover — observability must not break calls
+        logger.warning("openai_usage_log_failed", error=str(exc))
+
+
 class OpenAIClient(LLMClient):
     """LLM client backed by the OpenAI API.
 
@@ -32,25 +65,34 @@ class OpenAIClient(LLMClient):
         self._client = AsyncOpenAI(api_key=settings.openai_api_key)
         self._model = model or settings.llm_conversation_model
 
-    async def chat(
+    async def chat(  # type: ignore[override]
         self,
         messages: list[ChatMessage],
         options: ChatOptions | None = None,
     ) -> AsyncIterator[str]:
         """Stream chat completion tokens from OpenAI.
 
-        Yields individual text tokens as they are generated.
+        Yields individual text tokens as they are generated. Final chunk
+        carries a ``usage`` field (via ``stream_options``) which we log
+        for prompt-cache visibility.
         """
         opts = options or ChatOptions()
         try:
-            stream = await self._client.chat.completions.create(
+            stream = await self._client.chat.completions.create(  # type: ignore[call-overload]
                 model=self._model,
                 messages=[{"role": m.role, "content": m.content} for m in messages],
                 temperature=opts.temperature,
                 max_completion_tokens=opts.max_tokens,
                 stream=True,
+                stream_options={"include_usage": True},
             )
             async for chunk in stream:
+                usage = getattr(chunk, "usage", None)
+                if usage is not None:
+                    _log_usage(self._model, "chat", usage)
+                # Usage-only trailing chunk has no choices — skip safely.
+                if not chunk.choices:
+                    continue
                 delta = chunk.choices[0].delta
                 if delta.content is not None:
                     yield delta.content
@@ -80,7 +122,7 @@ class OpenAIClient(LLMClient):
 
         try:
             search_signalled = False
-            stream = self._client.responses.stream(
+            stream = self._client.responses.stream(  # type: ignore[call-overload]
                 model=self._model,
                 instructions=instructions or "",
                 input=input_messages,
@@ -103,11 +145,14 @@ class OpenAIClient(LLMClient):
                         delta = getattr(event, "delta", "")
                         if delta:
                             yield TextChunk(text=delta)
+                    elif event_type == "response.completed":
+                        final = getattr(event, "response", None)
+                        usage = getattr(final, "usage", None)
+                        if usage is not None:
+                            _log_usage(self._model, "chat_with_tools", usage)
         except Exception as exc:
             logger.error("openai_responses_api_error", error=str(exc))
-            raise ExternalServiceError(
-                "OpenAI", "Responses API stream failed"
-            ) from exc
+            raise ExternalServiceError("OpenAI", "Responses API stream failed") from exc
 
     async def structured[T: BaseModel](
         self,
@@ -125,13 +170,16 @@ class OpenAIClient(LLMClient):
             #       the OpenAI structured outputs API once stable.
             #       For now, instruct the model to return JSON matching
             #       the schema and parse manually.
-            response = await self._client.chat.completions.create(
+            response = await self._client.chat.completions.create(  # type: ignore[call-overload]
                 model=self._model,
                 messages=[{"role": m.role, "content": m.content} for m in messages],
                 temperature=opts.temperature,
                 max_completion_tokens=opts.max_tokens,
                 response_format={"type": "json_object"},
             )
+            usage = getattr(response, "usage", None)
+            if usage is not None:
+                _log_usage(self._model, "structured", usage)
             content = response.choices[0].message.content
             if content is None:
                 raise ExternalServiceError("OpenAI", "Empty response content")
