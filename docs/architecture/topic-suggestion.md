@@ -33,81 +33,23 @@ The pipeline depends on the memory extraction system (see [Memory & Conversation
 
 ### 2.1 Generation Trigger & Schedule
 
-Topic generation is triggered by a **Cloud Scheduler** job that sends an HTTP POST to `/api/topics/generate` daily at **06:00 JST** (before users start their day).
-
-```
-Cloud Scheduler (daily 06:00 JST)
-      │
-      ▼
-POST /api/topics/generate
-  Header: X-Cron-Secret (HMAC validation)
-      │
-      ▼
-TopicGenerationService
-  ├── generate_common_topics()
-  ├── assign_to_users()
-  └── generate_personal_topics()
-```
-
-The endpoint is protected by an HMAC secret (`X-Cron-Secret`) to prevent unauthorized invocation.
+Topic generation is triggered by a **Cloud Scheduler** job that sends an HTTP POST to `/api/topics/generate` daily at **06:00 JST** (before users start their day). The endpoint is protected by an HMAC secret (`X-Cron-Secret`) to prevent unauthorized invocation. Upon receiving the request, `TopicGenerationService` executes three steps in sequence: common topic generation, user assignment, and personal topic generation.
 
 ### 2.2 Generation Flow
 
-```
-POST /api/topics/generate
-    │
-    ├── 1. generate_common_topics()
-    │       ├── Idempotency check (skip if topics exist for today)
-    │       ├── Try keyword-driven generation (Section 2.3)
-    │       └── Fall back to trending search (Section 2.4)
-    │
-    ├── 2. assign_to_users()
-    │       └── Link today's common topics to all active users (Section 3.1)
-    │
-    └── 3. generate_personal_topics()
-            ├── Idempotency check (skip if personal topics exist for today)
-            ├── Collect per-user interest keywords
-            ├── Deduplicate against common pool
-            ├── Pool unique keywords across users
-            └── For each keyword: fetch, store, and assign (Section 2.5)
-```
+The generation endpoint performs three sequential operations. First, it generates common topics — checking for idempotency (skip if today's topics already exist), then trying keyword-driven generation (Section 2.3) with a fallback to trending search (Section 2.4). Second, it assigns the generated common topics to all active users. Third, it generates personal topics — again with an idempotency check, followed by collecting per-user interest keywords, deduplicating against the common pool, pooling unique keywords across users, and fetching a topic for each keyword (Section 2.5).
 
-Steps 1–3 run sequentially. Personal topic generation failure does not affect the response — it is caught and logged, returning `personal_topics_generated: 0`.
+These steps run sequentially. Personal topic generation failure does not affect the response — it is caught and logged, returning `personal_topics_generated: 0`.
 
 ### 2.3 Common Topics — Keyword-Driven Generation
 
-The primary path generates common topics from the most popular user interest keywords across all users.
-
-```
-InterestRepository.get_global_top_keywords(limit=3)
-    │
-    ├── Returns top 3 keywords by aggregate effective_weight
-    │
-    ▼
-For each keyword:
-    ├── _fetch_personal_topic(keyword)
-    │       ├── Sanitize keyword (Section 2.8)
-    │       ├── LLM + web search for latest news (Section 2.6)
-    │       └── Parse JSON response (Section 2.7)
-    │
-    └── create_suggestion(pool_type="common")
-```
+The primary path generates common topics from the most popular user interest keywords across all users. The system retrieves the top 3 keywords by aggregate effective weight, then for each keyword, fetches the latest news via LLM with web search and stores the result as a common topic suggestion.
 
 This approach produces topics that reflect the actual interests of the user base rather than generic trending news.
 
 ### 2.4 Common Topics — Trending Fallback (Cold Start)
 
-When no user interest keywords exist (e.g., on a fresh deployment), the system falls back to a broader LLM-driven trending search.
-
-```
-_fetch_topics()
-    ├── Prompt LLM to discover 3 trending global topics
-    │   (sports, technology, entertainment, science, business)
-    ├── LLM uses web search tool to find current news
-    └── Returns TopicSearchResult with up to 3 TopicItems
-```
-
-Each `TopicItem` includes a `source_keyword` assigned by the LLM (e.g., "NBA", "AI", "Oscars"), which is used for categorization and interest linking.
+When no user interest keywords exist (e.g., on a fresh deployment), the system falls back to a broader LLM-driven trending search. The LLM is prompted to discover 3 trending global topics across diverse categories (sports, technology, entertainment, science, business), using its web search tool to find current news. Each resulting topic includes a `source_keyword` assigned by the LLM (e.g., "NBA", "AI", "Oscars"), which is used for categorization and interest linking.
 
 ### 2.5 Personal Topics — Interest-Based Generation
 
