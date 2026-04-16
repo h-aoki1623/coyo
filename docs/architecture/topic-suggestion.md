@@ -12,21 +12,18 @@ This document describes how Coyo generates, assigns, and serves personalized top
   - [2.4 Common Topics — Trending Fallback (Cold Start)](#24-common-topics--trending-fallback-cold-start)
   - [2.5 Personal Topics — Interest-Based Generation](#25-personal-topics--interest-based-generation)
   - [2.6 Idempotency](#26-idempotency)
-- [3. Topic Assignment](#3-topic-assignment)
-  - [3.1 Common Topic Assignment](#31-common-topic-assignment)
-  - [3.2 Personal Topic Assignment](#32-personal-topic-assignment)
-- [4. Topic Delivery & Selection](#4-topic-delivery--selection)
-  - [4.1 Suggestions API](#41-suggestions-api)
-  - [4.2 Mobile Client](#42-mobile-client)
-  - [4.3 Fixed Topic Fallback](#43-fixed-topic-fallback)
-- [5. Integration with Other Systems](#5-integration-with-other-systems)
-  - [5.1 Conversation Creation](#51-conversation-creation)
-  - [5.2 Memory Extraction](#52-memory-extraction)
-  - [5.3 Theme Context & Memory Injection](#53-theme-context--memory-injection)
-- [6. Data Model](#6-data-model)
-- [7. API Reference](#7-api-reference)
-- [8. Configuration Reference](#8-configuration-reference)
-- [9. Key Files](#9-key-files)
+- [3. Topic Delivery & Selection](#3-topic-delivery--selection)
+  - [3.1 Suggestions API](#31-suggestions-api)
+  - [3.2 Mobile Client](#32-mobile-client)
+  - [3.3 Fixed Topic Fallback](#33-fixed-topic-fallback)
+- [4. Integration with Other Systems](#4-integration-with-other-systems)
+  - [4.1 Conversation Creation](#41-conversation-creation)
+  - [4.2 Memory Extraction](#42-memory-extraction)
+  - [4.3 Theme Context & Memory Injection](#43-theme-context--memory-injection)
+- [5. Data Model](#5-data-model)
+- [6. API Reference](#6-api-reference)
+- [7. Configuration Reference](#7-configuration-reference)
+- [8. Key Files](#8-key-files)
 
 ---
 
@@ -146,53 +143,9 @@ This makes the pipeline safe to retry (Cloud Scheduler retry, manual trigger, et
 
 ---
 
-## 3. Topic Assignment
+## 3. Topic Delivery & Selection
 
-### 3.1 Common Topic Assignment
-
-After common topics are generated, they are broadcast to **all active users**:
-
-```
-For each user_id in get_active_user_ids():
-    For each (rank, suggestion) in today's common topics:
-        create_user_suggestion(
-            user_id=user_id,
-            topic_suggestion_id=suggestion.id,
-            relevance_score=1.0 / rank
-        )
-```
-
-**Relevance scoring** by rank:
-
-| Rank | Relevance Score |
-|---|---|
-| 1st topic | 1.0 |
-| 2nd topic | 0.5 |
-| 3rd topic | 0.333 |
-
-Duplicate links (same user + topic) are silently skipped via `IntegrityError` handling.
-
-### 3.2 Personal Topic Assignment
-
-Personal topics are assigned only to users who have the matching interest:
-
-```
-For each keyword:
-    For each (user_id, effective_weight) in users_with_interest:
-        create_user_suggestion(
-            user_id=user_id,
-            topic_suggestion_id=suggestion.id,
-            relevance_score=effective_weight
-        )
-```
-
-The `relevance_score` equals the user's `effective_weight` for that interest (see [2-Layer Weight Model](memory-and-personalization.md#28-2-layer-weight-model)), so topics matching recently and frequently discussed interests rank higher.
-
----
-
-## 4. Topic Delivery & Selection
-
-### 4.1 Suggestions API
+### 3.1 Suggestions API
 
 **GET `/api/topics/suggestions`** returns the user's topic suggestions grouped by pool type.
 
@@ -202,7 +155,7 @@ Query logic:
 3. Return all topics from that date, ordered by `relevance_score DESC`
 4. Split into `personal` and `trending` arrays in the response
 
-### 4.2 Mobile Client
+### 3.2 Mobile Client
 
 The mobile app uses a Zustand store (`useSuggestionsStore`) to manage topic suggestion state:
 
@@ -234,7 +187,7 @@ User taps suggestion card
 - **Generation-based invalidation**: `reset()` bumps a generation counter to cancel in-flight prefetches, preventing cross-user cache leakage on sign-out
 - **Graceful degradation**: API failures flip `isReady=true` without `hasLoaded=true`, so the splash screen still dismisses but the hook retries on HomeScreen mount
 
-### 4.3 Fixed Topic Fallback
+### 3.3 Fixed Topic Fallback
 
 Even without generated suggestions, users can always start a conversation from 5 predefined topic categories:
 
@@ -250,9 +203,9 @@ These are hardcoded in the mobile app and always available regardless of API or 
 
 ---
 
-## 5. Integration with Other Systems
+## 4. Integration with Other Systems
 
-### 5.1 Conversation Creation
+### 4.1 Conversation Creation
 
 When a user selects a topic suggestion, the conversation is created with `topic_suggestion_id` (FK to `topic_suggestions`). This links the conversation to its originating topic for downstream use.
 
@@ -260,7 +213,7 @@ The `CreateConversationRequest` accepts exactly one of:
 - `topic: TopicLiteral` — a fixed topic key (e.g., "sports")
 - `topic_suggestion_id: UUID` — a generated suggestion
 
-### 5.2 Memory Extraction
+### 4.2 Memory Extraction
 
 After a conversation ends, the memory extraction pipeline resolves the conversation's topic keyword for interest upsert:
 
@@ -279,7 +232,7 @@ _resolve_topic_keyword(conversation)
 
 The resolved keyword is upserted into `user_interests` as part of the post-processing pipeline (see [User Interests — Post-Processing Pipeline](memory-and-personalization.md#25-user-interests--post-processing-pipeline)), ensuring that the topic itself is tracked as a user interest even if the LLM did not extract it from the conversation content.
 
-### 5.3 Theme Context & Memory Injection
+### 4.3 Theme Context & Memory Injection
 
 When a conversation starts from a topic suggestion, the `ThemeContext` is built from the suggestion's metadata:
 
@@ -300,7 +253,7 @@ This embedding is used by `MemoryContextService` to rank user interests and conv
 
 ---
 
-## 6. Data Model
+## 5. Data Model
 
 ```
 topic_suggestions
@@ -335,7 +288,7 @@ conversations
 
 ---
 
-## 7. API Reference
+## 6. API Reference
 
 ### POST /api/topics/generate
 
@@ -393,7 +346,7 @@ Get topic suggestions for the authenticated user.
 
 ---
 
-## 8. Configuration Reference
+## 7. Configuration Reference
 
 | Parameter | Default | Description |
 |---|---|---|
@@ -416,7 +369,7 @@ Get topic suggestions for the authenticated user.
 
 ---
 
-## 9. Key Files
+## 8. Key Files
 
 | File | Purpose |
 |---|---|
