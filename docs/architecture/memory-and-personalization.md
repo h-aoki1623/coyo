@@ -365,7 +365,7 @@ When a theme with embedding is available, User Interests and Conversation Summar
 score = α * sim_norm + β * weight_norm
 
 α = memory_theme_alpha (0.7)    — cosine similarity to theme
-β = memory_theme_beta  (0.3)    — effective_weight (2-layer model)
+β = memory_theme_beta  (0.3)    — effective_weight (see Section 2.8)
 ```
 
 - `sim_norm`: min-max normalized cosine similarity of interest embedding vs theme embedding
