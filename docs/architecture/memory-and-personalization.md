@@ -358,9 +358,9 @@ Embed → theme_embedding (1536-dim)
 
 ### 3.3 Theme-Relevant Selection Strategy
 
-When a theme with embedding is available, interests and summaries are ranked by blended scores:
+When a theme with embedding is available, User Interests and Conversation Summaries are ranked by blended scores:
 
-**Interest ranking**:
+**User Interest ranking**:
 ```
 score = α * sim_norm + β * weight_norm
 
@@ -371,9 +371,9 @@ score = α * sim_norm + β * weight_norm
 - `sim_norm`: min-max normalized cosine similarity of interest embedding vs theme embedding
 - `weight_norm`: min-max normalized effective_weight
 - Tiebreaker: keyword ascending (byte-stable for prompt cache)
-- Select top `memory_k_interest` (10) interests
+- Select top `memory_k_interest` (10) User Interests
 
-**Summary ranking**:
+**Conversation Summary ranking**:
 ```
 score = α * sim_norm + β * recency_decay
 
@@ -382,7 +382,7 @@ score = α * sim_norm + β * recency_decay
 ```
 
 - `recency_decay = e^(-days_ago / half_life_days)` where `half_life_days = 14`
-- Select top `memory_k_summary` (5) summaries
+- Select top `memory_k_summary` (5) Conversation Summaries
 
 **Fallback top-up**: If theme-ranked results are fewer than k (e.g., embeddings not yet backfilled), the remaining slots are filled from the legacy path (top-N by weight / most recent).
 
@@ -390,8 +390,8 @@ score = α * sim_norm + β * recency_decay
 
 Used when no theme embedding is available:
 
-- **Interests**: Top 10 by `effective_weight` descending
-- **Summaries**: Most recent 5 by `created_at` descending
+- **User Interests**: Top 10 by `effective_weight` descending
+- **Conversation Summaries**: Most recent 5 by `created_at` descending
 
 ### 3.5 Injected Memory Format
 
