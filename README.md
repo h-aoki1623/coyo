@@ -8,11 +8,23 @@ Coyo is an AI-powered English conversation practice app designed to help you imp
 - **Personalized conversations** — Conversations adapt to your interests and past episodes, so every session feels relevant and engaging rather than generic.
 - **Topic suggestions** — Not sure what to talk about? Coyo surfaces topics tailored to what you care about, so you always have a great starting point.
 
-<p align="center">
-  <img src="docs/images/home.png" alt="Home" width="250" />
-  <img src="docs/images/conversation.png" alt="Conversation" width="250" />
-  <img src="docs/images/feedback.png" alt="Feedback" width="250" />
-</p>
+<table>
+  <tr>
+    <th>Home</th>
+    <th>Conversation</th>
+    <th>Feedback</th>
+  </tr>
+  <tr>
+    <td>Personalized topic suggestions based on your interests</td>
+    <td>Real-time corrections with explanations in your native language</td>
+    <td>Session summary with all corrections at a glance</td>
+  </tr>
+  <tr>
+    <td><img src="docs/images/home.png" alt="Home" width="250" /></td>
+    <td><img src="docs/images/conversation.png" alt="Conversation" width="250" /></td>
+    <td><img src="docs/images/feedback.png" alt="Feedback" width="250" /></td>
+  </tr>
+</table>
 
 ### Why Coyo?
 
