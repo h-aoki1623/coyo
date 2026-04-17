@@ -8,9 +8,8 @@ This document describes how Coyo generates, assigns, and serves personalized top
 - [2. Topic Generation](#2-topic-generation)
   - [2.1 Generation Trigger & Schedule](#21-generation-trigger--schedule)
   - [2.2 Generation Flow](#22-generation-flow)
-  - [2.3 Common Topics — Keyword-Driven Generation](#23-common-topics--keyword-driven-generation)
-  - [2.4 Common Topics — Trending Fallback (Cold Start)](#24-common-topics--trending-fallback-cold-start)
-  - [2.5 Personal Topics — Interest-Based Generation](#25-personal-topics--interest-based-generation)
+  - [2.3 Common Topics](#23-common-topics)
+  - [2.4 Personal Topics](#24-personal-topics)
 - [3. Key Files](#3-key-files)
 
 ---
@@ -44,29 +43,33 @@ The generation endpoint performs three sequential operations:
 
 **Step 3 — Generate personal topics**: After an idempotency check, collect per-user interest keywords, remove keywords that overlap with the common pool, pool unique keywords across users, and fetch/store/assign a topic for each keyword (Section 2.5).
 
-These steps run sequentially. Personal topic generation failure does not affect the overall response — it is caught and logged, returning `personal_topics_generated: 0`.
+These steps run sequentially. If personal topic generation fails, the error is caught and logged without affecting the overall response.
 
-### 2.3 Common Topics — Keyword-Driven Generation
+### 2.3 Common Topics
+
+#### Keyword-Driven Generation
 
 The primary path generates common topics from the most popular user interest keywords across all users. The system retrieves the top 3 keywords by aggregate effective weight, then for each keyword, fetches the latest news via LLM with web search and stores the result as a common topic suggestion.
 
 This approach produces topics that reflect the actual interests of the user base rather than generic trending news.
 
-### 2.4 Common Topics — Trending Fallback (Cold Start)
+#### Trending Fallback (Cold Start)
 
-When no user interest keywords exist (e.g., on a fresh deployment), the system falls back to a broader LLM-driven trending search. The LLM is prompted to discover 3 trending global topics across diverse categories (sports, technology, entertainment, science, business), using its web search tool to find current news. Each resulting topic includes a `source_keyword` assigned by the LLM (e.g., "NBA", "AI", "Oscars"), which is used for categorization and interest linking.
+When no user interest keywords exist (e.g., on a fresh deployment), the system falls back to a broader LLM-driven trending search. The LLM is prompted to discover 3 trending global topics across diverse categories (sports, technology, entertainment, science, business), using its web search tool to find current news. Each resulting topic includes a source keyword assigned by the LLM (e.g., "NBA", "AI", "Oscars"), which is used for categorization and interest linking.
 
-### 2.5 Personal Topics — Interest-Based Generation
+### 2.4 Personal Topics
 
-Personal topics are generated from individual user interests that are marked as news-relevant (`is_news_relevant=true`). The process follows four steps:
+#### Interest-Based Generation
 
-**Step 1 — Collect per-user keywords**: For each active user, the system retrieves up to 7 top interests of type `category` that have `is_news_relevant=true`, ranked by effective weight (see [2-Layer Weight Model](memory-and-personalization.md#28-2-layer-weight-model)). Each result is a keyword paired with the user's effective weight for that interest.
+Personal topics are generated from individual user interests that are marked as news-relevant. The process follows four steps:
 
-**Step 2 — Deduplicate against common pool**: Keywords that match any of today's common topics' `source_keyword` (case-insensitive) are removed. This prevents personal topics from duplicating content already available to the user via the common pool.
+**Step 1 — Collect per-user keywords**: For each active user, the system retrieves up to 7 top category interests that are marked as news-relevant, ranked by effective weight (see [2-Layer Weight Model](memory-and-personalization.md#2-layer-weight-model)). Each result is a keyword paired with the user's effective weight for that interest.
+
+**Step 2 — Deduplicate against common pool**: Keywords that match any keyword already used by today's common topics (case-insensitive) are removed. This prevents personal topics from duplicating content already available to the user via the common pool.
 
 **Step 3 — Pool keywords across users**: The remaining keywords are pooled into a single map from keyword to the list of users who hold that interest (along with each user's effective weight). If multiple users share the same interest keyword, it appears only once in the pool — the system generates the topic once and assigns it to all relevant users.
 
-**Step 4 — Fetch, store, and assign**: For each unique keyword in the pool, the system fetches a topic via a single LLM + web search call, stores it as one `topic_suggestions` row with `pool_type="personal"`, and then creates a `user_topic_suggestions` link for every user who has that interest, using the user's effective weight as the relevance score.
+**Step 4 — Fetch, store, and assign**: For each unique keyword in the pool, the system fetches a topic via a single LLM + web search call, stores it as a personal topic suggestion, and then assigns it to every user who has that interest, using the user's effective weight as the relevance score.
 
 ---
 
