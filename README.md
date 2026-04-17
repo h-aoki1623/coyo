@@ -10,9 +10,9 @@ Coyo is an AI-powered English conversation practice app designed to help you imp
 
 <table>
   <tr>
-    <th>Home</th>
-    <th>Conversation</th>
-    <th>Feedback</th>
+    <th width="33%">Home</th>
+    <th width="33%">Conversation</th>
+    <th width="33%">Feedback</th>
   </tr>
   <tr>
     <td>Personalized topic suggestions based on your interests</td>
