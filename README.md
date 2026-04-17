@@ -20,6 +20,11 @@ coyo/
 │   ├── mobile/          # React Native (Expo) app
 │   └── api/             # FastAPI backend
 ├── docs/
+│   ├── architecture/
+│   │   ├── topic-suggestion.md          # Topic suggestion system design
+│   │   └── memory-and-personalization.md # Memory & personalization architecture
+│   ├── eval/
+│   │   └── interests-extraction-eval.md # Interests extraction evaluation model
 │   ├── CONTRIB.md       # Development workflow & scripts reference
 │   ├── DEPLOY.md        # Production deployment guide
 │   └── RUNBOOK.md       # Operations, troubleshooting & common fixes
@@ -111,3 +116,9 @@ make generate-api-types # Regenerate TS types from OpenAPI spec
 ```
 
 For the full scripts reference, see [docs/CONTRIB.md](docs/CONTRIB.md). For troubleshooting, see [docs/RUNBOOK.md](docs/RUNBOOK.md). For production deployment, see [docs/deploy/DEPLOY.md](docs/deploy/DEPLOY.md).
+
+### Architecture & Evaluation
+
+- [Topic Suggestion](docs/architecture/topic-suggestion.md) — How Coyo generates and serves personalized topic suggestions
+- [Memory & Personalization](docs/architecture/memory-and-personalization.md) — How Coyo extracts, stores, and injects user memories for personalization
+- [Interests Extraction Evaluation](docs/eval/interests-extraction-eval.md) — Evaluation framework for measuring interests extraction quality
