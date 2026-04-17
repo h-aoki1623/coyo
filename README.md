@@ -1,6 +1,34 @@
 # Coyo
 
-AI English conversation practice app.
+Coyo is an AI-powered English conversation practice app designed to help you improve your English naturally and enjoyably.
+
+### Features
+
+- **Real-time correction** — Coyo reviews your messages and offers natural, constructive feedback to help you refine your grammar, vocabulary, and expression.
+- **Personalized conversations** — Conversations adapt to your interests and past episodes, so every session feels relevant and engaging rather than generic.
+- **Topic suggestions** — Not sure what to talk about? Coyo surfaces topics tailored to what you care about, so you always have a great starting point.
+
+<table>
+  <tr>
+    <th width="33%">Home</th>
+    <th width="33%">Conversation</th>
+    <th width="33%">Feedback</th>
+  </tr>
+  <tr>
+    <td>Personalized topic suggestions based on your interests</td>
+    <td>Real-time corrections with explanations in your native language</td>
+    <td>Session summary with all corrections at a glance</td>
+  </tr>
+  <tr>
+    <td><img src="docs/images/home.png" alt="Home" width="250" /></td>
+    <td><img src="docs/images/conversation.png" alt="Conversation" width="250" /></td>
+    <td><img src="docs/images/feedback.png" alt="Feedback" width="250" /></td>
+  </tr>
+</table>
+
+### Why Coyo?
+
+Language learning sticks when it's personal. Coyo remembers what you've talked about, learns what interests you, and builds on that context to make each conversation more meaningful than the last.
 
 ## Project Structure
 
@@ -10,6 +38,11 @@ coyo/
 │   ├── mobile/          # React Native (Expo) app
 │   └── api/             # FastAPI backend
 ├── docs/
+│   ├── architecture/
+│   │   ├── topic-suggestion.md          # Topic suggestion system design
+│   │   └── memory-and-personalization.md # Memory & personalization architecture
+│   ├── eval/
+│   │   └── interests-extraction-eval.md # Interests extraction evaluation model
 │   ├── CONTRIB.md       # Development workflow & scripts reference
 │   ├── DEPLOY.md        # Production deployment guide
 │   └── RUNBOOK.md       # Operations, troubleshooting & common fixes
@@ -100,4 +133,13 @@ make migrate-new MSG="description"  # Create new migration
 make generate-api-types # Regenerate TS types from OpenAPI spec
 ```
 
-For the full scripts reference, see [docs/CONTRIB.md](docs/CONTRIB.md). For troubleshooting, see [docs/RUNBOOK.md](docs/RUNBOOK.md). For production deployment, see [docs/DEPLOY.md](docs/DEPLOY.md).
+For the full scripts reference, see [docs/CONTRIB.md](docs/CONTRIB.md). For troubleshooting, see [docs/RUNBOOK.md](docs/RUNBOOK.md). For production deployment, see [docs/deploy/DEPLOY.md](docs/deploy/DEPLOY.md).
+
+### Architecture
+
+- [Topic Suggestion](docs/architecture/topic-suggestion.md) — How Coyo generates and serves personalized topic suggestions
+- [Memory & Personalization](docs/architecture/memory-and-personalization.md) — How Coyo extracts, stores, and injects user memories for personalization
+
+### Evaluation
+
+- [Interests Extraction Evaluation](docs/eval/interests-extraction-eval.md) — Evaluation framework for measuring interests extraction quality
