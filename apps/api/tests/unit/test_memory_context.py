@@ -113,12 +113,12 @@ class TestBuildContext:
 
         assert result is not None
         assert "[WHAT YOU KNOW ABOUT THIS USER]" in result
-        assert "User Profile" in result
+        assert "--- User Profile ---" in result
         assert "software engineer" in result.lower()
         assert "tennis" in result.lower()
-        assert "Background" in result
+        assert "--- Background ---" in result
         assert "job_industry" in result
-        assert "Recent Conversations" in result
+        assert "--- Recent Conversations ---" in result
 
     @pytest.mark.unit
     async def test_build_context_theme_path_uses_embeddings_repo(
@@ -248,12 +248,12 @@ class TestBuildContext:
             result = await MemoryContextService.build_context(db_session, test_user.id)
 
         assert result is not None
-        assert "Interests" in result
+        assert "--- Interests ---" in result
         assert "cooking" in result
         # No profile summary, no attrs, no recent conversations
-        assert "User Profile" not in result
-        assert "Background" not in result
-        assert "Recent Conversations" not in result
+        assert "--- User Profile ---" not in result
+        assert "--- Background ---" not in result
+        assert "--- Recent Conversations ---" not in result
 
 
 # ---------------------------------------------------------------------------
@@ -482,3 +482,34 @@ class TestFormatMemoryBlock:
             recent_summaries=[],
         )
         assert "HOW TO USE THIS INFORMATION" in result
+
+    @pytest.mark.unit
+    def test_usage_instructions_direct_active_diversification(self):
+        """Usage instructions must tell the LLM to actively diversify.
+
+        The previous wording ("use ONLY when natural", "wait for the user to
+        bring it up") drove conversations on the same theme into repeated
+        opener patterns. This test guards against regressing to a passive
+        framing.
+        """
+        result = _format_memory_block(
+            profile_summary=None,
+            profile_attrs=[],
+            top_interests=[
+                InterestWithWeight(
+                    keyword="test",
+                    keyword_type="category",
+                    is_news_relevant=False,
+                    total_mentions=1,
+                    effective_weight=0.5,
+                    last_mentioned_conv_idx=1,
+                    summary=None,
+                ),
+            ],
+            recent_summaries=[],
+        )
+        assert "ACTIVELY" in result
+        assert "DIFFERENT angle" in result
+        assert "DEEPER" in result
+        # Behavior phrase — stable against minor wording-only edits.
+        assert "open with the same generic question" in result
