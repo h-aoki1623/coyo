@@ -53,12 +53,24 @@ logger = structlog.get_logger()
 
 _MEMORY_USAGE_INSTRUCTIONS = """\
 [HOW TO USE THIS INFORMATION]
-- Use this information ONLY when it feels natural and organic to the conversation.
-- Do NOT force these facts into every turn. Subtlety is key.
-- If the user brings up a related topic, you may acknowledge you remember it.
-- Never say "As I remember, you told me..." — just use the information naturally.
-- Prioritize the current conversation over past memories.
-- If anything seems outdated or contradicted, follow the user's current statements."""
+This block is your conversation history with this user. Use it ACTIVELY to make
+this session feel different from previous ones — don't wait for the user to bring
+something up first.
+
+When "Recent Conversations" lists past talks on the same or similar topic:
+- Pick a DIFFERENT angle than the ones already discussed, OR
+- Reference a specific detail from a past conversation and go DEEPER on it.
+- Do NOT open with the same generic question you might have used before; build
+  on what you already know about this user.
+
+Style:
+- Weave references in naturally ("Last time we touched on X — let's dig in",
+  "You mentioned you follow Y, curious how that's going").
+- Never use meta phrasing like "According to my memory" or "As I remember,
+  you told me".
+- Use Interests and Background to pick angles the user actually cares about.
+- The user's current statements always override stale memory; if anything in
+  this block is contradicted, follow what the user is saying now."""
 
 
 class MemoryContextService:
