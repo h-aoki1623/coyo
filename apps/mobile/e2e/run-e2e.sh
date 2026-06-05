@@ -37,7 +37,12 @@ init_log "[e2e]"
 init_worktree
 
 MAESTRO_PORT=7001
-MAESTRO_TIMEOUT=420  # 7 minutes (seconds) per maestro test invocation
+MAESTRO_TIMEOUT=600  # 10 minutes (seconds) per maestro test invocation.
+# This is a hang guard (e.g. kAXErrorInvalidUIElement), not a performance
+# assertion — per-step timeouts inside the flows still enforce responsiveness.
+# 420s proved too tight on a loaded Android emulator: the full 8-flow suite
+# needs ~480-500s there (voice-conversation alone takes ~4min with real
+# audio playback), so a healthy run was killed before the last two flows.
 
 # Enable E2E mode: bypasses microphone recording with test audio file
 export E2E_MODE=true
